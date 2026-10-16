@@ -1,17 +1,17 @@
 # Architecture
 
-## Implemented bootstrap
+## Implemented MVP
 
-- `App/`: SwiftUI app window, menu-bar commands using AppKit, fixed sample data,
-  heatmap grid, and Swift Charts column/line previews.
-- `Sources/SlopometerCore/`: UI-independent trailing averages and GRDB cache.
-- `Tests/SlopometerCoreTests/`: calculation and cache contracts.
-- `Package.swift`: core package and exact GRDB dependency.
-- `project.yml`: app target depending on that local core package.
+- `App/`: menu-bar accessory app (`LSUIElement`), `AppModel` (settings, polling,
+  snapshot publishing), dashboard and settings window, Keychain token store.
+- `Widget/`: WidgetKit extension that only decodes the shared snapshot.
+- `Shared/`: chart views compiled into both the app and the widget.
+- `Sources/SlopometerCore/`: calendar days, PR measurement, quota, GitHub client,
+  sync coordinator, GRDB cache, and snapshot builder. No UI code.
+- `Tests/SlopometerCoreTests/`: deterministic tests with a fake HTTP transport.
+- `project.yml`: app and widget targets depending on the local core package.
 
-The preview reads fixtures in memory. It does not write a production cache,
-request GitHub credentials, call GitHub, register login launch, or send notifications.
-The normal app window is scaffolding; the background app and widget are planned.
+It does not register login launch or send notifications.
 
 ## Intended flow
 

@@ -10,7 +10,7 @@ ROOT = Path(__file__).resolve().parent.parent
 REQUIRED = (
     "README.md", "SPEC.md", "SCOPE.md", "ROADMAP.md", "AGENTS.md", "CONTRIBUTING.md",
     "docs/README.md", "docs/DEVELOPMENT.md", "docs/TOOLING.md", "docs/ARCHITECTURE.md",
-    "docs/logic/measurements.md", "docs/logic/storage.md",
+    "docs/logic/measurements.md", "docs/logic/storage.md", "docs/logic/sync.md",
     "testing/MANUAL TO-DO/README.md",
     "testing/MANUAL TO-DO/desktop-and-appearance.md",
     "testing/MANUAL TO-DO/measurements-and-sync.md",

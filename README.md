@@ -12,15 +12,16 @@ turn a PR count into a productivity score.
 
 ## Current status
 
-Development scaffold, not a connected GitHub client. The native app previews
-grid, column, and line charts using fixed **sample data**, with a 7-day average
-on the column and line views. It has a menu-bar entry, a shared Swift package,
-a migrated SQLite cache foundation, and deterministic core tests.
+MVP for testing. Slopometer runs from the menu bar (no Dock icon), syncs one
+GitHub account, and shows a dashboard window and a desktop widget.
 
-The desktop widget, GitHub sync, real PR quotas, theme editing, and saved
-configurations are planned. A username alone will provide the contribution
-calendar; PR tracking and quotas will need an optional read-only token. See the
-[short roadmap](ROADMAP.md).
+- **Username only:** the account's contribution calendar from its public profile.
+- **Optional read-only token:** official calendar, PRs opened, authored PRs merged,
+  the exact PRs behind each count, a repository filter, and a daily PR quota.
+
+Grid, column, and line views; 30/90/365-day ranges; 7/30-day averages. Theme
+editing, saved configurations, launch at login, and notifications are planned. See
+the [short roadmap](ROADMAP.md).
 
 ## Develop
 
@@ -34,8 +35,9 @@ make validate
 make open
 ```
 
-Run the `Slopometer` scheme in Xcode, or use `make run` to build and open the
-unsigned development app. `make build` alone does not launch it. The checked-in
+Run the `Slopometer` scheme in Xcode, or use `make run` to build a signed app and
+launch it. Signing needs an Xcode account for the project team. Add the widget from
+the desktop's Edit Widgets menu. `make build` (unsigned) does not launch anything. The checked-in
 Xcode project can be built without XcodeGen.
 
 The stack is Swift 6, SwiftUI, AppKit, Swift Charts, and SQLite through GRDB.
