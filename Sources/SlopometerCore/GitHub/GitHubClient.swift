@@ -87,7 +87,8 @@ public struct GitHubClient: Sendable {
 
     public func profileCalendar(login: String) async throws -> [CalendarDay: Int] {
         guard Self.isValidLogin(login) else { throw GitHubError.invalidLogin }
-        var request = URLRequest(url: URL(string: "https://github.com/users/\(login)/contributions")!)
+        var request = URLRequest(
+            url: URL(string: "https://github.com/users/\(login)/contributions")!)
         request.setValue("Slopometer", forHTTPHeaderField: "User-Agent")
         request.setValue("text/html", forHTTPHeaderField: "Accept")
         let data = try await send(request)
@@ -187,7 +188,8 @@ public struct GitHubClient: Sendable {
                 items += next.items
             }
         }
-        return PullRequestFetch(records: try items.map { try $0.record() }, isIncomplete: incomplete)
+        return PullRequestFetch(
+            records: try items.map { try $0.record() }, isIncomplete: incomplete)
     }
 
     private func searchPage(query: String, token: String, page: Int) async throws

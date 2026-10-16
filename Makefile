@@ -6,7 +6,7 @@ PROJECT := Slopometer.xcodeproj
 XCODE_ARGS := -project $(PROJECT) -scheme Slopometer -configuration Debug -destination 'platform=macOS' -derivedDataPath .build/xcode -clonedSourcePackagesDirPath .build/SourcePackages
 LOCKED_PACKAGES := -disableAutomaticPackageResolution -onlyUsePackageVersionsFromResolvedFile
 SWIFT_FORMAT := swift run --package-path Tools --scratch-path .build/tools-build --disable-automatic-resolution -c release swift-format
-FORMATTED := Package.swift Tools/Package.swift App Sources Tests
+FORMATTED := Package.swift Tools/Package.swift App Shared Widget Sources Tests
 
 .PHONY: help doctor setup generate generate-check resolve lint format docs-check test build build-signed validate open run
 

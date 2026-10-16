@@ -40,10 +40,14 @@ struct CalendarDayTests {
 
     @Test func bucketsByCalendarDayAcrossDaylightSaving() {
         // 2026-03-08 is the US spring-forward day: 23 hours long in New York.
-        #expect(CalendarDay.containing(date("2026-03-08T04:30:00Z"), in: newYork) == day("2026-03-07"))
-        #expect(CalendarDay.containing(date("2026-03-08T05:30:00Z"), in: newYork) == day("2026-03-08"))
-        #expect(CalendarDay.containing(date("2026-03-09T03:30:00Z"), in: newYork) == day("2026-03-08"))
-        #expect(CalendarDay.containing(date("2026-03-09T04:30:00Z"), in: newYork) == day("2026-03-09"))
+        #expect(
+            CalendarDay.containing(date("2026-03-08T04:30:00Z"), in: newYork) == day("2026-03-07"))
+        #expect(
+            CalendarDay.containing(date("2026-03-08T05:30:00Z"), in: newYork) == day("2026-03-08"))
+        #expect(
+            CalendarDay.containing(date("2026-03-09T03:30:00Z"), in: newYork) == day("2026-03-08"))
+        #expect(
+            CalendarDay.containing(date("2026-03-09T04:30:00Z"), in: newYork) == day("2026-03-09"))
         let start = day("2026-03-09").start(in: newYork)
         #expect(start.timeIntervalSince(day("2026-03-08").start(in: newYork)) == 23 * 3600)
     }
@@ -92,7 +96,8 @@ struct PullRequestMeasurementTests {
             days: [day("2026-10-14"), day("2026-10-15")], records: [],
             coveredFrom: day("2026-10-15").start(in: bangkok))
         #expect(series.map(\.count) == [nil, 0])
-        #expect(scope.series(days: [day("2026-10-15")], records: [], coveredFrom: nil)[0].count == nil)
+        #expect(
+            scope.series(days: [day("2026-10-15")], records: [], coveredFrom: nil)[0].count == nil)
     }
 
     @Test func repositoryFilterIsCaseInsensitive() {
@@ -100,7 +105,8 @@ struct PullRequestMeasurementTests {
             pr("a", created: "2026-10-16T01:00:00Z", repository: "Me/App"),
             pr("b", created: "2026-10-16T01:00:00Z", repository: "me/other"),
         ]
-        let scope = PullRequestScope(metric: .prsOpened, repositories: ["me/app"], timeZone: bangkok)
+        let scope = PullRequestScope(
+            metric: .prsOpened, repositories: ["me/app"], timeZone: bangkok)
         #expect(scope.evidence(on: day("2026-10-16"), in: records).map(\.id) == ["a"])
     }
 }

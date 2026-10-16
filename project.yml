@@ -24,8 +24,10 @@ targets:
         excludes:
           - Info.plist
           - Slopometer.entitlements
+      - Shared
     dependencies:
       - package: SlopometerCore
+      - target: SlopometerWidget
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: dev.slopometer.app
@@ -35,6 +37,27 @@ targets:
         ENABLE_APP_SANDBOX: YES
         MARKETING_VERSION: 0.1.0
         CURRENT_PROJECT_VERSION: 1
+  SlopometerWidget:
+    type: app-extension
+    platform: macOS
+    sources:
+      - path: Widget
+        excludes:
+          - Info.plist
+          - SlopometerWidget.entitlements
+      - Shared
+    dependencies:
+      - package: SlopometerCore
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: dev.slopometer.app.widget
+        PRODUCT_NAME: SlopometerWidget
+        INFOPLIST_FILE: Widget/Info.plist
+        CODE_SIGN_ENTITLEMENTS: Widget/SlopometerWidget.entitlements
+        ENABLE_APP_SANDBOX: YES
+        MARKETING_VERSION: 0.1.0
+        CURRENT_PROJECT_VERSION: 1
+        SKIP_INSTALL: YES
 schemes:
   Slopometer:
     build:

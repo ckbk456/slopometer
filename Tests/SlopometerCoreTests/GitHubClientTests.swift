@@ -85,12 +85,28 @@ struct GitHubClientTests {
             let query = URLComponents(url: request.url!, resolvingAgainstBaseURL: false)!
                 .queryItems!.first { $0.name == "q" }!.value!
             if query.contains("created:") {
-                return (200, [:], searchPage(total: 1, items: [searchItem("a", created: "2026-05-01T00:00:00Z", merged: "2026-05-02T00:00:00Z")]))
+                return (
+                    200, [:],
+                    searchPage(
+                        total: 1,
+                        items: [
+                            searchItem(
+                                "a", created: "2026-05-01T00:00:00Z", merged: "2026-05-02T00:00:00Z"
+                            )
+                        ])
+                )
             }
-            return (200, [:], searchPage(total: 2, items: [
-                searchItem("a", created: "2026-05-01T00:00:00Z", merged: "2026-05-02T00:00:00Z"),
-                searchItem("old", created: "2025-11-01T00:00:00Z", merged: "2026-02-01T00:00:00Z"),
-            ]))
+            return (
+                200, [:],
+                searchPage(
+                    total: 2,
+                    items: [
+                        searchItem(
+                            "a", created: "2026-05-01T00:00:00Z", merged: "2026-05-02T00:00:00Z"),
+                        searchItem(
+                            "old", created: "2025-11-01T00:00:00Z", merged: "2026-02-01T00:00:00Z"),
+                    ])
+            )
         }
         let fetch = try await client(transport).authoredPullRequests(
             login: "me", token: "t", from: from, to: to)
@@ -129,7 +145,9 @@ struct GitHubClientTests {
     }
 
     @Test func reportsIncompleteSearchResults() async throws {
-        let transport = FakeTransport { _ in (200, [:], searchPage(total: 0, items: [], incomplete: true)) }
+        let transport = FakeTransport { _ in
+            (200, [:], searchPage(total: 0, items: [], incomplete: true))
+        }
         let fetch = try await client(transport).authoredPullRequests(
             login: "me", token: "t", from: from, to: to)
         #expect(fetch.isIncomplete)
@@ -139,7 +157,9 @@ struct GitHubClientTests {
         let limited = FakeTransport { _ in
             (403, ["X-RateLimit-Remaining": "0", "X-RateLimit-Reset": "1800000000"], Data())
         }
-        await #expect(throws: GitHubError.rateLimited(resetAt: Date(timeIntervalSince1970: 1_800_000_000))) {
+        await #expect(
+            throws: GitHubError.rateLimited(resetAt: Date(timeIntervalSince1970: 1_800_000_000))
+        ) {
             try await client(limited).viewerLogin(token: "t")
         }
         let rejected = FakeTransport { _ in (401, [:], Data()) }
@@ -149,7 +169,10 @@ struct GitHubClientTests {
     }
 
     @Test func rejectsInvalidLoginsBeforeAnyRequest() async {
-        let transport = FakeTransport { _ in Issue.record("unexpected request"); return (500, [:], Data()) }
+        let transport = FakeTransport { _ in
+            Issue.record("unexpected request")
+            return (500, [:], Data())
+        }
         await #expect(throws: GitHubError.invalidLogin) {
             try await client(transport).profileCalendar(login: "../evil")
         }
@@ -157,7 +180,26 @@ struct GitHubClientTests {
 
     @Test func requestsTheGraphQLCalendarInSpansOfAtMostAYear() async throws {
         let transport = FakeTransport { _ in
-            (200, [:], json(["data": ["user": ["contributionsCollection": ["contributionCalendar": ["weeks": [["contributionDays": [["date": "2026-10-15", "contributionCount": 4]]]]]]]]]))
+            (
+                200, [:],
+                json([
+                    "data": [
+                        "user": [
+                            "contributionsCollection": [
+                                "contributionCalendar": [
+                                    "weeks": [
+                                        [
+                                            "contributionDays": [
+                                                ["date": "2026-10-15", "contributionCount": 4]
+                                            ]
+                                        ]
+                                    ]
+                                ]
+                            ]
+                        ]
+                    ]
+                ])
+            )
         }
         let counts = try await client(transport).contributionCalendar(
             login: "me", token: "t", from: date("2025-09-16T00:00:00Z"), to: to)
@@ -181,7 +223,8 @@ struct SyncCoordinatorTests {
         }
         let report = await SyncCoordinator(client: client(transport), cache: cache).sync(
             SyncRequest(login: "me", token: "t", timeZone: bangkok, now: now))
-        #expect(report.pullRequestError == .tokenOwnerMismatch(expected: "me", actual: "someone-else"))
+        #expect(
+            report.pullRequestError == .tokenOwnerMismatch(expected: "me", actual: "someone-else"))
         #expect(!report.tokenVerified)
         #expect(try cache.syncState().calendarSource == .profilePage)
         #expect(transport.searchQueries.isEmpty)
@@ -196,14 +239,16 @@ struct SyncCoordinatorTests {
         let report = await SyncCoordinator(client: client(transport), cache: cache).sync(
             SyncRequest(login: "me", token: nil, timeZone: bangkok, now: now))
         #expect(report == SyncReport())
-        #expect(transport.requests.allSatisfy { $0.value(forHTTPHeaderField: "Authorization") == nil })
+        #expect(
+            transport.requests.allSatisfy { $0.value(forHTTPHeaderField: "Authorization") == nil })
         #expect(try cache.calendar().count == 3)
     }
 
     @Test func failedSyncKeepsCachedDataAndLastSuccess() async throws {
         let cache = try MeasurementCache()
         try cache.reset(for: "me")
-        try cache.replaceCalendar([day("2026-10-15"): 2], source: .profilePage, at: date("2026-10-15T00:00:00Z"))
+        try cache.replaceCalendar(
+            [day("2026-10-15"): 2], source: .profilePage, at: date("2026-10-15T00:00:00Z"))
         let offline = FakeTransport { _ in throw GitHubError.offline }
         let report = await SyncCoordinator(client: client(offline), cache: cache).sync(
             SyncRequest(login: "me", token: nil, timeZone: bangkok, now: now))

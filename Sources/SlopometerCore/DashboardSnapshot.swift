@@ -146,7 +146,9 @@ public enum SnapshotBuilder {
         }
 
         if let lastSync, now.timeIntervalSince(lastSync) > staleAfter {
-            notices.append("Data is stale; last synced \(lastSync.formatted(.relative(presentation: .named))).")
+            notices.append(
+                "Data is stale; last synced \(lastSync.formatted(.relative(presentation: .named)))."
+            )
         }
 
         // Today is incomplete, so the trend uses completed days only.
@@ -165,7 +167,8 @@ public enum SnapshotBuilder {
         var quota: DashboardSnapshot.Quota?
         if let goal = settings.goal, goal.isValid, tokenUsable {
             let progress = QuotaProgress(
-                goal: goal, repositories: settings.repositories, records: records, today: today, timeZone: timeZone,
+                goal: goal, repositories: settings.repositories, records: records, today: today,
+                timeZone: timeZone,
                 coverageComplete: prCoverageComplete)
             quota = DashboardSnapshot.Quota(
                 headline: progress.headline, count: progress.count, target: progress.target,
