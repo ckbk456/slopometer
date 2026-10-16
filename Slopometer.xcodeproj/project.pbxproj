@@ -13,12 +13,12 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		004CCB5674461C9A0D7A858C /* slopometer-toolchain */ = {isa = PBXFileReference; lastKnownFileType = folder; name = "slopometer-toolchain"; path = .; sourceTree = SOURCE_ROOT; };
 		181AD593328CA6011FFD3AC5 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		4CE6ACBCDE098C02149B86A4 /* SCOPE.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = SCOPE.md; sourceTree = "<group>"; };
 		68193896EEDBB06DB7E3A076 /* SPEC.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = SPEC.md; sourceTree = "<group>"; };
 		78D9D6EB3FDC6DB8A4AA442B /* SlopometerApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SlopometerApp.swift; sourceTree = "<group>"; };
 		7B1F1C47E64F87D003E4486E /* Slopometer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Slopometer.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		90F88CDE67495BB96DB22442 /* .. */ = {isa = PBXFileReference; lastKnownFileType = folder; name = ..; path = .; sourceTree = SOURCE_ROOT; };
 		AC3337228197F9192A2B19BE /* ROADMAP.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = ROADMAP.md; sourceTree = "<group>"; };
 		F862461AE51CA20761487F35 /* ScaffoldView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScaffoldView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -55,7 +55,7 @@
 		CA3707E00F5D2DB75C1C296A /* Packages */ = {
 			isa = PBXGroup;
 			children = (
-				004CCB5674461C9A0D7A858C /* slopometer-toolchain */,
+				90F88CDE67495BB96DB22442 /* .. */,
 			);
 			name = Packages;
 			sourceTree = "<group>";
@@ -120,7 +120,7 @@
 			mainGroup = E73564E4B5E63DB04145A811;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
-				EA609EF4A0619EA8689000AF /* XCLocalSwiftPackageReference "." */,
+				17A2B36F17A2B2D35029B354 /* XCLocalSwiftPackageReference "Sources/.." */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 3CC7093796866EA959BCC676 /* Products */;
@@ -334,9 +334,9 @@
 /* End XCConfigurationList section */
 
 /* Begin XCLocalSwiftPackageReference section */
-		EA609EF4A0619EA8689000AF /* XCLocalSwiftPackageReference "." */ = {
+		17A2B36F17A2B2D35029B354 /* XCLocalSwiftPackageReference "Sources/.." */ = {
 			isa = XCLocalSwiftPackageReference;
-			relativePath = .;
+			relativePath = Sources/..;
 		};
 /* End XCLocalSwiftPackageReference section */
 
