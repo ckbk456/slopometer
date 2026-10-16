@@ -4,7 +4,15 @@ Owner: `Sources/SlopometerCore/MeasurementCache.swift`.
 
 `MeasurementCache` uses GRDB's serialized `DatabaseQueue`. The initializer opens
 an in-memory database by default or a caller-provided file, then applies the
-named `createDailyMeasurements` migration without erasing data.
+named migrations `createDailyMeasurements` and `createSourceRecords` without
+erasing data. The app stores it at `Application Support/Slopometer/cache.sqlite`
+inside its sandbox container.
+
+`createSourceRecords` adds `pull_requests` (keyed by GitHub node ID, UTC
+timestamps), `contribution_days` (one calendar; replacing it drops the previous
+source), and a single-row `sync_state` JSON document (login, calendar source,
+last successful syncs, PR coverage start, incomplete flag). Replacements are
+whole-set transactions; `reset(for:)` clears data when the account changes.
 
 `CachedDay` stores a series ID, already-bucketed ISO day label, and optional count.
 The composite primary key is `(seriesID, day)`. Saving the same key replaces its
@@ -13,10 +21,8 @@ labels lexically; the caller must supply canonical YYYY-MM-DD dates. Counts may
 be unknown (`NULL`) or nonnegative, with a database constraint and API validation.
 Empty series IDs are rejected by the API.
 
-The series identity must eventually encode metric, repository/author selection,
-and timezone policy. This bootstrap does not yet construct those identities,
-validate calendar strings, track freshness/coverage, or persist raw PR records.
-The preview currently uses memory fixtures and does not open a production cache.
+The derived `daily_measurements` table is not used by the MVP; series are derived
+from source records on demand.
 
 Future schema changes add a named migration and preserve prior user data. Do not
 enable erase-on-schema-change or use this derived cache as PR quota evidence.

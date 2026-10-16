@@ -15,7 +15,10 @@ let package = Package(
             name: "SlopometerCore",
             dependencies: [.product(name: "GRDB", package: "GRDB.swift")]
         ),
-        .testTarget(name: "SlopometerCoreTests", dependencies: ["SlopometerCore"]),
+        .testTarget(
+            name: "SlopometerCoreTests", dependencies: ["SlopometerCore"],
+            resources: [.process("Fixtures")]
+        ),
     ],
     swiftLanguageModes: [.v6]
 )

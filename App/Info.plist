@@ -13,5 +13,14 @@
     <key>CFBundleVersion</key><string>$(CURRENT_PROJECT_VERSION)</string>
     <key>LSMinimumSystemVersion</key><string>$(MACOSX_DEPLOYMENT_TARGET)</string>
     <key>NSPrincipalClass</key><string>NSApplication</string>
+    <key>LSUIElement</key><true/>
+    <key>LSApplicationCategoryType</key><string>public.app-category.developer-tools</string>
+    <key>CFBundleURLTypes</key>
+    <array>
+        <dict>
+            <key>CFBundleURLName</key><string>dev.slopometer.app</string>
+            <key>CFBundleURLSchemes</key><array><string>slopometer</string></array>
+        </dict>
+    </array>
 </dict>
 </plist>

@@ -28,8 +28,8 @@ or fabricated AI attribution. The tagline is "Your daily slop, quantified."
 3. **App window:** inspect dates and the PRs behind a count, enter the account and
    optional token, set goals, and edit appearance.
 
-The current scaffold implements an ordinary app-window preview and menu-bar
-entry. It does not yet implement the widget, background mode, or the inspector.
+The MVP implements all three surfaces with the behavior described in the
+[sync logic guide](docs/logic/sync.md); manual verification is pending.
 
 ## Account and data access
 

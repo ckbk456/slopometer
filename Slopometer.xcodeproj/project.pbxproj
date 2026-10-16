@@ -8,19 +8,57 @@
 
 /* Begin PBXBuildFile section */
 		27355E91D3F0D148402F3A7C /* SlopometerCore in Frameworks */ = {isa = PBXBuildFile; productRef = 14F18CD2E45DA1E0B4AFBD02 /* SlopometerCore */; };
+		446D228ACFA5B9E9D255D051 /* MainView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E01B7F1D13FF129C1B3877CE /* MainView.swift */; };
+		5E1A783D176203CD4C6A9450 /* TokenStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CE86D6528E0B4B124751C3E /* TokenStore.swift */; };
+		6B047609193F8335AD141E3C /* SlopChart.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4BD827FF20CC2FB09AC22E9 /* SlopChart.swift */; };
 		6CDEFD6165BBE05510CF9AE1 /* SlopometerApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 78D9D6EB3FDC6DB8A4AA442B /* SlopometerApp.swift */; };
-		939B0A88DACAEE81B3F4665F /* ScaffoldView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F862461AE51CA20761487F35 /* ScaffoldView.swift */; };
+		6F309BE3F7C3BB11C16DDAD8 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66E709D3A0DD9070BE504A7A /* SettingsView.swift */; };
+		70C22BC55BFF67B9D144560C /* AppModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4293BFD7B2150A12590C6C3E /* AppModel.swift */; };
+		9C3F41BB24455980D51207E8 /* SlopometerWidget.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 9B1059BB2AB5A145DE46984F /* SlopometerWidget.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		A5A435FDED70B5F176AD5A20 /* SlopometerWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2A1C16357B72A82B74B9BD5 /* SlopometerWidget.swift */; };
+		AE6910F4607758AF7D66F8BE /* SlopChart.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4BD827FF20CC2FB09AC22E9 /* SlopChart.swift */; };
+		EFC776F9AC77B1CFAC0B7E79 /* SlopometerCore in Frameworks */ = {isa = PBXBuildFile; productRef = 959F817C77169F96EBED29B8 /* SlopometerCore */; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		D09964907C269D601182974C /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 2AF9DA926BDE8AA526127D27 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 9FBCA479FB07252B15A65522;
+			remoteInfo = SlopometerWidget;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		78948B700A4D1E23D10DC429 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				9C3F41BB24455980D51207E8 /* SlopometerWidget.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		181AD593328CA6011FFD3AC5 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
+		2CE86D6528E0B4B124751C3E /* TokenStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TokenStore.swift; sourceTree = "<group>"; };
+		4293BFD7B2150A12590C6C3E /* AppModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppModel.swift; sourceTree = "<group>"; };
 		4CE6ACBCDE098C02149B86A4 /* SCOPE.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = SCOPE.md; sourceTree = "<group>"; };
+		66E709D3A0DD9070BE504A7A /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		68193896EEDBB06DB7E3A076 /* SPEC.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = SPEC.md; sourceTree = "<group>"; };
 		78D9D6EB3FDC6DB8A4AA442B /* SlopometerApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SlopometerApp.swift; sourceTree = "<group>"; };
 		7B1F1C47E64F87D003E4486E /* Slopometer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Slopometer.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		90F88CDE67495BB96DB22442 /* .. */ = {isa = PBXFileReference; lastKnownFileType = folder; name = ..; path = .; sourceTree = SOURCE_ROOT; };
+		9B1059BB2AB5A145DE46984F /* SlopometerWidget.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = SlopometerWidget.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		AC3337228197F9192A2B19BE /* ROADMAP.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = ROADMAP.md; sourceTree = "<group>"; };
-		F862461AE51CA20761487F35 /* ScaffoldView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScaffoldView.swift; sourceTree = "<group>"; };
+		B4BD827FF20CC2FB09AC22E9 /* SlopChart.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SlopChart.swift; sourceTree = "<group>"; };
+		C2A1C16357B72A82B74B9BD5 /* SlopometerWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SlopometerWidget.swift; sourceTree = "<group>"; };
+		E01B7F1D13FF129C1B3877CE /* MainView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -32,24 +70,52 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		D5F4564B25F2508D7E9C0CB7 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				EFC776F9AC77B1CFAC0B7E79 /* SlopometerCore in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
 		1B5FE4DA1791A4823ED9696A /* App */ = {
 			isa = PBXGroup;
 			children = (
-				F862461AE51CA20761487F35 /* ScaffoldView.swift */,
+				4293BFD7B2150A12590C6C3E /* AppModel.swift */,
+				E01B7F1D13FF129C1B3877CE /* MainView.swift */,
+				66E709D3A0DD9070BE504A7A /* SettingsView.swift */,
 				78D9D6EB3FDC6DB8A4AA442B /* SlopometerApp.swift */,
+				2CE86D6528E0B4B124751C3E /* TokenStore.swift */,
 			);
 			path = App;
+			sourceTree = "<group>";
+		};
+		3CBB8302D1CD4232C41418D3 /* Widget */ = {
+			isa = PBXGroup;
+			children = (
+				C2A1C16357B72A82B74B9BD5 /* SlopometerWidget.swift */,
+			);
+			path = Widget;
 			sourceTree = "<group>";
 		};
 		3CC7093796866EA959BCC676 /* Products */ = {
 			isa = PBXGroup;
 			children = (
 				7B1F1C47E64F87D003E4486E /* Slopometer.app */,
+				9B1059BB2AB5A145DE46984F /* SlopometerWidget.appex */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		B5C9B3E86851ECBEC8938F51 /* Shared */ = {
+			isa = PBXGroup;
+			children = (
+				B4BD827FF20CC2FB09AC22E9 /* SlopChart.swift */,
+			);
+			path = Shared;
 			sourceTree = "<group>";
 		};
 		CA3707E00F5D2DB75C1C296A /* Packages */ = {
@@ -69,6 +135,8 @@
 				68193896EEDBB06DB7E3A076 /* SPEC.md */,
 				1B5FE4DA1791A4823ED9696A /* App */,
 				CA3707E00F5D2DB75C1C296A /* Packages */,
+				B5C9B3E86851ECBEC8938F51 /* Shared */,
+				3CBB8302D1CD4232C41418D3 /* Widget */,
 				3CC7093796866EA959BCC676 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -76,16 +144,37 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		9FBCA479FB07252B15A65522 /* SlopometerWidget */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 79E196EFB5D6C344DDFC7E3A /* Build configuration list for PBXNativeTarget "SlopometerWidget" */;
+			buildPhases = (
+				1B6993FE09E5996FE5CA6C09 /* Sources */,
+				D5F4564B25F2508D7E9C0CB7 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = SlopometerWidget;
+			packageProductDependencies = (
+				959F817C77169F96EBED29B8 /* SlopometerCore */,
+			);
+			productName = SlopometerWidget;
+			productReference = 9B1059BB2AB5A145DE46984F /* SlopometerWidget.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 		B9464FA185334A6967DA40EC /* Slopometer */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 565CA2F15A0FBAA69A2298CD /* Build configuration list for PBXNativeTarget "Slopometer" */;
 			buildPhases = (
 				02DD0E2F5A75691FE91C3698 /* Sources */,
 				7EE3C318EBA4DD47DC9D8711 /* Frameworks */,
+				78948B700A4D1E23D10DC429 /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				44242F2E8FC36EBC9CEF61BB /* PBXTargetDependency */,
 			);
 			name = Slopometer;
 			packageProductDependencies = (
@@ -104,6 +193,10 @@
 				BuildIndependentTargetsInParallel = YES;
 				LastUpgradeCheck = 1430;
 				TargetAttributes = {
+					9FBCA479FB07252B15A65522 = {
+						DevelopmentTeam = 5U4584QFCQ;
+						ProvisioningStyle = Automatic;
+					};
 					B9464FA185334A6967DA40EC = {
 						DevelopmentTeam = 5U4584QFCQ;
 						ProvisioningStyle = Automatic;
@@ -128,6 +221,7 @@
 			projectRoot = "";
 			targets = (
 				B9464FA185334A6967DA40EC /* Slopometer */,
+				9FBCA479FB07252B15A65522 /* SlopometerWidget */,
 			);
 		};
 /* End PBXProject section */
@@ -137,12 +231,33 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				939B0A88DACAEE81B3F4665F /* ScaffoldView.swift in Sources */,
+				70C22BC55BFF67B9D144560C /* AppModel.swift in Sources */,
+				446D228ACFA5B9E9D255D051 /* MainView.swift in Sources */,
+				6F309BE3F7C3BB11C16DDAD8 /* SettingsView.swift in Sources */,
+				AE6910F4607758AF7D66F8BE /* SlopChart.swift in Sources */,
 				6CDEFD6165BBE05510CF9AE1 /* SlopometerApp.swift in Sources */,
+				5E1A783D176203CD4C6A9450 /* TokenStore.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		1B6993FE09E5996FE5CA6C09 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				6B047609193F8335AD141E3C /* SlopChart.swift in Sources */,
+				A5A435FDED70B5F176AD5A20 /* SlopometerWidget.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		44242F2E8FC36EBC9CEF61BB /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 9FBCA479FB07252B15A65522 /* SlopometerWidget */;
+			targetProxy = D09964907C269D601182974C /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		1D4F79A075305D7971781D36 /* Debug */ = {
@@ -290,6 +405,48 @@
 			};
 			name = Release;
 		};
+		762D1A03B841455F7885A0C7 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = Widget/SlopometerWidget.entitlements;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_APP_SANDBOX = YES;
+				INFOPLIST_FILE = Widget/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@executable_path/../../../../Frameworks",
+				);
+				MARKETING_VERSION = 0.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = dev.slopometer.app.widget;
+				PRODUCT_NAME = SlopometerWidget;
+				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
+			};
+			name = Debug;
+		};
+		7B48A36EC253CB6C8C6D2A09 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = Widget/SlopometerWidget.entitlements;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_APP_SANDBOX = YES;
+				INFOPLIST_FILE = Widget/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@executable_path/../../../../Frameworks",
+				);
+				MARKETING_VERSION = 0.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = dev.slopometer.app.widget;
+				PRODUCT_NAME = SlopometerWidget;
+				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
+			};
+			name = Release;
+		};
 		A17098F44BE1BF76896828B8 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -331,6 +488,15 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;
 		};
+		79E196EFB5D6C344DDFC7E3A /* Build configuration list for PBXNativeTarget "SlopometerWidget" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				762D1A03B841455F7885A0C7 /* Debug */,
+				7B48A36EC253CB6C8C6D2A09 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
 /* End XCConfigurationList section */
 
 /* Begin XCLocalSwiftPackageReference section */
@@ -342,6 +508,10 @@
 
 /* Begin XCSwiftPackageProductDependency section */
 		14F18CD2E45DA1E0B4AFBD02 /* SlopometerCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = SlopometerCore;
+		};
+		959F817C77169F96EBED29B8 /* SlopometerCore */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = SlopometerCore;
 		};

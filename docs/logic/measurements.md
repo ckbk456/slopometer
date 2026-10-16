@@ -8,14 +8,20 @@ negative count throws. Confirmed zeros count in the denominator; an unknown
 (`nil`) or insufficient warm-up makes the output `nil`. Empty input is valid.
 The result includes the window ending at each supplied day.
 
-The caller owns calendar-day continuity, timezone bucketing, fetching warm-up
-history, and excluding incomplete today from the default completed-day trend.
-Those date/provider rules are specified in [SPEC](../../SPEC.md) and not yet
-implemented. Do not confuse this numeric function with a finished measurement engine.
+`CalendarDay` names a date without a timezone; `containing(_:in:)` buckets an
+instant by calendar boundaries in an IANA timezone, including daylight-saving days.
 
-The app's fixed sample series demonstrates the calculation. It is not a user's
-GitHub activity. PR IDs, creation/merge timestamps, repository filters, deduplication,
-and goals still need their own source records and tests before real counts ship.
+`PullRequestScope` counts unique PRs (by node ID) for `PRs opened` (`createdAt`) or
+`authored PRs merged` (`mergedAt`), optionally filtered to `owner/name` repositories
+(case-insensitive). Days starting before the fetched coverage are unknown; covered
+days with no PRs are zero. `evidence(on:in:)` returns the exact PRs behind a day.
 
-Deterministic evidence: `Tests/SlopometerCoreTests/MovingAverageTests.swift`.
+`QuotaProgress` counts today's evidence without capping it and reports `isReached`
+only when coverage is complete. Contributions are never re-bucketed: the provider's
+day labels are used as-is.
+
+The snapshot builder feeds `MovingAverage` completed days only, so today has no
+average. Sync and snapshot rules are in the [sync guide](sync.md).
+
+Deterministic evidence: `Tests/SlopometerCoreTests/MovingAverageTests.swift`, `MeasurementTests.swift`.
 Human/provider checklist: [measurements and sync](../../testing/MANUAL%20TO-DO/measurements-and-sync.md).
