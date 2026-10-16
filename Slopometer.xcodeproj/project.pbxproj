@@ -13,6 +13,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		004CCB5674461C9A0D7A858C /* slopometer-toolchain */ = {isa = PBXFileReference; lastKnownFileType = folder; name = "slopometer-toolchain"; path = .; sourceTree = SOURCE_ROOT; };
 		0945BB2E5A94158E9F732DB5 /* TOOLING.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = TOOLING.md; sourceTree = "<group>"; };
 		14F0E714D67CE0A3F1E2607B /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		181AD593328CA6011FFD3AC5 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
@@ -21,7 +22,6 @@
 		4CE6ACBCDE098C02149B86A4 /* SCOPE.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = SCOPE.md; sourceTree = "<group>"; };
 		5B558AB49BF63FF2CFE9A154 /* ARCHITECTURE.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = ARCHITECTURE.md; sourceTree = "<group>"; };
 		68193896EEDBB06DB7E3A076 /* SPEC.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = SPEC.md; sourceTree = "<group>"; };
-		6A9BFC81080D3F31CC84FC4A /* slopometer */ = {isa = PBXFileReference; lastKnownFileType = folder; name = slopometer; path = .; sourceTree = SOURCE_ROOT; };
 		73ACBB6634AA0C98157A47D5 /* measurements-and-sync.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "measurements-and-sync.md"; sourceTree = "<group>"; };
 		7721CB9A2D0214695111C077 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		78D9D6EB3FDC6DB8A4AA442B /* SlopometerApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SlopometerApp.swift; sourceTree = "<group>"; };
@@ -91,7 +91,7 @@
 		CA3707E00F5D2DB75C1C296A /* Packages */ = {
 			isa = PBXGroup;
 			children = (
-				6A9BFC81080D3F31CC84FC4A /* slopometer */,
+				004CCB5674461C9A0D7A858C /* slopometer-toolchain */,
 			);
 			name = Packages;
 			sourceTree = "<group>";
@@ -154,6 +154,10 @@
 				BuildIndependentTargetsInParallel = YES;
 				LastUpgradeCheck = 1430;
 				TargetAttributes = {
+					B9464FA185334A6967DA40EC = {
+						DevelopmentTeam = 5U4584QFCQ;
+						ProvisioningStyle = Automatic;
+					};
 				};
 			};
 			buildConfigurationList = 370B5F11B1B21E61C604F2CF /* Build configuration list for PBXProject "Slopometer" */;
@@ -224,8 +228,10 @@
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = 5U4584QFCQ;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
@@ -288,8 +294,10 @@
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = 5U4584QFCQ;
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;

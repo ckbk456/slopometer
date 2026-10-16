@@ -9,9 +9,12 @@ fi
 for tool in xcodebuild swift xcrun python3 make git; do
     command -v "$tool" >/dev/null || { printf 'Missing required tool: %s\n' "$tool" >&2; exit 1; }
 done
+if ! xcodebuild -version >/dev/null 2>&1; then
+    printf '%s\n' 'xcodebuild needs full Xcode. Run: export DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer' >&2
+    exit 1
+fi
 xcodebuild -version
 swift --version
-xcrun --find swift-format >/dev/null
 python3 --version
 if command -v xcodegen >/dev/null; then
     xcodegen --version

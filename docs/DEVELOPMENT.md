@@ -28,14 +28,16 @@ controlled. Agents must still inspect for separately running commands.
 | Development preparation: `make setup` | `Makefile` | 10s–3m | Low | Conditional; writes project and dependency caches; network |
 | Regenerate project: `make generate` | `project.yml`, `scripts/generate.sh` | <10s | No | Deterministic with XcodeGen 2.46.0; changes generated project |
 | Fetch exact dependencies: `make resolve` | `Package.swift`, `Package.resolved`, `Makefile` | 5s–3m | Low | Conditional on network/cache; cannot update locked versions |
-| Format check: `make lint` | `.swift-format`, `Makefile` | <10s | No | Deterministic within selected Xcode toolchain; no edits |
-| Format source: `make format` | `.swift-format`, `Makefile` | <10s | No | Mutates owned Swift files; implementation mode only |
+| Format check: `make lint` | `.swift-format`, `Tools/Package.swift`, `Makefile` | 1–3m cold, <10s warm | Cold only | Pinned swift-format 601.0.0 built from source; same result locally and in CI; no edits |
+| Format source: `make format` | `.swift-format`, `Tools/Package.swift`, `Makefile` | <10s warm | No | Mutates owned Swift files; implementation mode only |
+| Project drift check: `make generate-check` | `scripts/check_generated.sh` | <10s | No | Regenerates with XcodeGen 2.46.0 and fails if the committed project differs; CI installs the pinned, checksummed release |
 | Structural/doc checks: `make docs-check` | `scripts/check_structure.py` | <10s | No | Deterministic; reads links, configs, and lockfiles |
 | Core tests: `make test` | `Package.swift`, `Tests/`, `Makefile` | 5s–3m cold | Yes | One-shot; locked dependencies; temporary test-owned SQLite only |
-| Native app: `make build` | generated Xcode project, `Makefile` | 10s–5m cold | Yes | Unsigned Debug build; writes `.build/`; no launch |
+| Native app: `make build` | generated Xcode project, `Makefile` | 10s–5m cold | Yes | Unsigned Debug build used by validation and CI; writes `.build/`; no launch |
+| Signed app: `make build-signed` | `project.yml` team, `Makefile` | 10s–5m cold | Yes | Automatic signing with the project team; needs a signed-in Xcode account; required for the sandbox and widget |
 | Complete local gate: `make validate` | `Makefile` | 15s–8m cold | Yes | Sequential lint, docs, tests, build; internet if caches empty |
 | Open Xcode: `make open` | `Makefile` | <10s | No | Human-owned GUI action |
-| Preview app: `make run` | `Makefile` | Build + launch | Yes | Human-owned app process; quit via app/menu bar |
+| Preview app: `make run` | `Makefile` | Build + launch | Yes | Signed build, so it matches Xcode runs; human-owned app process; quit via menu bar |
 
 There is no separate JS lint, typecheck, codegen service, migration CLI, dev
 server, deployment command, release job, or UI test suite. Swift compilation
@@ -44,9 +46,8 @@ isolated databases. Those absent gates are not applicable, not passed.
 
 ## Git and generated files
 
-`main` is the integration branch; `codex/bootstrap` prepares the initial scaffold.
-Subsequent changes use `codex/<task>` in isolated worktrees from verified remote
-`main`. `project.yml` owns the committed `.xcodeproj`; regenerate after changing
+`main` is the integration branch. Changes use `codex/<task>` in isolated
+worktrees from verified remote `main`. `project.yml` owns the committed `.xcodeproj`; regenerate after changing
 targets or file membership. `Package.resolved` is canonical. Xcode 27.1 did not
 emit a separate workspace lockfile for this local-package layout; if another
 supported Xcode emits one, the structural check verifies its pins agree.
@@ -59,11 +60,12 @@ These are ignored. No global shell config or background service is needed.
 
 - `make validate` is the deterministic local gate. Do not run it concurrently with
   another build/test in this worktree. Investigate long runs using AGENTS thresholds.
-- CI uses the same gate on `macos-15` with Xcode 16.4, locked dependencies, and
-  a pinned checkout action. It uses the committed Xcode project and does not
-  separately regenerate it. No signing, provider, UI, or release checks run there.
+- CI runs once per pull request and on pushes to `main`, using `macos-15` with
+  Xcode 16.4, locked dependencies, and a pinned checkout action. It checks project
+  drift, then runs the same gate. No signing, provider, UI, or release checks run there.
+- If `xcode-select` points at Command Line Tools, export
+  `DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer`; `make doctor` says so.
 - Keep GUI and provider results in the [manual guides](../testing/MANUAL%20TO-DO/README.md).
   Tests/builds do not establish them. Do not launch the preview during read-only work.
 - Public repository/branch publication, PR creation, merging, and release are
-  separate authorities. This setup request authorizes a public initial repository;
-  it does not request a PR, deployment, or release.
+  separate authorities.
