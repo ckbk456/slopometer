@@ -14,7 +14,7 @@ Those date/provider rules are specified in [SPEC](../../SPEC.md) and not yet
 implemented. Do not confuse this numeric function with a finished measurement engine.
 
 The app's fixed sample series demonstrates the calculation. It is not a user's
-GitHub activity. PR IDs, creation/merge timestamps, selected scopes, deduplication,
+GitHub activity. PR IDs, creation/merge timestamps, repository filters, deduplication,
 and goals still need their own source records and tests before real counts ship.
 
 Deterministic evidence: `Tests/SlopometerCoreTests/MovingAverageTests.swift`.

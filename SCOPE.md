@@ -9,23 +9,28 @@
   and consolidated manual-testing guides.
 
 Bootstrap completion is a buildable development environment. It is not a
-connected GitHub dashboard, a proven desktop panel, or a signed release.
+connected GitHub dashboard, a working widget, or a signed release.
 
 ## First usable release
 
-- macOS desktop panel, menu-bar controls, and an expanded inspector/settings window.
-- One GitHub account, selected repositories and authors, with explicit bot selection.
-- GitHub account contribution calendar plus PR-opened and authored-PR-merged metrics.
+- Background menu-bar app, desktop widget, and an app window for inspection and settings.
+- One GitHub account by username; account-level measurement by default.
+- Username-only tier: account contribution calendar from the public profile.
+- Optional token tier: official contribution calendar, PRs opened, authored PRs
+  merged, PR evidence, and optional repository filters. The app states which
+  features need a token.
 - Grid, column, and line views; 30/90/365-day ranges; 7/30-day simple averages.
-- Palette presets, custom colors, opacity, density, and saved configurations.
-- One daily PR goal with target, metric, scope, timezone, and inspectable PR evidence.
+- Palette presets, custom colors, density, and saved configurations.
+- One daily PR goal (token tier) with target, metric, scope, timezone, and
+  inspectable PR evidence.
 - Local cache, pagination, delayed-event reconciliation, rate-limit handling,
-  offline/stale indicators, and credential storage in Keychain.
+  offline/stale indicators, shared widget snapshot, and token storage in Keychain.
 - Optional launch at login and opt-in quota-completion notification.
 
 ## Deferred
 
-Native WidgetKit summary; multiple simultaneous panels/accounts; team features;
+Custom desktop-level panel window; selecting other authors or bot accounts;
+OAuth or GitHub App sign-in; multiple simultaneous accounts; team features;
 GitLab/Bitbucket; commit/review-specific metrics; EMA and other trend models;
 custom formulas; export; account sync; commercial billing; public updater.
 
@@ -38,10 +43,12 @@ root helper, or Windows/Linux target in this scope.
 
 ## Delivery decisions still open
 
-- Dedicated GitHub sign-in design and private-repository permission model.
-- Final desktop-level behavior supported across target macOS versions.
-- License, release identity, signing/notarization, and public distribution channel.
+- Durability of the unofficial public-profile source and its fallback behavior.
+- Widget reload frequency achievable within system budgets.
+- License, release identity (bundle ID, App Group, signing team), notarization,
+  and public distribution channel.
 - Additional metrics or providers require a scope decision.
 
-The agreed stack is Swift, SwiftUI/AppKit, Swift Charts, and SQLite/GRDB. Changes
-to this scope require explicit human authorization. Roadmap notes cannot expand it.
+The agreed stack is Swift, SwiftUI/AppKit, WidgetKit, Swift Charts, and
+SQLite/GRDB. Changes to this scope require explicit human authorization.
+Roadmap notes cannot expand it.

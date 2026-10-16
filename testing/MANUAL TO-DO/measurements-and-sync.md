@@ -5,7 +5,8 @@ Provider integration and PR quotas are not yet implemented. All gates are pendin
 - [ ] Compare account contribution dates/counts with GitHub's provider calendar.
 - [ ] Inspect the exact PR list behind opened and authored-merged counts.
 - [ ] Confirm a PR opened earlier and merged today counts once today for merged activity.
-- [ ] Check selected bot/human authors, repository filters, private access and revoked access.
+- [ ] Username-only: calendar matches the public profile and is labeled unofficial.
+- [ ] Token: mismatched owner is reported; repository filters, private access, and revoked token behave.
 - [ ] Verify missing/partial permissions and pagination never turn unknown activity into zero.
 - [ ] Test repeated sync, offline startup, delayed provider updates, and rate-limit backoff.
 - [ ] Check local midnight and daylight-saving transitions; document provider-calendar differences.
