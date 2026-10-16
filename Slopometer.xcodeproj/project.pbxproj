@@ -14,21 +14,12 @@
 
 /* Begin PBXFileReference section */
 		004CCB5674461C9A0D7A858C /* slopometer-toolchain */ = {isa = PBXFileReference; lastKnownFileType = folder; name = "slopometer-toolchain"; path = .; sourceTree = SOURCE_ROOT; };
-		0945BB2E5A94158E9F732DB5 /* TOOLING.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = TOOLING.md; sourceTree = "<group>"; };
-		14F0E714D67CE0A3F1E2607B /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		181AD593328CA6011FFD3AC5 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
-		38C7256DF9FFB61D40EE2E17 /* measurements.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = measurements.md; sourceTree = "<group>"; };
-		3CA3024A07972231B22BE3A9 /* DEVELOPMENT.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = DEVELOPMENT.md; sourceTree = "<group>"; };
 		4CE6ACBCDE098C02149B86A4 /* SCOPE.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = SCOPE.md; sourceTree = "<group>"; };
-		5B558AB49BF63FF2CFE9A154 /* ARCHITECTURE.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = ARCHITECTURE.md; sourceTree = "<group>"; };
 		68193896EEDBB06DB7E3A076 /* SPEC.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = SPEC.md; sourceTree = "<group>"; };
-		73ACBB6634AA0C98157A47D5 /* measurements-and-sync.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "measurements-and-sync.md"; sourceTree = "<group>"; };
-		7721CB9A2D0214695111C077 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		78D9D6EB3FDC6DB8A4AA442B /* SlopometerApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SlopometerApp.swift; sourceTree = "<group>"; };
 		7B1F1C47E64F87D003E4486E /* Slopometer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Slopometer.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		AC3337228197F9192A2B19BE /* ROADMAP.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = ROADMAP.md; sourceTree = "<group>"; };
-		B9E1BB593D7085D272DFB64A /* storage.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = storage.md; sourceTree = "<group>"; };
-		DA7BD49D29CF00218B6C35CC /* desktop-and-appearance.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "desktop-and-appearance.md"; sourceTree = "<group>"; };
 		F862461AE51CA20761487F35 /* ScaffoldView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScaffoldView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -44,14 +35,6 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		0552D33372661AD7FDC92BB5 /* testing */ = {
-			isa = PBXGroup;
-			children = (
-				1E81C9DBC01CC137AE814BE1 /* MANUAL TO-DO */,
-			);
-			path = testing;
-			sourceTree = "<group>";
-		};
 		1B5FE4DA1791A4823ED9696A /* App */ = {
 			isa = PBXGroup;
 			children = (
@@ -61,31 +44,12 @@
 			path = App;
 			sourceTree = "<group>";
 		};
-		1E81C9DBC01CC137AE814BE1 /* MANUAL TO-DO */ = {
-			isa = PBXGroup;
-			children = (
-				DA7BD49D29CF00218B6C35CC /* desktop-and-appearance.md */,
-				73ACBB6634AA0C98157A47D5 /* measurements-and-sync.md */,
-				14F0E714D67CE0A3F1E2607B /* README.md */,
-			);
-			path = "MANUAL TO-DO";
-			sourceTree = "<group>";
-		};
 		3CC7093796866EA959BCC676 /* Products */ = {
 			isa = PBXGroup;
 			children = (
 				7B1F1C47E64F87D003E4486E /* Slopometer.app */,
 			);
 			name = Products;
-			sourceTree = "<group>";
-		};
-		94C581A85EAC869FB57F6417 /* logic */ = {
-			isa = PBXGroup;
-			children = (
-				38C7256DF9FFB61D40EE2E17 /* measurements.md */,
-				B9E1BB593D7085D272DFB64A /* storage.md */,
-			);
-			path = logic;
 			sourceTree = "<group>";
 		};
 		CA3707E00F5D2DB75C1C296A /* Packages */ = {
@@ -104,23 +68,9 @@
 				4CE6ACBCDE098C02149B86A4 /* SCOPE.md */,
 				68193896EEDBB06DB7E3A076 /* SPEC.md */,
 				1B5FE4DA1791A4823ED9696A /* App */,
-				F6FE45356B2FA779A2FDE4E9 /* docs */,
 				CA3707E00F5D2DB75C1C296A /* Packages */,
-				0552D33372661AD7FDC92BB5 /* testing */,
 				3CC7093796866EA959BCC676 /* Products */,
 			);
-			sourceTree = "<group>";
-		};
-		F6FE45356B2FA779A2FDE4E9 /* docs */ = {
-			isa = PBXGroup;
-			children = (
-				5B558AB49BF63FF2CFE9A154 /* ARCHITECTURE.md */,
-				3CA3024A07972231B22BE3A9 /* DEVELOPMENT.md */,
-				7721CB9A2D0214695111C077 /* README.md */,
-				0945BB2E5A94158E9F732DB5 /* TOOLING.md */,
-				94C581A85EAC869FB57F6417 /* logic */,
-			);
-			path = docs;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
