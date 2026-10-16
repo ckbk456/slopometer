@@ -2,9 +2,9 @@
 
 **Your daily slop, quantified.**
 
-A native Mac instrument for measuring GitHub activity: contribution grids,
-columns, trend lines, moving averages, and daily pull-request quotas. Keep an
-eye on the output of your human-and-agent software factory from the desktop.
+A native Mac instrument for measuring one GitHub account's activity:
+contribution grids, columns, trend lines, moving averages, and daily
+pull-request quotas, on a desktop widget and in the menu bar.
 
 Slopometer counts the activity you select. The name is a joke; the numbers
 should be precise. It does not detect AI-written code, judge code quality, or
@@ -17,8 +17,10 @@ grid, column, and line charts using fixed **sample data**, with a 7-day average
 on the column and line views. It has a menu-bar entry, a shared Swift package,
 a migrated SQLite cache foundation, and deterministic core tests.
 
-Desktop attachment, authentication, GitHub sync, real PR quotas, theme editing,
-and saved configurations are planned. See the [short roadmap](ROADMAP.md).
+The desktop widget, GitHub sync, real PR quotas, theme editing, and saved
+configurations are planned. A username alone will provide the contribution
+calendar; PR tracking and quotas will need an optional read-only token. See the
+[short roadmap](ROADMAP.md).
 
 ## Develop
 
