@@ -1,0 +1,393 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		27355E91D3F0D148402F3A7C /* SlopometerCore in Frameworks */ = {isa = PBXBuildFile; productRef = 14F18CD2E45DA1E0B4AFBD02 /* SlopometerCore */; };
+		6CDEFD6165BBE05510CF9AE1 /* SlopometerApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 78D9D6EB3FDC6DB8A4AA442B /* SlopometerApp.swift */; };
+		939B0A88DACAEE81B3F4665F /* ScaffoldView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F862461AE51CA20761487F35 /* ScaffoldView.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		0945BB2E5A94158E9F732DB5 /* TOOLING.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = TOOLING.md; sourceTree = "<group>"; };
+		14F0E714D67CE0A3F1E2607B /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
+		181AD593328CA6011FFD3AC5 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
+		38C7256DF9FFB61D40EE2E17 /* measurements.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = measurements.md; sourceTree = "<group>"; };
+		3CA3024A07972231B22BE3A9 /* DEVELOPMENT.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = DEVELOPMENT.md; sourceTree = "<group>"; };
+		4CE6ACBCDE098C02149B86A4 /* SCOPE.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = SCOPE.md; sourceTree = "<group>"; };
+		5B558AB49BF63FF2CFE9A154 /* ARCHITECTURE.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = ARCHITECTURE.md; sourceTree = "<group>"; };
+		68193896EEDBB06DB7E3A076 /* SPEC.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = SPEC.md; sourceTree = "<group>"; };
+		6A9BFC81080D3F31CC84FC4A /* slopometer */ = {isa = PBXFileReference; lastKnownFileType = folder; name = slopometer; path = .; sourceTree = SOURCE_ROOT; };
+		73ACBB6634AA0C98157A47D5 /* measurements-and-sync.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "measurements-and-sync.md"; sourceTree = "<group>"; };
+		7721CB9A2D0214695111C077 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
+		78D9D6EB3FDC6DB8A4AA442B /* SlopometerApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SlopometerApp.swift; sourceTree = "<group>"; };
+		7B1F1C47E64F87D003E4486E /* Slopometer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Slopometer.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		AC3337228197F9192A2B19BE /* ROADMAP.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = ROADMAP.md; sourceTree = "<group>"; };
+		B9E1BB593D7085D272DFB64A /* storage.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = storage.md; sourceTree = "<group>"; };
+		DA7BD49D29CF00218B6C35CC /* desktop-and-appearance.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "desktop-and-appearance.md"; sourceTree = "<group>"; };
+		F862461AE51CA20761487F35 /* ScaffoldView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScaffoldView.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		7EE3C318EBA4DD47DC9D8711 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				27355E91D3F0D148402F3A7C /* SlopometerCore in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		0552D33372661AD7FDC92BB5 /* testing */ = {
+			isa = PBXGroup;
+			children = (
+				1E81C9DBC01CC137AE814BE1 /* MANUAL TO-DO */,
+			);
+			path = testing;
+			sourceTree = "<group>";
+		};
+		1B5FE4DA1791A4823ED9696A /* App */ = {
+			isa = PBXGroup;
+			children = (
+				F862461AE51CA20761487F35 /* ScaffoldView.swift */,
+				78D9D6EB3FDC6DB8A4AA442B /* SlopometerApp.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		1E81C9DBC01CC137AE814BE1 /* MANUAL TO-DO */ = {
+			isa = PBXGroup;
+			children = (
+				DA7BD49D29CF00218B6C35CC /* desktop-and-appearance.md */,
+				73ACBB6634AA0C98157A47D5 /* measurements-and-sync.md */,
+				14F0E714D67CE0A3F1E2607B /* README.md */,
+			);
+			path = "MANUAL TO-DO";
+			sourceTree = "<group>";
+		};
+		3CC7093796866EA959BCC676 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				7B1F1C47E64F87D003E4486E /* Slopometer.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		94C581A85EAC869FB57F6417 /* logic */ = {
+			isa = PBXGroup;
+			children = (
+				38C7256DF9FFB61D40EE2E17 /* measurements.md */,
+				B9E1BB593D7085D272DFB64A /* storage.md */,
+			);
+			path = logic;
+			sourceTree = "<group>";
+		};
+		CA3707E00F5D2DB75C1C296A /* Packages */ = {
+			isa = PBXGroup;
+			children = (
+				6A9BFC81080D3F31CC84FC4A /* slopometer */,
+			);
+			name = Packages;
+			sourceTree = "<group>";
+		};
+		E73564E4B5E63DB04145A811 = {
+			isa = PBXGroup;
+			children = (
+				181AD593328CA6011FFD3AC5 /* README.md */,
+				AC3337228197F9192A2B19BE /* ROADMAP.md */,
+				4CE6ACBCDE098C02149B86A4 /* SCOPE.md */,
+				68193896EEDBB06DB7E3A076 /* SPEC.md */,
+				1B5FE4DA1791A4823ED9696A /* App */,
+				F6FE45356B2FA779A2FDE4E9 /* docs */,
+				CA3707E00F5D2DB75C1C296A /* Packages */,
+				0552D33372661AD7FDC92BB5 /* testing */,
+				3CC7093796866EA959BCC676 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		F6FE45356B2FA779A2FDE4E9 /* docs */ = {
+			isa = PBXGroup;
+			children = (
+				5B558AB49BF63FF2CFE9A154 /* ARCHITECTURE.md */,
+				3CA3024A07972231B22BE3A9 /* DEVELOPMENT.md */,
+				7721CB9A2D0214695111C077 /* README.md */,
+				0945BB2E5A94158E9F732DB5 /* TOOLING.md */,
+				94C581A85EAC869FB57F6417 /* logic */,
+			);
+			path = docs;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		B9464FA185334A6967DA40EC /* Slopometer */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 565CA2F15A0FBAA69A2298CD /* Build configuration list for PBXNativeTarget "Slopometer" */;
+			buildPhases = (
+				02DD0E2F5A75691FE91C3698 /* Sources */,
+				7EE3C318EBA4DD47DC9D8711 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = Slopometer;
+			packageProductDependencies = (
+				14F18CD2E45DA1E0B4AFBD02 /* SlopometerCore */,
+			);
+			productName = Slopometer;
+			productReference = 7B1F1C47E64F87D003E4486E /* Slopometer.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		2AF9DA926BDE8AA526127D27 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1430;
+				TargetAttributes = {
+				};
+			};
+			buildConfigurationList = 370B5F11B1B21E61C604F2CF /* Build configuration list for PBXProject "Slopometer" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = E73564E4B5E63DB04145A811;
+			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				EA609EF4A0619EA8689000AF /* XCLocalSwiftPackageReference "." */,
+			);
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 3CC7093796866EA959BCC676 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				B9464FA185334A6967DA40EC /* Slopometer */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		02DD0E2F5A75691FE91C3698 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				939B0A88DACAEE81B3F4665F /* ScaffoldView.swift in Sources */,
+				6CDEFD6165BBE05510CF9AE1 /* SlopometerApp.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		1D4F79A075305D7971781D36 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 6.0;
+			};
+			name = Debug;
+		};
+		5BDFB09AC5A343103F54AA29 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 6.0;
+			};
+			name = Release;
+		};
+		64899952FA0C2D531BFAF343 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = App/Slopometer.entitlements;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_APP_SANDBOX = YES;
+				INFOPLIST_FILE = App/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MARKETING_VERSION = 0.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = dev.slopometer.app;
+				PRODUCT_NAME = Slopometer;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		A17098F44BE1BF76896828B8 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = App/Slopometer.entitlements;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_APP_SANDBOX = YES;
+				INFOPLIST_FILE = App/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MARKETING_VERSION = 0.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = dev.slopometer.app;
+				PRODUCT_NAME = Slopometer;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		370B5F11B1B21E61C604F2CF /* Build configuration list for PBXProject "Slopometer" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1D4F79A075305D7971781D36 /* Debug */,
+				5BDFB09AC5A343103F54AA29 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		565CA2F15A0FBAA69A2298CD /* Build configuration list for PBXNativeTarget "Slopometer" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A17098F44BE1BF76896828B8 /* Debug */,
+				64899952FA0C2D531BFAF343 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		EA609EF4A0619EA8689000AF /* XCLocalSwiftPackageReference "." */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = .;
+		};
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		14F18CD2E45DA1E0B4AFBD02 /* SlopometerCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = SlopometerCore;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = 2AF9DA926BDE8AA526127D27 /* Project object */;
+}
