@@ -8,8 +8,8 @@ not a claim that another OS or CI run passed.
 | Deployment target | macOS 14.0+ in package/project | macOS 27.0.1; macOS 14 not runtime-tested |
 | Xcode | 16.4+; CI explicitly selects 16.4 | Xcode 27.1, build 27A9275 |
 | Swift | Tools 6.1+, language mode 6 | Apple Swift 6.4 |
-| XcodeGen | 2.46.0 for regeneration | 2.46.0 |
-| Formatter | `xcrun swift-format` bundled with selected Xcode | Version command reports `main`; use recorded Xcode identity |
+| XcodeGen | 2.46.0; CI verifies the release archive SHA-256 | 2.46.0 |
+| Formatter | swift-format 601.0.0 pinned in `Tools/Package.swift` | Built from source with the selected toolchain |
 | GRDB | Exact 7.11.1 and committed resolution pins | Its tagged manifest requires Swift tools 6.1 |
 | Python | 3.9+ standard library for structural checks | 3.14 installation available |
 | Make | GNU Make-compatible commands | Apple-provided GNU Make 3.81 |
@@ -38,5 +38,6 @@ review and install deliberately rather than running an unpinned installer.
   Xcode 16.4 was listed at `/Applications/Xcode_16.4.app` when inspected.
   Runner images change; the workflow fails rather than silently choosing another Xcode.
 
-The repo does not yet include an updater, signing team, notarization credentials,
+Signing uses Apple Development team `5U4584QFCQ` with automatic provisioning for
+local signed builds. The repo does not yet include an updater, notarization credentials,
 production configuration, release automation, or selected license.
