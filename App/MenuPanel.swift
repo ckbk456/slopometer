@@ -211,7 +211,7 @@ struct MenuPanel: View {
                 Label(model.connectionLabel, systemImage: isToken ? "key.fill" : "person")
                     .font(.caption)
                     .foregroundStyle(
-                        isToken ? AnyShapeStyle(SlopPalette.mark) : AnyShapeStyle(.secondary))
+                        isToken ? AnyShapeStyle(SlopPalette.markText) : AnyShapeStyle(.secondary))
             }
             Spacer(minLength: 0)
         }
