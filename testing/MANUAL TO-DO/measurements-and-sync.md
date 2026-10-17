@@ -7,6 +7,8 @@ Provider integration and PR quotas are not yet implemented. All gates are pendin
 - [ ] Confirm a PR opened earlier and merged today counts once today for merged activity.
 - [ ] Username-only: calendar matches the public profile and is labeled unofficial.
 - [ ] Token: mismatched owner is reported; repository filters, private access, and revoked token behave.
+- [ ] Repository checklist: lists synced repositories ticked by default; unticking one updates
+      counts, quota, and widget; the last one cannot be unticked; "All repositories" restores all.
 - [ ] Verify missing/partial permissions and pagination never turn unknown activity into zero.
 - [ ] Test repeated sync, offline startup, delayed provider updates, and rate-limit backoff.
 - [ ] Check local midnight and daylight-saving transitions; document provider-calendar differences.

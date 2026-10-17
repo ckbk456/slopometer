@@ -16,6 +16,12 @@ instant by calendar boundaries in an IANA timezone, including daylight-saving da
 (case-insensitive). Days starting before the fetched coverage are unknown; covered
 days with no PRs are zero. `evidence(on:in:)` returns the exact PRs behind a day.
 
+`RepositoryFilter` drives the settings checklist. Choices are repositories with synced
+PRs (merged case-insensitively, busiest first) plus selected repositories that have
+none. An empty selection means all readable repositories, so every choice shows as
+ticked. Unticking one from "all" keeps the rest; ticking every choice collapses back
+to "all" so new repositories are included; the last ticked repository stays ticked.
+
 `QuotaProgress` counts today's evidence without capping it and reports `isReached`
 only when coverage is complete. Contributions are never re-bucketed: the provider's
 day labels are used as-is.

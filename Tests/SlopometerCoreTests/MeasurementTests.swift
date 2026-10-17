@@ -142,3 +142,48 @@ struct QuotaTests {
         #expect(Goal(metric: .prsOpened, target: 1).isValid)
     }
 }
+
+@Suite("Repository filter checklist")
+struct RepositoryFilterTests {
+    let records = [
+        pr("a", created: "2026-10-16T01:00:00Z", repository: "me/app"),
+        pr("b", created: "2026-10-16T02:00:00Z", repository: "Me/App"),
+        pr("c", created: "2026-10-16T03:00:00Z", repository: "org/api"),
+        pr("d", created: "2026-10-16T04:00:00Z", repository: "me/docs"),
+    ]
+    var choices: [RepositoryChoice] { RepositoryFilter.choices(records: records, selected: []) }
+
+    @Test func choicesMergeCaseAndSortBusiestFirst() {
+        #expect(choices.map(\.id) == ["me/app", "me/docs", "org/api"])
+        #expect(choices.map(\.pullRequests) == [2, 1, 1])
+    }
+
+    @Test func selectedRepositoryWithoutPullRequestsStaysListed() {
+        let listed = RepositoryFilter.choices(records: records, selected: ["old/repo"])
+        #expect(listed.last == RepositoryChoice(name: "old/repo", pullRequests: 0))
+    }
+
+    @Test func emptySelectionIncludesEverything() {
+        #expect(choices.allSatisfy { RepositoryFilter.isIncluded($0.name, in: []) })
+        #expect(RepositoryFilter.isIncluded("ME/APP", in: ["me/app"]))
+        #expect(!RepositoryFilter.isIncluded("org/api", in: ["me/app"]))
+    }
+
+    @Test func untickingFromAllKeepsTheRest() {
+        #expect(
+            RepositoryFilter.toggling("org/api", in: [], choices: choices) == ["me/app", "me/docs"])
+    }
+
+    @Test func tickingEveryChoiceCollapsesToAll() {
+        #expect(
+            RepositoryFilter.toggling("org/api", in: ["me/app", "me/docs"], choices: choices)
+                == [])
+    }
+
+    @Test func lastTickedRepositoryCannotBeUnticked() {
+        #expect(RepositoryFilter.isLastIncluded("me/app", in: ["me/app"], choices: choices))
+        #expect(RepositoryFilter.toggling("me/app", in: ["me/app"], choices: choices) == ["me/app"])
+        let single = RepositoryFilter.choices(records: [records[0]], selected: [])
+        #expect(RepositoryFilter.toggling("me/app", in: [], choices: single) == [])
+    }
+}
