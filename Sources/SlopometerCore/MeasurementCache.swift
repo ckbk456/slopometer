@@ -135,6 +135,14 @@ public final class MeasurementCache: Sendable {
         }
     }
 
+    /// Whether cached records may be shown for `login`. A cache that names another account
+    /// still holds that account's data until the next sync resets it. A cache that names no
+    /// account (never synced) holds nothing from another account.
+    public func holds(_ login: String) throws -> Bool {
+        guard let owner = try syncState().login else { return true }
+        return owner.lowercased() == login.lowercased()
+    }
+
     /// Clears everything recorded for a previous account.
     public func reset(for login: String) throws {
         try database.write { db in

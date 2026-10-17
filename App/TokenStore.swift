@@ -7,6 +7,9 @@ struct TokenEntry: Codable, Equatable, Identifiable {
     let id: String
     var label: String
     var kind: AccessToken.Kind
+    /// The GitHub login that owns the token, from the last check that reached GitHub.
+    /// Nonsecret; nil until checked, and cleared when GitHub rejects the token.
+    var owner: String?
 }
 
 /// GitHub tokens kept in Keychain, one item per token. The list of entries is
@@ -46,6 +49,17 @@ enum TokenStore {
         guard SecItemAdd(item as CFDictionary, nil) == errSecSuccess else { return nil }
         persist(entries() + [entry])
         return entry
+    }
+
+    /// Remembers each token's owner from a sync; `nil` forgets it (the token was rejected).
+    static func setOwners(_ owners: [String: String?]) {
+        let updated = entries().map { entry in
+            guard let owner = owners[entry.id] else { return entry }
+            var changed = entry
+            changed.owner = owner
+            return changed
+        }
+        persist(updated)
     }
 
     static func remove(_ id: String) {

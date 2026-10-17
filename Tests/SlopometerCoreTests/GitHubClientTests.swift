@@ -212,22 +212,18 @@ struct GitHubClientTests {
 struct SyncCoordinatorTests {
     let now = date("2026-10-16T05:00:00Z")
 
-    @Test func tokenForAnotherAccountIsNotUsedForPRs() async throws {
+    /// The account is the token owner; a different typed username is not a mismatch.
+    @Test func theTokenOwnerReplacesTheTypedUsername() async throws {
         let cache = try MeasurementCache()
-        let transport = FakeTransport { request in
-            if request.url?.host == "github.com" {
-                let url = Bundle.module.url(forResource: "profile-calendar", withExtension: "html")!
-                return (200, [:], try Data(contentsOf: url))
-            }
-            return (200, [:], json(["data": ["viewer": ["login": "someone-else"]]]))
+        let transport = FakeTransport { _ in
+            (200, [:], json(["data": ["viewer": ["login": "someone-else"]]]))
         }
         let report = await SyncCoordinator(client: client(transport), cache: cache).sync(
             SyncRequest(login: "me", token: "t", timeZone: bangkok, now: now))
-        #expect(
-            report.pullRequestError == .tokenOwnerMismatch(expected: "me", actual: "someone-else"))
-        #expect(!report.tokenVerified)
-        #expect(try cache.syncState().calendarSource == .profilePage)
-        #expect(transport.searchQueries.isEmpty)
+        #expect(report.login == "someone-else")
+        #expect(report.tokenVerified)
+        #expect(report.tokenErrors.isEmpty)
+        #expect(try cache.syncState().login == "someone-else")
     }
 
     @Test func usernameOnlySyncNeverSendsCredentials() async throws {
@@ -238,7 +234,9 @@ struct SyncCoordinatorTests {
         }
         let report = await SyncCoordinator(client: client(transport), cache: cache).sync(
             SyncRequest(login: "me", token: nil, timeZone: bangkok, now: now))
-        #expect(report == SyncReport())
+        var expected = SyncReport()
+        expected.login = "me"
+        #expect(report == expected)
         #expect(
             transport.requests.allSatisfy { $0.value(forHTTPHeaderField: "Authorization") == nil })
         #expect(try cache.calendar().count == 3)

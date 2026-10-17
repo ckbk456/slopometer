@@ -49,3 +49,14 @@ rows, and Refresh/Open/Quit buttons with their shortcuts (Liquid Glass on macOS 
 Local validation and manual checks are recorded in the
 [desktop guide](testing/MANUAL%20TO-DO/desktop-and-appearance.md); the panel's
 appearance, keyboard, and VoiceOver behavior are not yet manually verified.
+
+GitHub connections (0.9.0): implemented on `codex/github-connections`. With tokens, the
+account is the token owner (the earliest-added verified token; others owned by someone else
+are kept but not counted), so a username is needed only without tokens; SPEC was updated on
+the user's direction. Fixed a stale "Verified for @x" after a username change, previous-account
+PR data shown under a new account until the next sync, and refreshes dropped while a sync was
+running (now queued to run right after). Settings drops the numbered tiers for an account
+summary, a token list with an Add Token sheet, the username fallback, and a folded
+InsecuSlopometer™ section; the Activity badge names the connection and lists tokens in a
+popover. Core tests cover the identity, gating, and queueing rules; every UI and provider
+check in the manual guides is pending.

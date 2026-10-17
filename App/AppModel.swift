@@ -17,6 +17,10 @@ final class AppModel {
         didSet {
             guard settings != oldValue else { return }
             persistSettings()
+            if settings.login != oldValue.login {
+                // A check made for the previous username says nothing about this one.
+                lastReport = nil
+            }
             rebuild()
             if settings.login != oldValue.login || settings.historyKey != oldValue.historyKey {
                 Task { await refresh() }
@@ -27,7 +31,9 @@ final class AppModel {
     /// Captured with the snapshot so failed rebuilds cannot relabel an older quota.
     private(set) var menuBarMetric = Metric.contributions
     private(set) var records: [PullRequestRecord] = []
-    private(set) var isSyncing = false
+    /// Coalesces refreshes; a request made during a sync runs right after it.
+    private var gate = RefreshGate()
+    var isSyncing: Bool { gate.isRunning }
     /// The quota's counts and target while the quota is off, so turning it on restores them.
     var parkedGoal: Goal {
         didSet {
@@ -90,14 +96,47 @@ final class AppModel {
 
     var hasToken: Bool { !tokens.isEmpty }
 
-    /// A token exists and they were not all rejected or found to belong to someone else.
-    var tokenUsable: Bool {
-        guard hasToken else { return false }
-        if lastReport?.tokenVerified == true { return true }
-        switch lastReport?.pullRequestError {
-        case .tokenOwnerMismatch, .unauthorized: return false
-        default: return true
+    /// The measured account: the earliest saved token's known owner, else the typed username.
+    var accountLogin: String {
+        AccountResolver.account(owners: tokens.map(\.owner), fallback: settings.login)
+    }
+
+    /// Whether the account comes from token owners rather than the typed username.
+    var accountFromTokens: Bool { tokens.contains { $0.owner != nil } }
+
+    /// The last report, only when it was made for the account now displayed.
+    private var currentReport: SyncReport? {
+        guard let lastReport, AccountResolver.same(lastReport.login, accountLogin) else {
+            return nil
         }
+        return lastReport
+    }
+
+    /// Each saved token's standing for the current account, in the order they were added.
+    func state(of token: TokenEntry) -> TokenState {
+        TokenState.resolve(
+            tokenID: token.id, savedOwner: token.owner, account: accountLogin,
+            report: currentReport)
+    }
+
+    /// A token verified for the current account (in a check this session, or remembered).
+    var tokenUsable: Bool { tokens.contains { state(of: $0).counts } }
+
+    /// The connection in use, worded the same in the badge, Settings, and menu bar panel.
+    var connectionLabel: String {
+        let states = tokens.map { ($0.kind, state(of: $0)) }
+        return ConnectionLabel.describe(
+            fineGrained: states.filter { $0.0 == .fineGrained && $0.1.counts }.count,
+            classic: states.filter { $0.0 == .classic && $0.1.counts }.count,
+            checking: states.filter { $0.1 == .checking }.count)
+    }
+
+    /// Where a token-derived account came from, for the disabled username field.
+    var accountSource: String {
+        let counted = tokens.filter { state(of: $0).counts }
+        return ConnectionLabel.source(
+            fineGrained: counted.filter { $0.kind == .fineGrained }.count,
+            classic: counted.filter { $0.kind == .classic }.count)
     }
 
     /// Short text for the menu bar: quota progress, else today's count.
@@ -125,19 +164,34 @@ final class AppModel {
 
     // MARK: Actions
 
+    /// Syncs now, or right after the sync in progress, so a change made during a sync
+    /// (new token, removed token, new username) is never dropped.
     func refresh() async {
-        guard let coordinator, !isSyncing, !settings.login.isEmpty else { return }
-        isSyncing = true
+        guard let coordinator, !accountLogin.isEmpty || hasToken else { return }
+        guard gate.request() else { return }
+        repeat {
+            await sync(with: coordinator)
+        } while gate.finish()
+    }
+
+    private func sync(with coordinator: SyncCoordinator) async {
+        guard !accountLogin.isEmpty || hasToken else { return }
         lastAttempt = Date()
+        // Read at the start of each run, so a queued run uses the latest settings and tokens.
         let report = await coordinator.sync(
             SyncRequest(
-                login: settings.login, tokens: TokenStore.tokens(), timeZone: settings.timeZone,
+                login: accountLogin, tokens: TokenStore.tokens(), timeZone: settings.timeZone,
                 historyDays: settings.historyDays))
+        var owners: [String: String?] = report.tokenOwners.mapValues { Optional($0) }
+        for (id, error) in report.tokenErrors where error == .unauthorized {
+            owners[id] = .some(nil)
+        }
+        TokenStore.setOwners(owners)
+        tokens = TokenStore.entries()
         lastReport = report
         consecutiveFailures =
             report.calendarError == nil && report.pullRequestError == nil
             ? 0 : consecutiveFailures + 1
-        isSyncing = false
         rebuild()
     }
 
@@ -149,15 +203,16 @@ final class AppModel {
     enum TokenSaveResult {
         case saved
         case duplicate
-        case wrongKind
+        case classicNotAllowed
         case keychainFailed
     }
 
-    func addToken(_ token: String, label: String, as kind: AccessToken.Kind) -> TokenSaveResult {
+    /// Saves a token; its kind follows GitHub's prefix. Classic tokens need InsecuSlopometer™.
+    func addToken(_ token: String, label: String) -> TokenSaveResult {
         let value = token.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !value.isEmpty else { return .keychainFailed }
-        guard AccessToken.Kind(of: value) == kind, kind == .fineGrained || allowsClassicTokens
-        else { return .wrongKind }
+        guard AccessToken.Kind(of: value) == .fineGrained || allowsClassicTokens
+        else { return .classicNotAllowed }
         if TokenStore.tokens().contains(where: { $0.value == value }) { return .duplicate }
         let name = label.trimmingCharacters(in: .whitespaces)
         let fallback = tokens.isEmpty ? "Personal" : "Token \(tokens.count + 1)"
@@ -166,6 +221,7 @@ final class AppModel {
         }
         tokens = TokenStore.entries()
         lastReport = nil
+        rebuild()
         Task { await refresh() }
         return .saved
     }
@@ -176,21 +232,6 @@ final class AppModel {
         lastReport = nil
         rebuild()
         Task { await refresh() }
-    }
-
-    /// Short status for one saved token from the last sync.
-    func status(of token: TokenEntry) -> (text: String, ok: Bool) {
-        switch lastReport?.tokenErrors[token.id] {
-        case .tokenOwnerMismatch(_, let actual)?:
-            return ("Belongs to @\(actual), not counted", false)
-        case .unauthorized?: return ("Rejected by GitHub", false)
-        case let error?: return ("Not checked: \(error.message)", false)
-        case nil:
-            if lastReport?.verifiedTokenIDs.contains(token.id) == true {
-                return ("Verified for @\(settings.login)", true)
-            }
-            return ("Saved in Keychain", true)
-        }
     }
 
     func openMainWindow() {
@@ -204,20 +245,24 @@ final class AppModel {
         guard let cache else { return }
         var problems: [String] = []
         if let startupError { problems.append(startupError) }
-        if let error = lastReport?.calendarError { problems.append(error.message) }
+        let report = currentReport
+        if let error = report?.calendarError { problems.append(error.message) }
         for token in tokens {
-            guard let error = lastReport?.tokenErrors[token.id] else { continue }
+            guard let error = report?.tokenErrors[token.id] else { continue }
             problems.append(
                 tokens.count > 1 ? "Token “\(token.label)”: \(error.message)" : error.message)
         }
         // Without a verified token the PR error is a token error already listed above.
-        if lastReport?.tokenVerified == true, let error = lastReport?.pullRequestError {
+        if report?.tokenVerified == true, let error = report?.pullRequestError {
             problems.append(error.message)
         }
+        // The snapshot names the measured account, which may come from the tokens.
+        var measured = settings
+        measured.login = accountLogin
         do {
-            records = try cache.pullRequests()
+            records = try cache.holds(measured.login) ? cache.pullRequests() : []
             snapshot = try SnapshotBuilder.build(
-                settings: settings, cache: cache, tokenUsable: tokenUsable, problems: problems)
+                settings: measured, cache: cache, tokenUsable: tokenUsable, problems: problems)
             menuBarMetric =
                 snapshot.quota == nil
                 ? snapshot.metric : settings.goal?.metric ?? snapshot.metric
