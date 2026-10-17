@@ -2,29 +2,44 @@ import Foundation
 
 public struct SyncRequest: Sendable {
     public let login: String
-    public let token: String?
+    /// Saved tokens in the order they were added; empty means username only.
+    public let tokens: [AccessToken]
     public let timeZone: TimeZone
     public let now: Date
     /// Displayed range plus moving-average warm-up.
     public let historyDays: Int
 
     public init(
-        login: String, token: String?, timeZone: TimeZone, now: Date = Date(),
+        login: String, tokens: [AccessToken], timeZone: TimeZone, now: Date = Date(),
         historyDays: Int = 395
     ) {
         self.login = login
-        self.token = token?.isEmpty == true ? nil : token
+        self.tokens = tokens.filter { !$0.value.isEmpty }
         self.timeZone = timeZone
         self.now = now
         self.historyDays = historyDays
+    }
+
+    public init(
+        login: String, token: String?, timeZone: TimeZone, now: Date = Date(),
+        historyDays: Int = 395
+    ) {
+        self.init(
+            login: login, tokens: token.map { [AccessToken(id: "default", value: $0)] } ?? [],
+            timeZone: timeZone, now: now, historyDays: historyDays)
     }
 }
 
 public struct SyncReport: Equatable, Sendable {
     public var calendarError: GitHubError?
+    /// PR data was not refreshed: no token was usable, or the PR fetch failed.
     public var pullRequestError: GitHubError?
-    /// The token was verified as belonging to the configured login.
+    /// At least one token was verified as belonging to the configured login.
     public var tokenVerified = false
+    /// Tokens verified as belonging to the configured login, by token ID.
+    public var verifiedTokenIDs: Set<String> = []
+    /// Tokens that were rejected, belong to someone else, or could not be checked.
+    public var tokenErrors: [String: GitHubError] = [:]
 
     public var rateLimitReset: Date? {
         for error in [calendarError, pullRequestError] {
@@ -63,26 +78,30 @@ public actor SyncCoordinator {
         let today = CalendarDay.containing(request.now, in: request.timeZone)
         let start = today.adding(days: -request.historyDays).start(in: request.timeZone)
 
-        var verifiedToken: String?
-        if let token = request.token {
+        var verified: [AccessToken] = []
+        for token in request.tokens {
             do {
-                let owner = try await client.viewerLogin(token: token)
+                let owner = try await client.viewerLogin(token: token.value)
                 if owner.lowercased() == request.login.lowercased() {
-                    verifiedToken = token
-                    report.tokenVerified = true
+                    verified.append(token)
+                    report.verifiedTokenIDs.insert(token.id)
                 } else {
-                    report.pullRequestError = .tokenOwnerMismatch(
+                    report.tokenErrors[token.id] = .tokenOwnerMismatch(
                         expected: request.login, actual: owner)
                 }
             } catch {
-                report.pullRequestError = Self.githubError(error)
+                report.tokenErrors[token.id] = Self.githubError(error)
             }
+        }
+        report.tokenVerified = !verified.isEmpty
+        if verified.isEmpty, let first = request.tokens.first {
+            report.pullRequestError = report.tokenErrors[first.id]
         }
 
         do {
-            if let token = verifiedToken {
+            if let token = verified.first {
                 let counts = try await client.contributionCalendar(
-                    login: request.login, token: token, from: start, to: request.now)
+                    login: request.login, token: token.value, from: start, to: request.now)
                 try cache.replaceCalendar(counts, source: .graphQL, at: request.now)
             } else {
                 let counts = try await client.profileCalendar(login: request.login)
@@ -92,13 +111,21 @@ public actor SyncCoordinator {
             report.calendarError = Self.githubError(error)
         }
 
-        if let token = verifiedToken {
+        if !verified.isEmpty {
             do {
-                let fetch = try await client.authoredPullRequests(
-                    login: request.login, token: token, from: start, to: request.now)
+                // Each token sees a different set of repositories; merge by node ID.
+                var byID: [String: PullRequestRecord] = [:]
+                // A token that could not be used hides its repositories, so counts may be low.
+                var incomplete = verified.count < request.tokens.count
+                for token in verified {
+                    let fetch = try await client.authoredPullRequests(
+                        login: request.login, token: token.value, from: start, to: request.now)
+                    incomplete = incomplete || fetch.isIncomplete
+                    for record in fetch.records { byID[record.id] = record }
+                }
                 try cache.replacePullRequests(
-                    fetch.records, coveringFrom: start, incomplete: fetch.isIncomplete,
-                    at: request.now)
+                    byID.values.sorted { $0.createdAt < $1.createdAt }, coveringFrom: start,
+                    incomplete: incomplete, at: request.now)
             } catch {
                 report.pullRequestError = Self.githubError(error)
             }

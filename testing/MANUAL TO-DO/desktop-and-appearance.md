@@ -11,6 +11,10 @@
 - [ ] Without a token, PRs opened / Authored PRs merged show the token explanation; Add
       Token opens Settings scrolled to the token field. Rejected or mismatched tokens show
       their own wording.
+- [ ] Settings order: GitHub connections (1 public account, 2 fine-grained tokens, 3 classic
+      tokens behind InsecuSlopometer™), Pull requests, Timezone, About. Pull requests is
+      grayed out without a token; Counts and Daily target stay visible but grayed out while
+      the quota is off, and turning it back on restores their earlier values.
 - [ ] Type a daily quota target (for example 100); values outside 1–999 snap into range.
 
 ## Menu-bar metric icons (0.3.1): pending

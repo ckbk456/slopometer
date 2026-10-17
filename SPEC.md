@@ -40,7 +40,7 @@ before asking for one:
 | Tier | Requires | Provides |
 | --- | --- | --- |
 | Username only | Public profile | Account contribution calendar |
-| Token | User-pasted read-only GitHub token | Official contribution calendar, PRs opened, authored PRs merged, PR evidence, PR quotas, optional repository filters |
+| Token | One or more user-pasted read-only GitHub tokens | Official contribution calendar, PRs opened, authored PRs merged, PR evidence, PR quotas, optional repository filters |
 
 - **Username only** reads GitHub's public profile contribution calendar. It is
   not a documented API and may change or break; label it as an unofficial source.
@@ -51,6 +51,14 @@ before asking for one:
   PR metrics cover only repositories the token can read. Recommend a fine-grained
   read-only token (metadata and pull requests); never require write access.
   There is no OAuth sign-in flow.
+- A fine-grained token reads one resource owner's repositories, so several tokens
+  may be saved (for example one for the account and one per organization). Each
+  is verified separately; PRs from every verified token are merged by node ID. A
+  token that fails is reported by name and marks PR coverage incomplete. Say
+  plainly that an account-owned token cannot see an organization's private repositories.
+- Classic tokens cannot be limited to read-only. They are refused unless the person
+  opts in to **InsecuSlopometer™**, which explains that the `repo` scope grants
+  write access. Classic tokens are labeled as such while saved.
 - Removing the token returns to the username-only tier and hides PR data that
   can no longer be refreshed rather than presenting it as current.
 
@@ -149,7 +157,7 @@ requests a widget reload only when the snapshot changes. The snapshot carries
 counts, labels, and freshness, never credentials. When the app is not running,
 the widget shows the last snapshot with its age.
 
-The token belongs in Keychain. Never place tokens in source, preferences, logs,
+Tokens belong in Keychain. Never place tokens in source, preferences, logs,
 the shared snapshot, or chart exports. The sample-data scaffold needs no
 credentials.
 

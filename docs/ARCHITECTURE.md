@@ -3,7 +3,7 @@
 ## Implemented MVP
 
 - `App/`: menu-bar accessory app (`LSUIElement`), `AppModel` (settings, polling,
-  snapshot publishing), dashboard and settings window, Keychain token store.
+  snapshot publishing), dashboard and settings window, Keychain token store (several tokens).
 - `Widget/`: WidgetKit extension that only decodes the shared snapshot.
 - `Shared/`: chart views compiled into both the app and the widget.
 - `Sources/SlopometerCore/`: calendar days, PR measurement, quota, GitHub client,

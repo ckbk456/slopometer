@@ -1,21 +1,60 @@
 import Foundation
 import Security
+import SlopometerCore
 
-/// The optional GitHub token, kept only in Keychain.
+/// A saved token's nonsecret details; the value itself lives only in Keychain.
+struct TokenEntry: Codable, Equatable, Identifiable {
+    let id: String
+    var label: String
+    var kind: AccessToken.Kind
+}
+
+/// GitHub tokens kept in Keychain, one item per token. The list of entries is
+/// nonsecret and kept in preferences.
 enum TokenStore {
     private static let service = "dev.slopometer.github-token"
-    private static let account = "default"
+    /// The Keychain account used when only one token could be saved.
+    private static let legacyID = "default"
+    private static let entriesKey = "tokenEntries"
 
-    private static var query: [String: Any] {
-        [
-            kSecClass as String: kSecClassGenericPassword,
-            kSecAttrService as String: service,
-            kSecAttrAccount as String: account,
+    static func entries() -> [TokenEntry] {
+        if let data = UserDefaults.standard.data(forKey: entriesKey),
+            let saved = try? JSONDecoder().decode([TokenEntry].self, from: data)
+        {
+            return saved
+        }
+        guard let legacy = read(legacyID) else { return [] }
+        let migrated = [
+            TokenEntry(id: legacyID, label: "Personal", kind: AccessToken.Kind(of: legacy))
         ]
+        persist(migrated)
+        return migrated
     }
 
-    static func read() -> String? {
-        var request = query
+    /// Saved tokens with their values, in the order they were added.
+    static func tokens() -> [AccessToken] {
+        entries().compactMap { entry in read(entry.id).map { AccessToken(id: entry.id, value: $0) }
+        }
+    }
+
+    static func add(_ value: String, label: String) -> TokenEntry? {
+        let entry = TokenEntry(
+            id: UUID().uuidString, label: label, kind: AccessToken.Kind(of: value))
+        var item = query(entry.id)
+        item[kSecValueData as String] = Data(value.utf8)
+        item[kSecAttrAccessible as String] = kSecAttrAccessibleAfterFirstUnlock
+        guard SecItemAdd(item as CFDictionary, nil) == errSecSuccess else { return nil }
+        persist(entries() + [entry])
+        return entry
+    }
+
+    static func remove(_ id: String) {
+        SecItemDelete(query(id) as CFDictionary)
+        persist(entries().filter { $0.id != id })
+    }
+
+    private static func read(_ id: String) -> String? {
+        var request = query(id)
         request[kSecReturnData as String] = true
         request[kSecMatchLimit as String] = kSecMatchLimitOne
         var result: AnyObject?
@@ -25,17 +64,17 @@ enum TokenStore {
         return String(data: data, encoding: .utf8)
     }
 
-    static func save(_ token: String) -> Bool {
-        delete()
-        var item = query
-        item[kSecValueData as String] = Data(token.utf8)
-        item[kSecAttrAccessible as String] = kSecAttrAccessibleAfterFirstUnlock
-        return SecItemAdd(item as CFDictionary, nil) == errSecSuccess
+    private static func query(_ id: String) -> [String: Any] {
+        [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrService as String: service,
+            kSecAttrAccount as String: id,
+        ]
     }
 
-    @discardableResult
-    static func delete() -> Bool {
-        let status = SecItemDelete(query as CFDictionary)
-        return status == errSecSuccess || status == errSecItemNotFound
+    private static func persist(_ entries: [TokenEntry]) {
+        if let data = try? JSONEncoder().encode(entries) {
+            UserDefaults.standard.set(data, forKey: entriesKey)
+        }
     }
 }

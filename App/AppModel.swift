@@ -9,6 +9,8 @@ import WidgetKit
 @Observable
 final class AppModel {
     private static let settingsKey = "settings"
+    private static let classicTokensKey = "allowClassicTokens"
+    private static let parkedGoalKey = "parkedGoal"
     static let pollInterval: TimeInterval = 15 * 60
 
     var settings: DashboardSettings {
@@ -26,7 +28,20 @@ final class AppModel {
     private(set) var menuBarMetric = Metric.contributions
     private(set) var records: [PullRequestRecord] = []
     private(set) var isSyncing = false
-    private(set) var hasToken: Bool
+    /// The quota's counts and target while the quota is off, so turning it on restores them.
+    var parkedGoal: Goal {
+        didSet {
+            if let data = try? JSONEncoder().encode(parkedGoal) {
+                UserDefaults.standard.set(data, forKey: Self.parkedGoalKey)
+            }
+        }
+    }
+    /// Saved tokens' nonsecret details, in the order they were added.
+    private(set) var tokens: [TokenEntry]
+    /// InsecuSlopometer™: accept classic tokens, which cannot be limited to read-only.
+    var allowsClassicTokens: Bool {
+        didSet { UserDefaults.standard.set(allowsClassicTokens, forKey: Self.classicTokensKey) }
+    }
     private(set) var lastReport: SyncReport?
     private(set) var lastAttempt: Date?
     private(set) var startupError: String?
@@ -48,7 +63,11 @@ final class AppModel {
         } else {
             settings = DashboardSettings()
         }
-        hasToken = TokenStore.read() != nil
+        tokens = TokenStore.entries()
+        allowsClassicTokens = UserDefaults.standard.bool(forKey: Self.classicTokensKey)
+        parkedGoal =
+            UserDefaults.standard.data(forKey: Self.parkedGoalKey)
+            .flatMap { try? JSONDecoder().decode(Goal.self, from: $0) } ?? Goal()
         do {
             let cache = try MeasurementCache(path: Self.cachePath())
             self.cache = cache
@@ -69,9 +88,12 @@ final class AppModel {
 
     // MARK: Derived state
 
-    /// A token exists and was not rejected or found to belong to someone else.
+    var hasToken: Bool { !tokens.isEmpty }
+
+    /// A token exists and they were not all rejected or found to belong to someone else.
     var tokenUsable: Bool {
         guard hasToken else { return false }
+        if lastReport?.tokenVerified == true { return true }
         switch lastReport?.pullRequestError {
         case .tokenOwnerMismatch, .unauthorized: return false
         default: return true
@@ -109,7 +131,7 @@ final class AppModel {
         lastAttempt = Date()
         let report = await coordinator.sync(
             SyncRequest(
-                login: settings.login, token: TokenStore.read(), timeZone: settings.timeZone,
+                login: settings.login, tokens: TokenStore.tokens(), timeZone: settings.timeZone,
                 historyDays: settings.historyDays))
         lastReport = report
         consecutiveFailures =
@@ -124,21 +146,51 @@ final class AppModel {
         if Date().timeIntervalSince(lastAttempt) > 10 * 60 { await refresh() }
     }
 
-    func saveToken(_ token: String) -> Bool {
-        let trimmed = token.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmed.isEmpty, TokenStore.save(trimmed) else { return false }
-        hasToken = true
-        lastReport = nil
-        Task { await refresh() }
-        return true
+    enum TokenSaveResult {
+        case saved
+        case duplicate
+        case wrongKind
+        case keychainFailed
     }
 
-    func removeToken() {
-        TokenStore.delete()
-        hasToken = false
+    func addToken(_ token: String, label: String, as kind: AccessToken.Kind) -> TokenSaveResult {
+        let value = token.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !value.isEmpty else { return .keychainFailed }
+        guard AccessToken.Kind(of: value) == kind, kind == .fineGrained || allowsClassicTokens
+        else { return .wrongKind }
+        if TokenStore.tokens().contains(where: { $0.value == value }) { return .duplicate }
+        let name = label.trimmingCharacters(in: .whitespaces)
+        let fallback = tokens.isEmpty ? "Personal" : "Token \(tokens.count + 1)"
+        guard TokenStore.add(value, label: name.isEmpty ? fallback : name) != nil else {
+            return .keychainFailed
+        }
+        tokens = TokenStore.entries()
+        lastReport = nil
+        Task { await refresh() }
+        return .saved
+    }
+
+    func removeToken(_ id: String) {
+        TokenStore.remove(id)
+        tokens = TokenStore.entries()
         lastReport = nil
         rebuild()
         Task { await refresh() }
+    }
+
+    /// Short status for one saved token from the last sync.
+    func status(of token: TokenEntry) -> (text: String, ok: Bool) {
+        switch lastReport?.tokenErrors[token.id] {
+        case .tokenOwnerMismatch(_, let actual)?:
+            return ("Belongs to @\(actual), not counted", false)
+        case .unauthorized?: return ("Rejected by GitHub", false)
+        case let error?: return ("Not checked: \(error.message)", false)
+        case nil:
+            if lastReport?.verifiedTokenIDs.contains(token.id) == true {
+                return ("Verified for @\(settings.login)", true)
+            }
+            return ("Saved in Keychain", true)
+        }
     }
 
     func openMainWindow() {
@@ -153,7 +205,15 @@ final class AppModel {
         var problems: [String] = []
         if let startupError { problems.append(startupError) }
         if let error = lastReport?.calendarError { problems.append(error.message) }
-        if let error = lastReport?.pullRequestError { problems.append(error.message) }
+        for token in tokens {
+            guard let error = lastReport?.tokenErrors[token.id] else { continue }
+            problems.append(
+                tokens.count > 1 ? "Token “\(token.label)”: \(error.message)" : error.message)
+        }
+        // Without a verified token the PR error is a token error already listed above.
+        if lastReport?.tokenVerified == true, let error = lastReport?.pullRequestError {
+            problems.append(error.message)
+        }
         do {
             records = try cache.pullRequests()
             snapshot = try SnapshotBuilder.build(

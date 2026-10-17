@@ -8,15 +8,21 @@ Owners: `Sources/SlopometerCore/SyncCoordinator.swift`, `GitHub/GitHubClient.swi
 - **Username only:** fetches `github.com/users/<login>/contributions` (undocumented
   HTML) and parses each day's tooltip. Markup that yields no days, or tooltips that
   do not match the cells, is an error, never zero activity. No credential is sent.
-- **Token:** first calls GraphQL `viewer { login }`. A token owned by another account
-  is reported (`tokenOwnerMismatch`) and not used; the calendar then falls back to
-  the profile page. A verified token fetches the GraphQL calendar in spans of at
-  most one year and PRs through REST search.
+- **Token:** each saved token first calls GraphQL `viewer { login }`. A token owned by
+  another account is reported (`tokenOwnerMismatch`) and not used. The first verified
+  token fetches the GraphQL calendar in spans of at most one year; with none, the
+  calendar falls back to the profile page. Every verified token fetches PRs through
+  REST search, because each fine-grained token reads one resource owner's
+  repositories. Per-token errors are in `SyncReport.tokenErrors`, keyed by token ID.
+- **Token kinds:** `github_pat_` tokens are fine-grained; anything else is treated
+  as classic and is accepted only with the InsecuSlopometer™ opt-in.
 
 ## PR fetch
 
 Two searches cover the history window: `author:<login> type:pr created:<from>..<to>`
-and the same with `merged:`. Results are merged by node ID. A window reporting more
+and the same with `merged:`, run per verified token. Results from every token are
+merged by node ID. If any saved token could not be used, coverage is marked
+incomplete because its repositories are missing. A window reporting more
 than 1,000 results is split in half recursively; pages are fetched up to the
 reported total. `incomplete_results` marks coverage incomplete. Each search request
 waits 2.1 s to stay under the 30 requests/minute search limit, so a first sync of
@@ -43,8 +49,10 @@ stale data (older than 45 minutes), incomplete coverage, and sync errors.
 
 The app writes the snapshot as JSON to the App Group container
 `5U4584QFCQ.dev.slopometer` and reloads widget timelines only when the bytes change.
-The widget decodes it and never fetches or reads Keychain. The token lives only in
-Keychain (service `dev.slopometer.github-token`).
+The widget decodes it and never fetches or reads Keychain. Tokens live only in
+Keychain (service `dev.slopometer.github-token`, one item per token ID); their names
+and kinds are nonsecret preferences (`tokenEntries`). The single token saved by
+earlier versions (account `default`) is adopted as "Personal".
 
 macOS refuses App Group access to unsigned builds and to a copy signed differently
 from the one that owns the container. A failed write is shown in the app window as
