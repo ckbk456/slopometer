@@ -44,4 +44,42 @@ struct MeasurementCacheTests {
         let reopened = try MeasurementCache(path: path)
         #expect(try reopened.days(in: "demo") == [record])
     }
+
+    @Test func syncStateWrittenBeforeCheckpointsStillDecodes() throws {
+        let legacy = Data(#"{"login":"me","pullRequestResultsIncomplete":true}"#.utf8)
+        let state = try JSONDecoder().decode(SyncState.self, from: legacy)
+        #expect(state.login == "me")
+        #expect(state.pullRequestResultsIncomplete)
+        #expect(state.lastFullPullRequestSync == nil)
+        #expect(state.pullRequestCheckpoints.isEmpty)
+    }
+
+    @Test func upsertKeepsOtherRecordsAndOnlyWidensCoverage() throws {
+        let cache = try MeasurementCache()
+        try cache.reset(for: "me")
+        let first = Date(timeIntervalSince1970: 1_700_000_000)
+        let record = PullRequestRecord(
+            id: "x", number: 1, title: "x", repository: "me/app", url: "u", isDraft: false,
+            createdAt: first, mergedAt: nil)
+        try cache.replacePullRequests(
+            [record], coveringFrom: first, incomplete: false, checkpoints: ["a": first],
+            at: first)
+        let later = first.addingTimeInterval(900)
+        let merged = PullRequestRecord(
+            id: "x", number: 1, title: "x", repository: "me/app", url: "u", isDraft: false,
+            createdAt: first, mergedAt: later)
+        let other = PullRequestRecord(
+            id: "y", number: 2, title: "y", repository: "me/app", url: "u", isDraft: false,
+            createdAt: later, mergedAt: nil)
+        try cache.upsertPullRequests(
+            [merged, other], coveringFrom: later, incomplete: true, checkpoints: ["b": later],
+            at: later)
+        #expect(try cache.pullRequests() == [merged, other])
+        let state = try cache.syncState()
+        #expect(state.pullRequestCoverageStart == first)
+        #expect(state.pullRequestResultsIncomplete)
+        #expect(state.pullRequestCheckpoints == ["a": first, "b": later])
+        #expect(state.lastFullPullRequestSync == first)
+        #expect(state.lastPullRequestSync == later)
+    }
 }

@@ -188,7 +188,9 @@ struct MenuPanel: View {
     @ViewBuilder
     private var syncRow: some View {
         if model.isSyncing {
-            PanelRow(icon: "arrow.triangle.2.circlepath", title: "Syncing with GitHub…")
+            PanelRow(
+                icon: "arrow.triangle.2.circlepath",
+                title: model.syncStage?.label ?? "Syncing with GitHub…")
         } else if let synced = snapshot.lastSuccessfulSync {
             PanelRow(icon: "arrow.triangle.2.circlepath", title: "Synced") {
                 Text("\(synced, style: .relative) ago")
@@ -249,7 +251,7 @@ struct MenuPanel: View {
                 .disabled(model.isSyncing || needsLogin)
                 .keyboardShortcut("r")
                 .help("Refresh now (⌘R)")
-                .accessibilityLabel(model.isSyncing ? "Refreshing" : "Refresh now")
+                .accessibilityLabel(model.isSyncing ? model.refreshLabel : "Refresh now")
 
                 Button {
                     openMainWindow()

@@ -53,8 +53,32 @@ func searchPage(total: Int, items: [[String: Any]], incomplete: Bool = false) ->
     json(["total_count": total, "incomplete_results": incomplete, "items": items])
 }
 
-func client(_ transport: FakeTransport) -> GitHubClient {
-    GitHubClient(transport: transport, searchPause: {})
+/// A clock that only sleeping advances, so limiter waits are observable and instant.
+final class FakeClock: @unchecked Sendable {
+    private let lock = NSLock()
+    private var time: Date
+    private(set) var sleeps: [TimeInterval] = []
+
+    init(_ start: Date = date("2026-10-16T00:00:00Z")) {
+        time = start
+    }
+
+    var now: Date { lock.withLock { time } }
+
+    func sleep(_ seconds: TimeInterval) {
+        lock.withLock {
+            sleeps.append(seconds)
+            time = time.addingTimeInterval(seconds)
+        }
+    }
+
+    func limiter() -> SearchRateLimiter {
+        SearchRateLimiter(now: { self.now }, sleep: { self.sleep($0) })
+    }
+}
+
+func client(_ transport: FakeTransport, clock: FakeClock = FakeClock()) -> GitHubClient {
+    GitHubClient(transport: transport, searchLimiter: clock.limiter())
 }
 
 @Suite("Public profile calendar")
@@ -84,7 +108,7 @@ struct GitHubClientTests {
         let transport = FakeTransport { request in
             let query = URLComponents(url: request.url!, resolvingAgainstBaseURL: false)!
                 .queryItems!.first { $0.name == "q" }!.value!
-            if query.contains("created:") {
+            if !query.contains("merged:") {
                 return (
                     200, [:],
                     searchPage(
@@ -114,6 +138,31 @@ struct GitHubClientTests {
         #expect(fetch.records.first?.repository == "me/app")
         #expect(!fetch.isIncomplete)
         #expect(transport.searchQueries.allSatisfy { $0.hasPrefix("author:me type:pr ") })
+        // The merged search skips PRs the created search already returned.
+        #expect(
+            transport.searchQueries == [
+                "author:me type:pr created:2026-01-01T00:00:00Z..2026-10-16T00:00:00Z",
+                "author:me type:pr merged:2026-01-01T00:00:00Z..2026-10-16T00:00:00Z"
+                    + " created:<2026-01-01T00:00:00Z",
+            ])
+    }
+
+    @Test func fetchesChangesSinceACheckpointWithOneSearch() async throws {
+        let transport = FakeTransport { _ in
+            (
+                200, [:],
+                searchPage(
+                    total: 1,
+                    items: [searchItem("old", created: "2025-11-01T00:00:00Z", merged: nil)])
+            )
+        }
+        let fetch = try await client(transport).updatedPullRequests(
+            login: "me", token: "t", since: date("2026-10-15T18:00:00Z"), to: to)
+        #expect(fetch.records.map(\.id) == ["old"])
+        #expect(
+            transport.searchQueries == [
+                "author:me type:pr updated:2026-10-15T18:00:00Z..2026-10-16T00:00:00Z"
+            ])
     }
 
     @Test func splitsWindowsThatExceedTheSearchCap() async throws {
@@ -166,6 +215,37 @@ struct GitHubClientTests {
         await #expect(throws: GitHubError.unauthorized) {
             try await client(rejected).viewerLogin(token: "t")
         }
+    }
+
+    @Test func searchesWaitOnlyWhenTheMinuteBudgetIsSpent() async throws {
+        let clock = FakeClock()
+        let transport = FakeTransport { _ in (200, [:], searchPage(total: 0, items: [])) }
+        let client = client(transport, clock: clock)
+        for _ in 0..<(SearchRateLimiter.requestsPerWindow / 2) {
+            _ = try await client.authoredPullRequests(login: "me", token: "t", from: from, to: to)
+        }
+        #expect(clock.sleeps.isEmpty)
+        #expect(transport.searchQueries.count == SearchRateLimiter.requestsPerWindow)
+        _ = try await client.authoredPullRequests(login: "me", token: "t", from: from, to: to)
+        #expect(clock.sleeps.count == 1)
+        #expect(clock.sleeps[0] > 59 && clock.sleeps[0] <= 60)
+    }
+
+    @Test func anExhaustedSearchBudgetWaitsForGitHubsReset() async throws {
+        let clock = FakeClock()
+        let reset = clock.now.addingTimeInterval(20)
+        let transport = FakeTransport { _ in
+            (
+                200,
+                [
+                    "X-RateLimit-Remaining": "0",
+                    "X-RateLimit-Reset": String(Int(reset.timeIntervalSince1970)),
+                ], searchPage(total: 0, items: [])
+            )
+        }
+        _ = try await client(transport, clock: clock).authoredPullRequests(
+            login: "me", token: "t", from: from, to: to)
+        #expect(clock.sleeps == [20])
     }
 
     @Test func rejectsInvalidLoginsBeforeAnyRequest() async {
@@ -280,7 +360,9 @@ struct SyncCoordinatorTests {
         #expect(report.pullRequestError == nil)
         #expect(try cache.pullRequests().map(\.id).sorted() == ["org-only", "shared"])
         #expect(try !cache.syncState().pullRequestResultsIncomplete)
-        #expect(transport.searchQueries.count == 4)
+        // Recent window then older window, created and merged searches, per token.
+        #expect(transport.searchQueries.count == 8)
+        #expect(report.pullRequestSyncMode == .fullReconcile)
     }
 
     @Test func aFailedTokenKeepsTheOthersButMarksCoverageIncomplete() async throws {
@@ -318,5 +400,207 @@ struct SyncCoordinatorTests {
         #expect(report.calendarError == .offline)
         #expect(try cache.calendar() == [day("2026-10-15"): 2])
         #expect(try cache.syncState().lastCalendarSync == date("2026-10-15T00:00:00Z"))
+    }
+}
+
+/// Records what a sync had published when each stage began.
+final class StageLog: @unchecked Sendable {
+    private let lock = NSLock()
+    private(set) var entries: [(SyncStage, Bool, [String])] = []
+
+    func record(_ progress: SyncProgress, cache: MeasurementCache) {
+        let ids = (try? cache.pullRequests().map(\.id).sorted()) ?? []
+        lock.withLock { entries.append((progress.stage, progress.cacheChanged, ids)) }
+    }
+}
+
+@Suite("Incremental sync")
+struct IncrementalSyncTests {
+    let now = date("2026-10-16T05:00:00Z")
+    let token = AccessToken(id: "a", value: "personal")
+
+    /// Verifies the token as `me`, serves an empty calendar, and answers searches from
+    /// `items`, which receives the query string.
+    func serving(_ items: @escaping @Sendable (String) throws -> [[String: Any]]) -> FakeTransport {
+        FakeTransport { request in
+            if request.url?.path == "/graphql" {
+                let body = String(data: request.httpBody ?? Data(), encoding: .utf8) ?? ""
+                if body.contains("viewer") {
+                    return (200, [:], json(["data": ["viewer": ["login": "me"]]]))
+                }
+                let calendar = ["contributionCalendar": ["weeks": [] as [Any]]]
+                return (200, [:], json(["data": ["user": ["contributionsCollection": calendar]]]))
+            }
+            let query = URLComponents(url: request.url!, resolvingAgainstBaseURL: false)!
+                .queryItems!.first { $0.name == "q" }!.value!
+            let found = try items(query)
+            return (200, [:], searchPage(total: found.count, items: found))
+        }
+    }
+
+    func request(at date: Date, tokens: [AccessToken]? = nil) -> SyncRequest {
+        SyncRequest(login: "me", tokens: tokens ?? [token], timeZone: bangkok, now: date)
+    }
+
+    /// Full window on the first sync: an old PR and a recent one.
+    @Sendable static func history(_ query: String) -> [[String: Any]] {
+        // Windows start at Bangkok midnight, 17:00Z the day before.
+        if query.contains("created:2026-09-15T17:00:00Z..") {  // recent window
+            return [searchItem("recent", created: "2026-10-15T01:00:00Z")]
+        }
+        if query.contains("created:2025-09-15T17:00:00Z..2026-09-15T16:59:59Z") {  // older
+            return [searchItem("old", created: "2026-01-10T01:00:00Z")]
+        }
+        return []
+    }
+
+    @Test func firstSyncPublishesRecentPullRequestsBeforeOlderHistory() async throws {
+        let cache = try MeasurementCache()
+        let log = StageLog()
+        let report = await SyncCoordinator(client: client(serving(Self.history)), cache: cache)
+            .sync(request(at: now)) { log.record($0, cache: cache) }
+        #expect(report.pullRequestError == nil)
+        #expect(report.pullRequestSyncMode == .fullReconcile)
+        #expect(
+            log.entries.map(\.0) == [
+                .checkingTokens, .updatingCalendar, .fetchingRecentPullRequests,
+                .loadingOlderPullRequests,
+            ])
+        #expect(log.entries.map(\.1) == [false, false, true, true])
+        // When older history starts loading, the recent PR is already in the cache.
+        #expect(log.entries[3].2 == ["recent"])
+        #expect(try cache.pullRequests().map(\.id) == ["old", "recent"])
+        let state = try cache.syncState()
+        #expect(state.lastFullPullRequestSync == now)
+        #expect(state.pullRequestCheckpoints == ["a": now])
+        #expect(state.pullRequestCoverageStart == day("2025-09-16").start(in: bangkok))
+    }
+
+    @Test func coverageIsOnlyTheRecentWindowUntilOlderHistoryLoads() async throws {
+        let cache = try MeasurementCache()
+        let seen = StageLog()
+        _ = await SyncCoordinator(client: client(serving(Self.history)), cache: cache)
+            .sync(request(at: now)) { progress in
+                guard progress.stage == .loadingOlderPullRequests else { return }
+                let start = try? cache.syncState().pullRequestCoverageStart
+                let recentOnly = start == day("2026-09-16").start(in: bangkok)
+                seen.record(
+                    SyncProgress(stage: progress.stage, cacheChanged: recentOnly), cache: cache)
+            }
+        #expect(seen.entries.map(\.1) == [true])
+    }
+
+    @Test func theNextSyncFetchesOnlyChangesAndMergesThemIn() async throws {
+        let cache = try MeasurementCache()
+        _ = await SyncCoordinator(client: client(serving(Self.history)), cache: cache)
+            .sync(request(at: now))
+        let later = now.addingTimeInterval(15 * 60)
+        let transport = serving { query in
+            // Six hours before the checkpoint, up to this sync's time.
+            #expect(query == "author:me type:pr updated:2026-10-15T23:00:00Z..2026-10-16T05:15:00Z")
+            return [
+                searchItem(
+                    "recent", created: "2026-10-15T01:00:00Z", merged: "2026-10-16T05:10:00Z"),
+                searchItem("new", created: "2026-10-16T05:05:00Z"),
+            ]
+        }
+        let report = await SyncCoordinator(client: client(transport), cache: cache)
+            .sync(request(at: later))
+        #expect(report.pullRequestError == nil)
+        #expect(report.pullRequestSyncMode == .changesOnly)
+        #expect(transport.searchQueries.count == 1)
+        let records = try cache.pullRequests()
+        #expect(records.map(\.id) == ["old", "recent", "new"])
+        #expect(records.first { $0.id == "recent" }?.mergedAt == date("2026-10-16T05:10:00Z"))
+        let state = try cache.syncState()
+        #expect(state.pullRequestCheckpoints == ["a": later])
+        #expect(state.lastFullPullRequestSync == now)
+        #expect(state.lastPullRequestSync == later)
+    }
+
+    @Test func changesOutsideTheWindowAreNotAdded() async throws {
+        let cache = try MeasurementCache()
+        _ = await SyncCoordinator(client: client(serving(Self.history)), cache: cache)
+            .sync(request(at: now))
+        let transport = serving { _ in
+            [
+                searchItem("ancient-comment", created: "2024-01-01T00:00:00Z"),
+                searchItem(
+                    "ancient-merged", created: "2024-01-01T00:00:00Z",
+                    merged: "2026-10-16T05:10:00Z"),
+            ]
+        }
+        _ = await SyncCoordinator(client: client(transport), cache: cache)
+            .sync(request(at: now.addingTimeInterval(15 * 60)))
+        #expect(try cache.pullRequests().map(\.id) == ["ancient-merged", "old", "recent"])
+    }
+
+    @Test func aDayLaterTheWholeWindowIsReconciledAndRemovedPRsDisappear() async throws {
+        let cache = try MeasurementCache()
+        _ = await SyncCoordinator(client: client(serving(Self.history)), cache: cache)
+            .sync(request(at: now))
+        let later = now.addingTimeInterval(25 * 3600)
+        let transport = serving { query in
+            query.contains("created:2026-09-16T17:00:00Z..")
+                ? [searchItem("recent", created: "2026-10-15T01:00:00Z")] : []
+        }
+        let report = await SyncCoordinator(client: client(transport), cache: cache)
+            .sync(request(at: later))
+        #expect(report.pullRequestSyncMode == .fullReconcile)
+        #expect(transport.searchQueries.allSatisfy { !$0.contains("updated:") })
+        #expect(try cache.pullRequests().map(\.id) == ["recent"])
+        #expect(try cache.syncState().lastFullPullRequestSync == later)
+    }
+
+    @Test func aNewTokenForcesAFullReconcile() async throws {
+        let cache = try MeasurementCache()
+        _ = await SyncCoordinator(client: client(serving(Self.history)), cache: cache)
+            .sync(request(at: now))
+        let transport = serving(Self.history)
+        let report = await SyncCoordinator(client: client(transport), cache: cache)
+            .sync(
+                request(
+                    at: now.addingTimeInterval(60),
+                    tokens: [token, AccessToken(id: "b", value: "org")]))
+        #expect(report.pullRequestSyncMode == .fullReconcile)
+        #expect(try cache.syncState().pullRequestCheckpoints.keys.sorted() == ["a", "b"])
+    }
+
+    @Test func aFailedChangeFetchKeepsRecordsAndTheCheckpoint() async throws {
+        let cache = try MeasurementCache()
+        _ = await SyncCoordinator(client: client(serving(Self.history)), cache: cache)
+            .sync(request(at: now))
+        let transport = serving { _ in throw GitHubError.offline }
+        let report = await SyncCoordinator(client: client(transport), cache: cache)
+            .sync(request(at: now.addingTimeInterval(15 * 60)))
+        #expect(report.pullRequestSyncMode == .changesOnly)
+        #expect(report.pullRequestError == .offline)
+        #expect(try cache.pullRequests().map(\.id) == ["old", "recent"])
+        let state = try cache.syncState()
+        #expect(state.pullRequestCheckpoints == ["a": now])
+        #expect(!state.pullRequestResultsIncomplete)
+    }
+
+    @Test func aFailedOlderWindowKeepsRecentPRsWithNarrowCoverage() async throws {
+        let cache = try MeasurementCache()
+        let transport = serving { query in
+            if query.contains("created:2025-09-15T17:00:00Z..") {
+                throw GitHubError.http(status: 502)
+            }
+            return Self.history(query)
+        }
+        let report = await SyncCoordinator(client: client(transport), cache: cache)
+            .sync(request(at: now))
+        #expect(report.pullRequestError == .http(status: 502))
+        #expect(try cache.pullRequests().map(\.id) == ["recent"])
+        let state = try cache.syncState()
+        #expect(state.pullRequestCoverageStart == day("2026-09-16").start(in: bangkok))
+        #expect(state.lastFullPullRequestSync == nil)
+        #expect(state.pullRequestCheckpoints.isEmpty)
+        // The next sync starts over with a full window.
+        let retry = await SyncCoordinator(client: client(serving(Self.history)), cache: cache)
+            .sync(request(at: now.addingTimeInterval(60)))
+        #expect(retry.pullRequestSyncMode == .fullReconcile)
+        #expect(try cache.pullRequests().map(\.id) == ["old", "recent"])
     }
 }

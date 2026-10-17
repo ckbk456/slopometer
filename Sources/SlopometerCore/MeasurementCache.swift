@@ -41,8 +41,31 @@ public struct SyncState: Codable, Equatable, Sendable {
     /// PR records are complete for activity at or after this instant.
     public var pullRequestCoverageStart: Date?
     public var pullRequestResultsIncomplete = false
+    /// When the whole window was last refetched and stale records removed.
+    public var lastFullPullRequestSync: Date?
+    /// Per token ID, the instant up to which that token's PR changes were fetched.
+    /// Missing for a token that has not completed a fetch; a failed fetch never advances it.
+    public var pullRequestCheckpoints: [String: Date] = [:]
 
     public init() {}
+
+    /// Fields added after a cache was written decode as their defaults.
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        login = try container.decodeIfPresent(String.self, forKey: .login)
+        calendarSource = try container.decodeIfPresent(CalendarSource.self, forKey: .calendarSource)
+        lastCalendarSync = try container.decodeIfPresent(Date.self, forKey: .lastCalendarSync)
+        lastPullRequestSync = try container.decodeIfPresent(Date.self, forKey: .lastPullRequestSync)
+        pullRequestCoverageStart = try container.decodeIfPresent(
+            Date.self, forKey: .pullRequestCoverageStart)
+        pullRequestResultsIncomplete =
+            try container.decodeIfPresent(Bool.self, forKey: .pullRequestResultsIncomplete) ?? false
+        lastFullPullRequestSync = try container.decodeIfPresent(
+            Date.self, forKey: .lastFullPullRequestSync)
+        pullRequestCheckpoints =
+            try container.decodeIfPresent([String: Date].self, forKey: .pullRequestCheckpoints)
+            ?? [:]
+    }
 }
 
 extension PullRequestRecord: FetchableRecord, PersistableRecord {
@@ -183,9 +206,11 @@ public final class MeasurementCache: Sendable {
     }
 
     /// Replaces all PR records with a complete fetch, so deleted or inaccessible PRs
-    /// disappear and repeated syncs cannot double-count.
+    /// disappear and repeated syncs cannot double-count. Records this as a full sync and
+    /// sets every given token's checkpoint.
     public func replacePullRequests(
-        _ records: [PullRequestRecord], coveringFrom start: Date, incomplete: Bool, at date: Date
+        _ records: [PullRequestRecord], coveringFrom start: Date, incomplete: Bool,
+        checkpoints: [String: Date] = [:], at date: Date
     ) throws {
         try database.write { db in
             try PullRequestRecord.deleteAll(db)
@@ -196,6 +221,28 @@ public final class MeasurementCache: Sendable {
             state.pullRequestCoverageStart = start
             state.pullRequestResultsIncomplete = incomplete
             state.lastPullRequestSync = date
+            state.lastFullPullRequestSync = date
+            state.pullRequestCheckpoints = checkpoints
+            try Self.write(state, db)
+        }
+    }
+
+    /// Inserts or updates records by node ID and keeps the rest, for incremental and
+    /// partial fetches. Coverage can only widen; an incomplete flag only clears with a
+    /// full replacement. Checkpoints are set for the given tokens only.
+    public func upsertPullRequests(
+        _ records: [PullRequestRecord], coveringFrom start: Date, incomplete: Bool,
+        checkpoints: [String: Date] = [:], at date: Date
+    ) throws {
+        try database.write { db in
+            for record in PullRequestScope.unique(records) {
+                try record.save(db)
+            }
+            var state = try Self.state(db)
+            state.pullRequestCoverageStart = min(state.pullRequestCoverageStart ?? start, start)
+            state.pullRequestResultsIncomplete = state.pullRequestResultsIncomplete || incomplete
+            state.lastPullRequestSync = date
+            state.pullRequestCheckpoints.merge(checkpoints) { _, new in new }
             try Self.write(state, db)
         }
     }

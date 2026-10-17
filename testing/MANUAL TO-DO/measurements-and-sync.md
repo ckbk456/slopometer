@@ -24,6 +24,14 @@ Provider integration and PR quotas are not yet implemented. All gates are pendin
       counts, quota, and widget; the last one cannot be unticked; "All repositories" restores all.
 - [ ] Verify missing/partial permissions and pagination never turn unknown activity into zero.
 - [ ] Test repeated sync, offline startup, delayed provider updates, and rate-limit backoff.
+- [ ] First sync with a token: the calendar and the last 30 days of PRs appear (app, menu
+      bar, widget) while the refresh control still reads "Loading older PRs…"; older days
+      stay unknown, not zero, until it finishes; no 2-second gaps between search requests.
+- [ ] Later syncs: a manual refresh after merging a PR finishes in a few seconds with one
+      `updated:` search per token and shows the merge; a PR deleted on GitHub disappears
+      only after the daily full reconcile (or a new token, which forces one).
+- [ ] Search budget: a sync of more than 28 search requests in a minute waits instead of
+      receiving 403/429; with a revoked token mid-sync the other tokens' data is kept.
 - [ ] Check local midnight and daylight-saving transitions; document provider-calendar differences.
 - [ ] Confirm 7/30-day averages include zero days, warm-up history, and missing-data gaps.
 - [ ] Set/edit a quota; exceed it; verify exact scope/unit, day reset, and PR evidence.

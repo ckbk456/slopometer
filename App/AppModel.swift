@@ -34,6 +34,8 @@ final class AppModel {
     /// Coalesces refreshes; a request made during a sync runs right after it.
     private var gate = RefreshGate()
     var isSyncing: Bool { gate.isRunning }
+    /// What the running sync is doing, for the refresh controls.
+    private(set) var syncStage: SyncStage?
     /// The quota's counts and target while the quota is off, so turning it on restores them.
     var parkedGoal: Goal {
         didSet {
@@ -181,7 +183,10 @@ final class AppModel {
         let report = await coordinator.sync(
             SyncRequest(
                 login: accountLogin, tokens: TokenStore.tokens(), timeZone: settings.timeZone,
-                historyDays: settings.historyDays))
+                historyDays: settings.historyDays)
+        ) { [weak self] progress in
+            await MainActor.run { self?.advance(to: progress) }
+        }
         var owners: [String: String?] = report.tokenOwners.mapValues { Optional($0) }
         for (id, error) in report.tokenErrors where error == .unauthorized {
             owners[id] = .some(nil)
@@ -192,7 +197,20 @@ final class AppModel {
         consecutiveFailures =
             report.calendarError == nil && report.pullRequestError == nil
             ? 0 : consecutiveFailures + 1
+        syncStage = nil
         rebuild()
+    }
+
+    /// Shows each stage and publishes data the sync has already written, so the calendar
+    /// and recent PRs appear before older history finishes loading.
+    private func advance(to progress: SyncProgress) {
+        syncStage = progress.stage
+        if progress.cacheChanged { rebuild() }
+    }
+
+    /// Text for the refresh control: the running stage, else the action.
+    var refreshLabel: String {
+        isSyncing ? syncStage?.label ?? "Refreshing…" : "Refresh Now"
     }
 
     func refreshIfStale() async {

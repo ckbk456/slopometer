@@ -125,6 +125,8 @@ struct DashboardView: View {
                         freshness(snapshot).font(.caption).foregroundStyle(.secondary)
                         if model.isSyncing {
                             ProgressView().controlSize(.small)
+                                .help(model.refreshLabel)
+                                .accessibilityLabel(model.refreshLabel)
                         } else {
                             Button {
                                 Task { await model.refresh() }

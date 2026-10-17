@@ -71,3 +71,10 @@ level. Unfocused desktop tiles use white level fills and cut their number out fr
 The menu bar panel's background is mostly opaque. Core tests cover week alignment and
 contrast targets; every rendering check in the
 [desktop guide](testing/MANUAL%20TO-DO/desktop-and-appearance.md) is pending.
+
+Sync speed and progressive display: search requests are paced by a shared rolling
+budget instead of a fixed pause; a full sync fetches and publishes the last 30 days
+before older history; every other sync fetches only PRs updated since each token's
+checkpoint, with a full reconcile at least daily. Core tests cover the limiter, the
+two-phase first sync, changes-only syncs, the daily reconcile, a new token, and
+failed fetches. Human checks for live timing and the progressive display are pending.
