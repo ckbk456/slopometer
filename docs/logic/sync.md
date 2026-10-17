@@ -69,7 +69,12 @@ as columns or line. A quota headline falls back to today's count when no quota i
 active. The widget distinguishes no readable snapshot ("No data yet"), no username, and
 a size whose PR metric has no usable token. Settings saved before widget settings
 existed decode with every size following the saved dashboard metric and view.
-Activity marks are accent-tinted so levels survive the tinted desktop rendering.
+Activity marks are accent-tinted so levels survive the tinted desktop rendering. Medium
+and large footers read `SyncAgeLabel` ("Synced 21:47 (00:02 ago)", naming the day when
+the sync was not today); the timeline holds one entry per minute for an hour so the age
+advances without the app. In the unfocused (non-full-color) desktop rendering, the
+medium strip's busiest tiles (levels 3–4) cut their number out of the tile instead of
+drawing near-white text on a near-white tile, and today's weekday is bold.
 
 The dashboard replaces the chart with a token explanation when a PR metric is
 selected without a usable token (missing, rejected, or owned by another account)
