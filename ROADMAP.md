@@ -41,3 +41,11 @@ longer refocuses the Username field when it closes (root cause reasoned from App
 focus behavior, not yet observed fixed); the app's cards, badge, and small buttons use
 Liquid Glass on macOS 26+ with the earlier look as fallback. Local validation is recorded
 in the handoff; every UI check in the desktop manual guide remains pending.
+
+Menu-bar panel (0.8.0): implemented the window-style menu-bar panel with the
+metric's Octicon, a large headline count or quota with the quota meter and status,
+a last-7-days strip from existing snapshot series, icon-led sync/account/notice
+rows, and Refresh/Open/Quit buttons with their shortcuts (Liquid Glass on macOS 26+).
+Local validation and manual checks are recorded in the
+[desktop guide](testing/MANUAL%20TO-DO/desktop-and-appearance.md); the panel's
+appearance, keyboard, and VoiceOver behavior are not yet manually verified.

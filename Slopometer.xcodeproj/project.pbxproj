@@ -11,6 +11,7 @@
 		0DA7C51AD547C85076A95E3F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 5A483B753EAA80FAF20E259A /* Assets.xcassets */; };
 		27355E91D3F0D148402F3A7C /* SlopometerCore in Frameworks */ = {isa = PBXBuildFile; productRef = 14F18CD2E45DA1E0B4AFBD02 /* SlopometerCore */; };
 		446D228ACFA5B9E9D255D051 /* MainView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E01B7F1D13FF129C1B3877CE /* MainView.swift */; };
+		5333B9EFCADBD19CEDA57972 /* MenuPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7FB30203F2B9554B613E1009 /* MenuPanel.swift */; };
 		59F7189D91F09A7B448DDF29 /* QuotaMeter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FA4514AA2C3D0088573E5A6 /* QuotaMeter.swift */; };
 		5E1A783D176203CD4C6A9450 /* TokenStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CE86D6528E0B4B124751C3E /* TokenStore.swift */; };
 		6B047609193F8335AD141E3C /* SlopChart.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4BD827FF20CC2FB09AC22E9 /* SlopChart.swift */; };
@@ -67,6 +68,7 @@
 		78D9D6EB3FDC6DB8A4AA442B /* SlopometerApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SlopometerApp.swift; sourceTree = "<group>"; };
 		7B1F1C47E64F87D003E4486E /* Slopometer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Slopometer.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		7C28CD2A91D2162A9B26C8AB /* WidgetContent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetContent.swift; sourceTree = "<group>"; };
+		7FB30203F2B9554B613E1009 /* MenuPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuPanel.swift; sourceTree = "<group>"; };
 		90F88CDE67495BB96DB22442 /* .. */ = {isa = PBXFileReference; lastKnownFileType = folder; name = ..; path = .; sourceTree = SOURCE_ROOT; };
 		93D504B3D0A8761AC6CC1321 /* Glass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Glass.swift; sourceTree = "<group>"; };
 		9B1059BB2AB5A145DE46984F /* SlopometerWidget.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = SlopometerWidget.appex; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -105,6 +107,7 @@
 				325C0AB1F343F8C48BED92F2 /* BuildInfo.swift */,
 				93D504B3D0A8761AC6CC1321 /* Glass.swift */,
 				E01B7F1D13FF129C1B3877CE /* MainView.swift */,
+				7FB30203F2B9554B613E1009 /* MenuPanel.swift */,
 				66E709D3A0DD9070BE504A7A /* SettingsView.swift */,
 				78D9D6EB3FDC6DB8A4AA442B /* SlopometerApp.swift */,
 				2CE86D6528E0B4B124751C3E /* TokenStore.swift */,
@@ -279,6 +282,7 @@
 				A138EFD2A03DB78FBB9EA276 /* BuildInfo.swift in Sources */,
 				C8512F9249C0687A0E8B4B10 /* Glass.swift in Sources */,
 				446D228ACFA5B9E9D255D051 /* MainView.swift in Sources */,
+				5333B9EFCADBD19CEDA57972 /* MenuPanel.swift in Sources */,
 				888E53BC5853E784F4857160 /* QuotaMeter.swift in Sources */,
 				6F309BE3F7C3BB11C16DDAD8 /* SettingsView.swift in Sources */,
 				AE6910F4607758AF7D66F8BE /* SlopChart.swift in Sources */,
@@ -367,7 +371,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 0.7.0;
+				MARKETING_VERSION = 0.8.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -430,7 +434,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 0.7.0;
+				MARKETING_VERSION = 0.8.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";

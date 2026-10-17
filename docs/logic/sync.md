@@ -96,6 +96,28 @@ label spell out the count and unit, or the metric with "no data yet". The app
 bundles the original vector assets and their [Octicons license](../../App/Resources/Octicons-LICENSE.txt);
 provenance is recorded in [third-party notices](../../THIRD_PARTY_NOTICES.md).
 
+Clicking the badge opens a window-style panel (`MenuBarExtra` with `.window`, in
+`App/MenuPanel.swift`) rather than a plain menu. It reads only the current snapshot
+and app state; it never fetches on its own:
+
+- **Headline:** a caption with the badge's Octicon. With an active quota it shows
+  "Daily slop quota", count / target, "<unit> today in <scope>", the dashboard's
+  status wording (Coverage incomplete, Target reached, or N to go), and the
+  `QuotaMeter`. Otherwise it shows the badge metric's title and today's count, or an
+  en dash when unknown. A PR metric without a usable token says it needs a token;
+  without a username the panel asks the user to open Slopometer and enter one.
+- **Last 7 days:** labeled day tiles for the badge metric, taken from a series the
+  snapshot already holds (the dashboard's when its metric matches, else a widget's).
+  The strip is hidden when no series matches or all seven days are unknown; unknown
+  days show an en dash and today is outlined as incomplete.
+- **Status rows:** sync state (syncing, relative time since the last successful sync,
+  or not synced yet), the account with its access tier, and every snapshot notice and
+  widget sharing problem the headline does not already state, in the primary color.
+- **Footer:** Refresh (⌘R, a spinner while syncing, disabled without a username), Open
+  (⌘O, closes the panel and opens the window), Quit (⌘Q), and the build summary.
+  macOS 26 and later use Liquid Glass button styles; earlier systems, and builds from
+  SDKs before macOS 26 (`#if compiler(>=6.2)`), use bordered buttons.
+
 ## App window layout and appearance (0.7.0)
 
 Owners: `App/MainView.swift`, `App/SettingsView.swift`, `App/Glass.swift`.
