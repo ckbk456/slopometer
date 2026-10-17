@@ -43,12 +43,25 @@ private struct MenuBarLabel: View {
 
     var body: some View {
         HStack(spacing: 4) {
-            Image(systemName: "gauge.with.dots.needle.50percent")
+            Image(iconName)
+                .renderingMode(.template)
+                .resizable()
+                .frame(width: 16, height: 16)
             Text(model.menuBarTitle)
                 .monospacedDigit()
         }
-        .accessibilityLabel(model.snapshot.quota?.headline ?? "Slopometer")
+        .help(model.menuBarDescription)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("Slopometer, \(model.menuBarDescription)")
         .onAppear { model.openWindowAction = openWindow }
+    }
+
+    private var iconName: String {
+        switch model.menuBarMetric {
+        case .contributions: "octicon-calendar"
+        case .prsOpened: "octicon-git-pull-request"
+        case .prsMerged: "octicon-git-merge"
+        }
     }
 }
 

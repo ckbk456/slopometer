@@ -20,3 +20,10 @@ Data-source evidence behind the account-level, optional-token design is in
 
 Update status only with evidence. Research belongs alongside the decision it
 informs; it cannot override [SPEC](SPEC.md) or [SCOPE](SCOPE.md).
+
+Menu-bar metric icons (0.3.1): implemented with calendar, pull-request, and merge
+Octicons that follow the displayed count, plus full tooltip and accessibility
+wording. `make validate` passed locally on 2026-10-17 (formatting, documentation,
+39 core tests, unsigned native build); project regeneration is stable with
+XcodeGen 2.46.0. The user accepted the menu-bar fix on 2026-10-17; the full
+appearance/accessibility matrix remains pending.

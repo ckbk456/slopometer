@@ -13,6 +13,23 @@
       their own wording.
 - [ ] Type a daily quota target (for example 100); values outside 1–999 snap into range.
 
+## Menu-bar metric icons (0.3.1): pending
+
+Acceptance: on 2026-10-17 the user reported being happy with the fix and authorized
+publication and merge. This is acceptance of the observed fix; the individual
+checks below were not separately reported and remain pending.
+
+- [ ] Without a quota, switch Contributions / PRs opened / Authored PRs merged and
+      verify the badge shows the calendar / pull-request / merge icon with today's count.
+- [ ] With a quota enabled, change its metric between PRs opened and authored PRs merged;
+      the icon and count/target follow the quota even when the chart shows another metric.
+- [ ] Disable the quota or remove its token; the badge returns to the selected metric.
+      Missing data shows an en dash, never a fabricated zero.
+- [ ] Hover the badge and inspect it with VoiceOver: the full metric and count are
+      announced, including the quota target or "no data yet" when appropriate.
+- [ ] Check all three icons in light/dark appearance and a selected menu-bar item,
+      on Retina and non-Retina displays where available; verify crisp, compact shapes.
+
 ## Widget and background app: pending
 
 - [ ] App runs from the menu bar without a Dock icon; the window opens on demand.

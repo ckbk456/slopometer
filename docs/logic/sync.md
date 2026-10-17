@@ -62,6 +62,22 @@ The dashboard replaces the chart with a token explanation when a PR metric is
 selected without a usable token (missing, rejected, or owned by another account)
 and links to the token section in Settings, so `tokenNeededNotice` is not repeated.
 
+## Menu-bar badge
+
+The menu bar shows the active quota's count/target when the snapshot contains a
+quota; otherwise it shows today's count for the snapshot's selected metric, or
+an en dash for unknown data. Its 16-point monochrome Octicon follows that same
+metric: `calendar` for Contributions, `git-pull-request` for PRs opened, and
+`git-merge` for authored PRs merged. Contributions cover GitHub's daily activity
+count, not just commits; PRs opened includes drafts rather than measuring only drafts.
+
+`AppModel` captures the badge metric with each successful snapshot rebuild, so an
+active goal can differ from the chart without mislabeling its count, and a failed
+rebuild retains the previous count and metric together. The tooltip and VoiceOver
+label spell out the count and unit, or the metric with "no data yet". The app
+bundles the original vector assets and their [Octicons license](../../App/Resources/Octicons-LICENSE.txt);
+provenance is recorded in [third-party notices](../../THIRD_PARTY_NOTICES.md).
+
 ## Known limits
 
 - In timezones ahead of the profile page's day labels, username-only "today" can be

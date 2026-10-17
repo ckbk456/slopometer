@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0DA7C51AD547C85076A95E3F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 5A483B753EAA80FAF20E259A /* Assets.xcassets */; };
 		27355E91D3F0D148402F3A7C /* SlopometerCore in Frameworks */ = {isa = PBXBuildFile; productRef = 14F18CD2E45DA1E0B4AFBD02 /* SlopometerCore */; };
 		446D228ACFA5B9E9D255D051 /* MainView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E01B7F1D13FF129C1B3877CE /* MainView.swift */; };
 		59F7189D91F09A7B448DDF29 /* QuotaMeter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FA4514AA2C3D0088573E5A6 /* QuotaMeter.swift */; };
@@ -15,6 +16,7 @@
 		6CDEFD6165BBE05510CF9AE1 /* SlopometerApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 78D9D6EB3FDC6DB8A4AA442B /* SlopometerApp.swift */; };
 		6F309BE3F7C3BB11C16DDAD8 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66E709D3A0DD9070BE504A7A /* SettingsView.swift */; };
 		70C22BC55BFF67B9D144560C /* AppModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4293BFD7B2150A12590C6C3E /* AppModel.swift */; };
+		8032311671336129941C55F8 /* Octicons-LICENSE.txt in Resources */ = {isa = PBXBuildFile; fileRef = 0AA17FB0273F52A4536DAADD /* Octicons-LICENSE.txt */; };
 		888E53BC5853E784F4857160 /* QuotaMeter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FA4514AA2C3D0088573E5A6 /* QuotaMeter.swift */; };
 		9C3F41BB24455980D51207E8 /* SlopometerWidget.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 9B1059BB2AB5A145DE46984F /* SlopometerWidget.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		A138EFD2A03DB78FBB9EA276 /* BuildInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 325C0AB1F343F8C48BED92F2 /* BuildInfo.swift */; };
@@ -48,12 +50,14 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		0AA17FB0273F52A4536DAADD /* Octicons-LICENSE.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = "Octicons-LICENSE.txt"; sourceTree = "<group>"; };
 		181AD593328CA6011FFD3AC5 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		1FA4514AA2C3D0088573E5A6 /* QuotaMeter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuotaMeter.swift; sourceTree = "<group>"; };
 		2CE86D6528E0B4B124751C3E /* TokenStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TokenStore.swift; sourceTree = "<group>"; };
 		325C0AB1F343F8C48BED92F2 /* BuildInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BuildInfo.swift; sourceTree = "<group>"; };
 		4293BFD7B2150A12590C6C3E /* AppModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppModel.swift; sourceTree = "<group>"; };
 		4CE6ACBCDE098C02149B86A4 /* SCOPE.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = SCOPE.md; sourceTree = "<group>"; };
+		5A483B753EAA80FAF20E259A /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		66E709D3A0DD9070BE504A7A /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		68193896EEDBB06DB7E3A076 /* SPEC.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = SPEC.md; sourceTree = "<group>"; };
 		78D9D6EB3FDC6DB8A4AA442B /* SlopometerApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SlopometerApp.swift; sourceTree = "<group>"; };
@@ -90,11 +94,13 @@
 			isa = PBXGroup;
 			children = (
 				4293BFD7B2150A12590C6C3E /* AppModel.swift */,
+				5A483B753EAA80FAF20E259A /* Assets.xcassets */,
 				325C0AB1F343F8C48BED92F2 /* BuildInfo.swift */,
 				E01B7F1D13FF129C1B3877CE /* MainView.swift */,
 				66E709D3A0DD9070BE504A7A /* SettingsView.swift */,
 				78D9D6EB3FDC6DB8A4AA442B /* SlopometerApp.swift */,
 				2CE86D6528E0B4B124751C3E /* TokenStore.swift */,
+				E6050A50124B029FC09B3A1B /* Resources */,
 			);
 			path = App;
 			sourceTree = "<group>";
@@ -131,6 +137,14 @@
 				90F88CDE67495BB96DB22442 /* .. */,
 			);
 			name = Packages;
+			sourceTree = "<group>";
+		};
+		E6050A50124B029FC09B3A1B /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				0AA17FB0273F52A4536DAADD /* Octicons-LICENSE.txt */,
+			);
+			path = Resources;
 			sourceTree = "<group>";
 		};
 		E73564E4B5E63DB04145A811 = {
@@ -175,6 +189,7 @@
 			buildConfigurationList = 565CA2F15A0FBAA69A2298CD /* Build configuration list for PBXNativeTarget "Slopometer" */;
 			buildPhases = (
 				02DD0E2F5A75691FE91C3698 /* Sources */,
+				DF363C6FDD446B565EF55BB7 /* Resources */,
 				7EE3C318EBA4DD47DC9D8711 /* Frameworks */,
 				78948B700A4D1E23D10DC429 /* Embed Foundation Extensions */,
 			);
@@ -232,6 +247,18 @@
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		DF363C6FDD446B565EF55BB7 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				0DA7C51AD547C85076A95E3F /* Assets.xcassets in Resources */,
+				8032311671336129941C55F8 /* Octicons-LICENSE.txt in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		02DD0E2F5A75691FE91C3698 /* Sources */ = {
@@ -326,7 +353,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 0.3.0;
+				MARKETING_VERSION = 0.3.1;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -389,7 +416,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 0.3.0;
+				MARKETING_VERSION = 0.3.1;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
