@@ -22,6 +22,8 @@ final class AppModel {
         }
     }
     private(set) var snapshot = DashboardSnapshot.placeholder
+    /// Captured with the snapshot so failed rebuilds cannot relabel an older quota.
+    private(set) var menuBarMetric = Metric.contributions
     private(set) var records: [PullRequestRecord] = []
     private(set) var isSyncing = false
     private(set) var hasToken: Bool
@@ -81,6 +83,13 @@ final class AppModel {
         if let quota = snapshot.quota { return "\(quota.count)/\(quota.target)" }
         if let today = snapshot.todayCount { return "\(today)" }
         return "–"
+    }
+
+    /// Full wording for the compact badge's tooltip and accessibility label.
+    var menuBarDescription: String {
+        if let quota = snapshot.quota { return quota.headline }
+        if let today = snapshot.todayCount { return "Today so far: \(today) \(snapshot.unit)" }
+        return "\(menuBarMetric.title): no data yet"
     }
 
     /// PRs behind a day's count for the selected PR metric.
@@ -149,6 +158,9 @@ final class AppModel {
             records = try cache.pullRequests()
             snapshot = try SnapshotBuilder.build(
                 settings: settings, cache: cache, tokenUsable: tokenUsable, problems: problems)
+            menuBarMetric =
+                snapshot.quota == nil
+                ? snapshot.metric : settings.goal?.metric ?? snapshot.metric
         } catch {
             startupError = "Could not read the local cache: \(error.localizedDescription)"
             return
