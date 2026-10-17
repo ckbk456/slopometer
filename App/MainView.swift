@@ -45,38 +45,54 @@ struct DashboardView: View {
         @Bindable var model = model
         let snapshot = model.snapshot
         let gated = snapshot.metric.requiresToken && !model.tokenUsable
-        ScrollView {
-            VStack(alignment: .leading, spacing: 20) {
-                header(snapshot)
-                if snapshot.tier == .notConfigured {
-                    ContentUnavailableView {
-                        Label(
-                            "No account yet", systemImage: "person.crop.circle.badge.questionmark")
-                    } description: {
-                        Text("Enter a GitHub username to measure its contribution calendar.")
-                    } actions: {
-                        Button("Add Username") { openSettings(.account) }
-                    }
-                } else {
-                    if let quota = snapshot.quota { QuotaCard(quota: quota) }
-                    controls($model.settings)
-                    if gated {
-                        TokenGate(metric: snapshot.metric) { openSettings(.token) }
-                    } else {
-                        SlopChart(
-                            points: snapshot.points, style: snapshot.chartStyle,
-                            unit: snapshot.unit, showsAverage: snapshot.averageWindow > 0,
-                            selection: $selectedDay, gridMaxHeight: 220
-                        )
-                        .frame(height: snapshot.chartStyle == .grid ? nil : 220)
-                        footnote(snapshot)
-                        if let selectedDay { dayDetail(selectedDay, snapshot: snapshot) }
-                    }
-                    notices(snapshot, gated: gated)
+        // The chart takes whatever height the window has left over (at least
+        // `chartMinHeight`); content taller than the window scrolls as before.
+        GeometryReader { viewport in
+            ScrollView {
+                FillingStack(
+                    spacing: 20, height: viewport.size.height - Self.verticalPadding * 2
+                ) {
+                    content(snapshot, gated: gated, settings: $model.settings)
                 }
+                .padding(.horizontal, 4)
+                .padding(.vertical, Self.verticalPadding)
             }
-            .padding(.horizontal, 4)
-            .padding(.vertical, 8)
+        }
+    }
+
+    private static let verticalPadding: CGFloat = 8
+    private static let chartMinHeight: CGFloat = 220
+
+    @ViewBuilder
+    private func content(
+        _ snapshot: DashboardSnapshot, gated: Bool, settings: Binding<DashboardSettings>
+    ) -> some View {
+        header(snapshot)
+        if snapshot.tier == .notConfigured {
+            ContentUnavailableView {
+                Label(
+                    "No account yet", systemImage: "person.crop.circle.badge.questionmark")
+            } description: {
+                Text("Enter a GitHub username to see its contributions.")
+            } actions: {
+                Button("Add Username") { openSettings(.account) }
+            }
+        } else {
+            if let quota = snapshot.quota { QuotaCard(quota: quota) }
+            controls(settings)
+            if gated {
+                TokenGate(metric: snapshot.metric) { openSettings(.token) }
+            } else {
+                SlopChart(
+                    points: snapshot.points, style: snapshot.chartStyle,
+                    unit: snapshot.unit, showsAverage: snapshot.averageWindow > 0,
+                    selection: $selectedDay
+                )
+                .layoutValue(key: FillsHeight.self, value: Self.chartMinHeight)
+                footnote(snapshot)
+                if let selectedDay { dayDetail(selectedDay, snapshot: snapshot) }
+            }
+            notices(snapshot, gated: gated)
         }
     }
 
@@ -87,27 +103,29 @@ struct DashboardView: View {
                 Text("Your daily slop, quantified.").foregroundStyle(.secondary)
             }
             Spacer()
-            VStack(alignment: .trailing, spacing: 6) {
-                if !snapshot.login.isEmpty {
-                    HStack(spacing: 8) {
-                        Text("@\(snapshot.login)").font(.callout.weight(.medium))
-                        TierBadge(tier: snapshot.tier)
-                    }
-                }
-                HStack(spacing: 6) {
-                    freshness(snapshot).font(.caption).foregroundStyle(.secondary)
-                    if model.isSyncing {
-                        ProgressView().controlSize(.small)
-                    } else {
-                        Button {
-                            Task { await model.refresh() }
-                        } label: {
-                            Image(systemName: "arrow.clockwise")
+            GlassGroup(spacing: 4) {
+                VStack(alignment: .trailing, spacing: 6) {
+                    if !snapshot.login.isEmpty {
+                        HStack(spacing: 8) {
+                            Text("@\(snapshot.login)").font(.callout.weight(.medium))
+                            TierBadge(tier: snapshot.tier)
                         }
-                        .buttonStyle(.borderless)
-                        .help("Refresh now")
-                        .accessibilityLabel("Refresh now")
-                        .disabled(snapshot.login.isEmpty)
+                    }
+                    HStack(spacing: 6) {
+                        freshness(snapshot).font(.caption).foregroundStyle(.secondary)
+                        if model.isSyncing {
+                            ProgressView().controlSize(.small)
+                        } else {
+                            Button {
+                                Task { await model.refresh() }
+                            } label: {
+                                Image(systemName: "arrow.clockwise")
+                            }
+                            .glassIconButtonStyle()
+                            .help("Refresh now")
+                            .accessibilityLabel("Refresh now")
+                            .disabled(snapshot.login.isEmpty)
+                        }
                     }
                 }
             }
@@ -144,7 +162,7 @@ struct DashboardView: View {
                 .disabled(settings.wrappedValue.chartStyle == .grid)
                 .help(
                     settings.wrappedValue.chartStyle == .grid
-                        ? "Averages show in the column and line views." : "")
+                        ? "Averages show in columns and line." : "")
             }
             .disabled(model.snapshot.metric.requiresToken && !model.tokenUsable)
         }
@@ -178,6 +196,7 @@ struct DashboardView: View {
                 } label: {
                     Image(systemName: "xmark")
                 }
+                // Borderless, not glass: the card is already glass.
                 .buttonStyle(.borderless)
                 .help("Close")
                 .accessibilityLabel("Close day details")
@@ -185,20 +204,20 @@ struct DashboardView: View {
             if snapshot.metric.requiresToken {
                 let prs = model.evidence(on: day)
                 if prs.isEmpty {
-                    Text("No PRs counted on this day.").foregroundStyle(.secondary)
+                    Text("No PRs counted this day.").foregroundStyle(.secondary)
                 } else {
                     VStack(alignment: .leading, spacing: 6) {
                         ForEach(prs) { PullRequestRow(record: $0) }
                     }
                 }
             } else {
-                Text("GitHub reports contributions as a daily total, without the items behind it.")
+                Text("GitHub gives contributions as a daily total only.")
                     .foregroundStyle(.secondary)
             }
         }
         .padding(14)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(.quaternary.opacity(0.5), in: RoundedRectangle(cornerRadius: 10))
+        .glassCard(cornerRadius: 10)
     }
 
     @ViewBuilder
@@ -241,8 +260,7 @@ private struct TierBadge: View {
         .padding(.horizontal, 8)
         .padding(.vertical, 3)
         .foregroundStyle(isToken ? SlopPalette.mark : .secondary)
-        .background(
-            (isToken ? SlopPalette.mark : Color.secondary).opacity(0.14), in: Capsule())
+        .glassCapsule(tint: isToken ? SlopPalette.mark : Color.secondary)
     }
 }
 
@@ -266,6 +284,7 @@ private struct TokenGate: View {
                     .fixedSize(horizontal: false, vertical: true)
             }
             HStack(spacing: 12) {
+                // Bordered, not glass: the card behind it is already glass.
                 Button(model.hasToken ? "Review Tokens" : "Add Token", action: openTokenSettings)
                     .buttonStyle(.borderedProminent)
                     .keyboardShortcut(.defaultAction)
@@ -277,7 +296,7 @@ private struct TokenGate: View {
         .padding(.vertical, 36)
         .padding(.horizontal, 24)
         .frame(maxWidth: .infinity)
-        .background(.quaternary.opacity(0.5), in: RoundedRectangle(cornerRadius: 12))
+        .glassCard(cornerRadius: 12)
     }
 
     private var title: String {
@@ -291,11 +310,11 @@ private struct TokenGate: View {
     private var message: String {
         switch model.lastReport?.pullRequestError {
         case .tokenOwnerMismatch(_, let actual):
-            "A saved token is for @\(actual), not @\(model.settings.login). Replace it with a token created on @\(model.settings.login)."
+            "A saved token is for @\(actual), not @\(model.settings.login). Replace it with one from @\(model.settings.login)."
         case .unauthorized:
-            "It may have expired or been revoked. Create a new one and replace it in Settings."
+            "It may have expired or been revoked. Replace it in Settings."
         default:
-            "A username alone only shows contributions. To count the PRs you open and merge, add a fine-grained GitHub token with read-only Pull requests access."
+            "A username only shows contributions. To count PRs, add a fine-grained token with read-only Pull requests access."
         }
     }
 }
@@ -343,7 +362,7 @@ private struct QuotaCard: View {
             .font(.callout)
             if showsEvidence {
                 if quota.evidence.isEmpty {
-                    Text("No PRs counted yet today.").foregroundStyle(.secondary)
+                    Text("No PRs yet today.").foregroundStyle(.secondary)
                 } else {
                     VStack(alignment: .leading, spacing: 6) {
                         ForEach(quota.evidence) { item in
@@ -356,7 +375,7 @@ private struct QuotaCard: View {
             }
         }
         .padding(16)
-        .background(.quaternary.opacity(0.5), in: RoundedRectangle(cornerRadius: 12))
+        .glassCard(cornerRadius: 12)
     }
 
     private var evidenceTitle: String {
@@ -423,6 +442,59 @@ private struct EvidenceRow: View {
                 .lineLimit(1)
         }
         .contentShape(Rectangle())
+    }
+}
+
+/// Marks the one child of `FillingStack` that takes the leftover height, with its minimum.
+private struct FillsHeight: LayoutValueKey {
+    static let defaultValue: CGFloat? = nil
+}
+
+/// A leading-aligned vertical stack for scroll content. Children get their ideal height,
+/// except the one marked `FillsHeight`, which is offered whatever is left of `height`
+/// (the visible height), but never less than its minimum. When the rest is taller than
+/// the window, that child gets its minimum and the scroll view scrolls. `height` comes
+/// from the scroll view's frame, not from the content, so resizing cannot feed back into
+/// itself and jitter. A child may take less than it is offered (the grid stays square).
+private struct FillingStack: Layout {
+    let spacing: CGFloat
+    let height: CGFloat
+
+    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
+        let sizes = measure(width: proposal.width, subviews: subviews)
+        let width = proposal.width ?? sizes.map(\.width).max() ?? 0
+        return CGSize(width: width, height: total(sizes))
+    }
+
+    func placeSubviews(
+        in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()
+    ) {
+        let sizes = measure(width: bounds.width, subviews: subviews)
+        var y = bounds.minY
+        for (subview, size) in zip(subviews, sizes) {
+            subview.place(
+                at: CGPoint(x: bounds.minX, y: y),
+                proposal: ProposedViewSize(width: bounds.width, height: size.height))
+            y += size.height + spacing
+        }
+    }
+
+    private func measure(width: CGFloat?, subviews: Subviews) -> [CGSize] {
+        var sizes = subviews.map { subview -> CGSize in
+            subview[FillsHeight.self] == nil
+                ? subview.sizeThatFits(ProposedViewSize(width: width, height: nil)) : .zero
+        }
+        let fixed = total(sizes)
+        for (index, subview) in subviews.enumerated() {
+            guard let minimum = subview[FillsHeight.self] else { continue }
+            let offered = max(minimum, height - fixed)
+            sizes[index] = subview.sizeThatFits(ProposedViewSize(width: width, height: offered))
+        }
+        return sizes
+    }
+
+    private func total(_ sizes: [CGSize]) -> CGFloat {
+        sizes.map(\.height).reduce(0, +) + spacing * CGFloat(max(sizes.count - 1, 0))
     }
 }
 
