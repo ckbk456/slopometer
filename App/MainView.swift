@@ -92,7 +92,7 @@ struct DashboardView: View {
                     }
                 }
                 HStack(spacing: 6) {
-                    Text(freshness(snapshot)).font(.caption).foregroundStyle(.secondary)
+                    freshness(snapshot).font(.caption).foregroundStyle(.secondary)
                     if model.isSyncing {
                         ProgressView().controlSize(.small)
                     } else {
@@ -216,9 +216,11 @@ struct DashboardView: View {
         }
     }
 
-    private func freshness(_ snapshot: DashboardSnapshot) -> String {
-        guard let synced = snapshot.lastSuccessfulSync else { return "Not synced yet" }
-        return "Synced \(synced.formatted(.relative(presentation: .named)))"
+    /// Counts up from the last sync. SwiftUI redraws only this text, and only while the
+    /// window is visible; nothing is polled or recomputed.
+    private func freshness(_ snapshot: DashboardSnapshot) -> Text {
+        guard let synced = snapshot.lastSuccessfulSync else { return Text("Not synced yet") }
+        return Text("Synced \(synced, style: .relative) ago")
     }
 }
 
