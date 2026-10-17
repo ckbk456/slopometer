@@ -11,8 +11,8 @@
 - [ ] Without a token, PRs opened / Authored PRs merged show the token explanation; Add
       Token opens Settings scrolled to the token field. Rejected or mismatched tokens show
       their own wording.
-- [ ] Settings order: GitHub connections (1 public account, 2 fine-grained tokens, 3
-      InsecuSlopometer™ with an "Allow classic tokens" toggle), Pull requests, Timezone, About. Pull requests is
+- [ ] Settings order: Username, Tokens (InsecuSlopometer™ last; see 0.9.0 below), Pull
+      requests, Timezone, About. Pull requests is
       grayed out without a token; Counts and Daily target stay visible but grayed out while
       the quota is off, and turning it back on restores their earlier values.
 - [ ] Type a daily quota target (for example 100); values outside 1–999 snap into range.
@@ -36,6 +36,31 @@
       buttons render as Liquid Glass, legible in light/dark and with Reduce Transparency
       and Increase Contrast. On macOS 14/15: the earlier gray cards and borderless buttons.
 - [ ] Condensed wording reads clearly and still says which features need a token.
+
+## GitHub connections (0.9.0): pending
+
+- [ ] Settings shows no numbered markers and no GitHub heading. Username comes first: a row
+      with the account's initial, @account, the connection wording, and sync status, then
+      the username field. Tokens: one row per token (name, Fine-grained/Classic chip,
+      standing line, Remove), then Add Token…, the creation link, and `?`, then the
+      InsecuSlopometer™ row with its switch on the right.
+- [ ] Add Token… opens a sheet focused on the token field; Esc cancels; an empty token
+      disables Add Token; a classic token with InsecuSlopometer™ off shows the refusal; a
+      duplicate says it is already saved. The token value never appears afterwards.
+- [ ] Without a token, the dashboard's Add Token opens Settings with the sheet; with tokens,
+      Review Tokens scrolls to the token list. Add Username focuses the username field.
+- [ ] With a token saved, the username field is grayed out and reads "Using @owner from your
+      fine-grained tokens"; removing every token makes it editable again with the earlier name.
+- [ ] Connection wording is identical in the Activity badge, Settings summary, and the menu
+      bar panel's account row: "Public profile (username only)", "Fine-grained tokens (N)",
+      "Classic tokens (N)", or "Fine-grained + classic tokens (N)", counting only counted tokens.
+- [ ] Clicking the Activity badge opens a popover listing each token's name, kind, and
+      standing (counted, not counted with reason, or checking) with no secrets; "Manage in
+      Settings" closes it and opens the token section. VoiceOver reads the badge as
+      "Connection: …".
+- [ ] The InsecuSlopometer™ switch turns classic tokens on and off; it is disabled while classic
+      tokens are saved; scroll position stays put when `?` popovers or the sheet close.
+- [ ] Light/dark, Increase Contrast, and macOS 14/15 versus 26+ rendering stay legible.
 
 ## Menu-bar metric icons (0.3.1): pending
 
@@ -69,7 +94,7 @@ checks below were not separately reported and remain pending.
 - [ ] PR metric without a token: the headline explains the token requirement and the
       token notice is not repeated in the rows.
 - [ ] Sync row shows "Syncing with GitHub…" while Refresh spins, then "Synced <time> ago";
-      account row shows @login with Token or Username only; notices are readable.
+      account row shows @login with the connection wording below it; notices are readable.
 - [ ] ⌘R, ⌘O, and ⌘Q work while the panel is open; Refresh is disabled without a username.
 - [ ] VoiceOver reads the headline (headline wording plus status), the meter's "N of M",
       each day tile, and the Refresh/Open/Quit buttons by name.

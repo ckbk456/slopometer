@@ -1,6 +1,6 @@
 # Sync and snapshot logic: implemented MVP
 
-Owners: `Sources/SlopometerCore/SyncCoordinator.swift`, `GitHub/GitHubClient.swift`,
+Owners: `Sources/SlopometerCore/SyncCoordinator.swift`, `Connection.swift`, `GitHub/GitHubClient.swift`,
 `GitHub/ProfileCalendarParser.swift`, `DashboardSnapshot.swift`, `App/AppModel.swift`.
 
 ## Tiers
@@ -8,12 +8,32 @@ Owners: `Sources/SlopometerCore/SyncCoordinator.swift`, `GitHub/GitHubClient.swi
 - **Username only:** fetches `github.com/users/<login>/contributions` (undocumented
   HTML) and parses each day's tooltip. Markup that yields no days, or tooltips that
   do not match the cells, is an error, never zero activity. No credential is sent.
-- **Token:** each saved token first calls GraphQL `viewer { login }`. A token owned by
-  another account is reported (`tokenOwnerMismatch`) and not used. The first verified
+- **Token:** each saved token first calls GraphQL `viewer { login }`. The first verified
   token fetches the GraphQL calendar in spans of at most one year; with none, the
   calendar falls back to the profile page. Every verified token fetches PRs through
   REST search, because each fine-grained token reads one resource owner's
   repositories. Per-token errors are in `SyncReport.tokenErrors`, keyed by token ID.
+- **Account (0.9.0):** with tokens, the account is the token owner, not the typed username
+  (`AccountResolver`): the owner of the earliest-added token whose owner is known. A
+  fine-grained token whose resource owner is an organization is still owned by its
+  creator, so it agrees. A token owned by anyone else is kept, reported as
+  `tokenOwnerMismatch` ("Belongs to @x, not counted"), and not used; it marks PR coverage
+  incomplete. A rejected token forgets its remembered owner, so the next token's owner can
+  take over. Without a known owner (no tokens, or none checked yet), the typed username is
+  the account; it stays stored while tokens exist and is used again when all are removed.
+  `SyncReport` records the account it measured (`login`), the tokens it checked, and each
+  token's owner. Owners are remembered with the token's nonsecret entry (`tokenEntries`).
+- **Token standing:** `TokenState.resolve` uses the last report only when it was made for
+  the current account and covered that token; otherwise it uses the remembered owner, or
+  shows "Checking…". So a check for a previous account, or one made before a token was
+  added, never reads as verified. A token counts when verified for the account, or when
+  the last check could not reach GitHub but the token is known to belong to the account.
+  The app treats a token as usable only then.
+- **Connection wording:** `ConnectionLabel` names what is in use, counting only counted
+  tokens: "Public profile (username only)", "Fine-grained tokens (N)", "Classic tokens (N)",
+  or "Fine-grained + classic tokens (N)"; "Checking tokens…" while none is counted yet and
+  some are unchecked. The Activity badge, Settings, and the menu bar panel use it. Token
+  values are never shown.
 - **Token kinds:** `github_pat_` tokens are fine-grained; anything else is treated
   as classic and is accepted only with the InsecuSlopometer™ opt-in.
 
@@ -35,9 +55,16 @@ PRs that were deleted or became inaccessible, at the cost of repeated requests.
 ## Scheduling (app)
 
 The app syncs at launch, then every 15 minutes, after wake when the last attempt is
-over 10 minutes old, and on manual refresh. Overlapping syncs are skipped. Failures
-back off exponentially from 2 minutes to 1 hour; rate limits wait until GitHub's
-reset time. Changing the username clears the previous account's cache.
+over 10 minutes old, and on manual refresh. A refresh requested while a sync runs is not dropped: `RefreshGate`
+queues one more run that starts as soon as the current sync ends and reads the settings and
+tokens current at that moment, so adding or removing a token or changing the username always
+syncs promptly. Those changes also discard the last report at once, so token rows show their
+remembered owner or "Checking…" instead of a stale verdict. Failures back off exponentially
+from 2 minutes to 1 hour; rate limits wait until GitHub's reset time. A new account's sync
+clears the previous account's cache. Until then `SnapshotBuilder` treats a cache whose
+`sync_state.login` names another account as empty: no counts, quota, PR evidence, or sync
+time, and the notice "No data for @x yet. It appears after the next sync." The app's
+evidence and repository list read nothing from such a cache either.
 
 ## Snapshot
 
@@ -77,7 +104,7 @@ medium strip's busiest tiles (levels 3–4) cut their number out of the tile ins
 drawing near-white text on a near-white tile, and today's weekday is bold.
 
 The dashboard replaces the chart with a token explanation when a PR metric is
-selected without a usable token (missing, rejected, or owned by another account)
+selected without a usable token (missing, still being checked, rejected, or owned by another account)
 and links to the token section in Settings, so `tokenNeededNotice` is not repeated.
 
 ## Menu-bar badge
@@ -111,7 +138,7 @@ and app state; it never fetches on its own:
   The strip is hidden when no series matches or all seven days are unknown; unknown
   days show an en dash and today is outlined as incomplete.
 - **Status rows:** sync state (syncing, relative time since the last successful sync,
-  or not synced yet), the account with its access tier, and every snapshot notice and
+  or not synced yet), the account with its connection wording on a second line, and every snapshot notice and
   widget sharing problem the headline does not already state, in the primary color.
 - **Footer:** Refresh (⌘R, a spinner while syncing, disabled without a username), Open
   (⌘O, closes the panel and opens the window), Quit (⌘Q), and the build summary.
@@ -129,11 +156,25 @@ Owners: `App/MainView.swift`, `App/SettingsView.swift`, `App/Glass.swift`.
   from the content, so resizing does not feed back into the layout. The grid keeps
   square cells, sized by the smaller of width and height, so a long range that is
   limited by width leaves its spare height below the notices rather than between rows.
-- Settings keeps a one-line caption per access tier; the longer guidance (public-profile
-  limits, fine-grained token setup and organization tokens, classic-token write access,
-  timezone day labels) sits behind a `?` popover. Tier 3 is headed InsecuSlopometer™;
-  its toggle reads "Allow classic tokens" and behaves as before.
-- Before the repository picker or a `?` popover opens, a focused text field in the
+- Settings (0.9.0) has no numbered tiers and no separate GitHub heading. **Username**
+  comes first: one summary row (an initial, @account or "No account yet", the connection
+  wording, and sync status), then the username field. **Tokens**
+  lists every saved token (name, Fine-grained or Classic chip, then "Owned by @x, counted",
+  "Belongs to @x, not counted", "Rejected by GitHub, not counted", "Not checked: …", or
+  "Checking…") with Remove, then one Add Token… button, the creation link, and a `?`.
+  Add Token… opens a sheet with Name and Token fields; the kind follows the prefix, and a
+  classic token is refused unless InsecuSlopometer™ is on. Asking for the token section
+  from the dashboard with no token saved opens the sheet. The username is editable only
+  without tokens; with tokens it is grayed out and says "Using @x from your fine-grained
+  tokens". **InsecuSlopometer™** is the last row of Tokens: its name, a one-line caption,
+  a `?`, and the "Allow classic tokens" switch on the right, disabled while classic tokens
+  are saved.
+  Longer guidance (token setup, organizations, account rule, public-profile limits,
+  classic-token write access, timezone day labels) sits behind `?` popovers.
+- The Activity header's connection badge shows the connection wording. Clicking it opens a
+  popover listing each saved token's name, kind, and standing (as in Settings) and a
+  "Manage in Settings" button that opens the token section. It holds no secrets.
+- Before the repository picker, a `?` popover, or the Add Token sheet opens, a focused text field in the
   window gives up focus. A popover takes key status, and when it closed the window
   restored focus to the Username field, which selected its text and scrolled the form
   to the top. Menus do not take key status, so other pickers never did this.

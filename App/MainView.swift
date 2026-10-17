@@ -32,7 +32,7 @@ struct MainView: View {
         .tint(SlopPalette.mark)
         .padding()
         .frame(minWidth: 640, minHeight: 540)
-        .onAppear { if model.settings.login.isEmpty { tab = .settings } }
+        .onAppear { if model.accountLogin.isEmpty && !model.hasToken { tab = .settings } }
     }
 }
 
@@ -69,13 +69,23 @@ struct DashboardView: View {
     ) -> some View {
         header(snapshot)
         if snapshot.tier == .notConfigured {
-            ContentUnavailableView {
-                Label(
-                    "No account yet", systemImage: "person.crop.circle.badge.questionmark")
-            } description: {
-                Text("Enter a GitHub username to see its contributions.")
-            } actions: {
-                Button("Add Username") { openSettings(.account) }
+            if model.hasToken {
+                ContentUnavailableView {
+                    Label("Checking your tokens", systemImage: "key.horizontal")
+                } description: {
+                    Text("The account comes from your tokens once GitHub confirms who owns them.")
+                } actions: {
+                    Button("Review Tokens") { openSettings(.token) }
+                }
+            } else {
+                ContentUnavailableView {
+                    Label(
+                        "No account yet", systemImage: "person.crop.circle.badge.questionmark")
+                } description: {
+                    Text("Add a token, or enter a GitHub username to see its contributions.")
+                } actions: {
+                    Button("Add Username") { openSettings(.account) }
+                }
             }
         } else {
             if let quota = snapshot.quota { QuotaCard(quota: quota) }
@@ -108,7 +118,7 @@ struct DashboardView: View {
                     if !snapshot.login.isEmpty {
                         HStack(spacing: 8) {
                             Text("@\(snapshot.login)").font(.callout.weight(.medium))
-                            TierBadge(tier: snapshot.tier)
+                            ConnectionBadge { openSettings(.token) }
                         }
                     }
                     HStack(spacing: 6) {
@@ -246,21 +256,133 @@ struct DashboardView: View {
     }
 }
 
-/// Which access tier the numbers come from, so a missing token is visible at a glance.
-private struct TierBadge: View {
-    let tier: DashboardSnapshot.Tier
+/// The connection in use (public profile, or which tokens), so a missing token is visible at
+/// a glance. Clicking it lists every saved token and how it feeds the data; never secrets.
+private struct ConnectionBadge: View {
+    @Environment(AppModel.self) private var model
+    let manage: () -> Void
+    @State private var isPresented = false
 
     var body: some View {
-        let isToken = tier == .token
-        Label(
-            isToken ? "Token" : "Username only",
-            systemImage: isToken ? "key.fill" : "person"
-        )
-        .font(.caption.weight(.medium))
-        .padding(.horizontal, 8)
-        .padding(.vertical, 3)
-        .foregroundStyle(isToken ? SlopPalette.mark : .secondary)
-        .glassCapsule(tint: isToken ? SlopPalette.mark : Color.secondary)
+        let usesTokens = model.tokenUsable
+        Button {
+            isPresented.toggle()
+        } label: {
+            Label(model.connectionLabel, systemImage: usesTokens ? "key.fill" : "person")
+                .font(.caption.weight(.medium))
+                .padding(.horizontal, 8)
+                .padding(.vertical, 3)
+                .foregroundStyle(usesTokens ? SlopPalette.mark : .secondary)
+                .glassCapsule(tint: usesTokens ? SlopPalette.mark : Color.secondary)
+                .contentShape(Capsule())
+        }
+        .buttonStyle(.plain)
+        .help("Show where the data comes from")
+        .accessibilityLabel("Connection: \(model.connectionLabel)")
+        .accessibilityHint("Shows the tokens feeding the data")
+        .popover(isPresented: $isPresented, arrowEdge: .bottom) {
+            ConnectionDetails {
+                isPresented = false
+                manage()
+            }
+        }
+    }
+}
+
+/// Every saved token with its kind, owner, and whether it is counted.
+private struct ConnectionDetails: View {
+    @Environment(AppModel.self) private var model
+    let manage: () -> Void
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            VStack(alignment: .leading, spacing: 2) {
+                Text(model.connectionLabel).font(.headline)
+                Text(caption).font(.callout).foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            if !model.tokens.isEmpty {
+                VStack(alignment: .leading, spacing: 10) {
+                    ForEach(model.tokens) { TokenSummaryRow(entry: $0) }
+                }
+            }
+            HStack {
+                Spacer()
+                Button("Manage in Settings", action: manage)
+            }
+        }
+        .padding(14)
+        .frame(width: 320, alignment: .leading)
+    }
+
+    private var caption: String {
+        let login = model.accountLogin
+        if model.tokens.isEmpty {
+            return
+                "Contributions for @\(login) come from the public profile. Add a token to count PRs."
+        }
+        return login.isEmpty
+            ? "Waiting for GitHub to confirm who owns your tokens."
+            : "Tokens owned by @\(login) are counted. Values stay in Keychain."
+    }
+}
+
+/// One saved token: name, kind, and its standing. Shared by Settings and the badge popover.
+struct TokenSummaryRow<Trailing: View>: View {
+    @Environment(AppModel.self) private var model
+    let entry: TokenEntry
+    @ViewBuilder var trailing: () -> Trailing
+
+    var body: some View {
+        let state = model.state(of: entry)
+        HStack(alignment: .center, spacing: 10) {
+            Image(systemName: icon(state))
+                .foregroundStyle(state.isProblem ? Color.orange : Color.secondary)
+                .frame(width: 18)
+            VStack(alignment: .leading, spacing: 2) {
+                HStack(spacing: 6) {
+                    Text(entry.label).lineLimit(1)
+                    TokenKindChip(kind: entry.kind)
+                }
+                Text(state.summary)
+                    .font(.caption)
+                    .foregroundStyle(state.isProblem ? Color.orange : Color.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            Spacer(minLength: 8)
+            trailing()
+        }
+        .accessibilityElement(children: .combine)
+    }
+
+    private func icon(_ state: TokenState) -> String {
+        switch state {
+        case .checking: "hourglass"
+        case .counted: "checkmark.circle.fill"
+        case .otherOwner: "person.crop.circle.badge.xmark"
+        case .rejected, .unavailable: "exclamationmark.triangle.fill"
+        }
+    }
+}
+
+extension TokenSummaryRow where Trailing == EmptyView {
+    init(entry: TokenEntry) {
+        self.init(entry: entry) { EmptyView() }
+    }
+}
+
+/// Fine-grained or classic, in words; classic is tinted because it can write.
+struct TokenKindChip: View {
+    let kind: AccessToken.Kind
+
+    var body: some View {
+        let classic = kind == .classic
+        Text(classic ? "Classic" : "Fine-grained")
+            .font(.caption2.weight(.semibold))
+            .padding(.horizontal, 6).padding(.vertical, 1)
+            .foregroundStyle(classic ? Color.orange : Color.secondary)
+            .background(
+                (classic ? Color.orange : Color.secondary).opacity(0.14), in: Capsule())
     }
 }
 
@@ -299,23 +421,29 @@ private struct TokenGate: View {
         .glassCard(cornerRadius: 12)
     }
 
+    private var states: [TokenState] { model.tokens.map { model.state(of: $0) } }
+
     private var title: String {
-        switch model.lastReport?.pullRequestError {
-        case .tokenOwnerMismatch: "Your token belongs to another account"
-        case .unauthorized: "GitHub rejected your token"
-        default: "\(metric.title) needs a GitHub token"
+        if states.contains(.checking) { return "Checking your tokens" }
+        if states.contains(.rejected) { return "GitHub rejected your token" }
+        if states.contains(where: { $0.owner != nil }) {
+            return "Your tokens belong to another account"
         }
+        return "\(metric.title) needs a GitHub token"
     }
 
     private var message: String {
-        switch model.lastReport?.pullRequestError {
-        case .tokenOwnerMismatch(_, let actual):
-            "A saved token is for @\(actual), not @\(model.settings.login). Replace it with one from @\(model.settings.login)."
-        case .unauthorized:
-            "It may have expired or been revoked. Replace it in Settings."
-        default:
-            "A username only shows contributions. To count PRs, add a fine-grained token with read-only Pull requests access."
+        if states.contains(.checking) {
+            return "PR stats appear once GitHub confirms who owns them."
         }
+        if states.contains(.rejected) {
+            return "It may have expired or been revoked. Replace it in Settings."
+        }
+        if let owner = states.lazy.compactMap(\.owner).first {
+            return "A saved token is for @\(owner), not @\(model.accountLogin)."
+        }
+        return
+            "A username only shows contributions. To count PRs, add a fine-grained token with read-only Pull requests access."
     }
 }
 

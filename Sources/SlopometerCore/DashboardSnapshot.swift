@@ -154,24 +154,33 @@ public enum SnapshotBuilder {
         "\(metric.title) needs a GitHub token. Add one in Settings."
     }
 
+    /// Shown while the cache holds no data for the displayed account yet.
+    public static func notSyncedNotice(for login: String) -> String {
+        "No data for @\(login) yet. It appears after the next sync."
+    }
+
     /// - Parameters:
-    ///   - tokenUsable: a token exists and the last sync verified its owner.
+    ///   - tokenUsable: a token verified for `settings.login` exists.
     ///   - problems: user-facing sync problems to surface alongside cached data.
     public static func build(
         settings: DashboardSettings, cache: MeasurementCache, tokenUsable: Bool,
         problems: [String], now: Date = Date()
     ) throws -> DashboardSnapshot {
         guard !settings.login.isEmpty else { return .placeholder }
-        let state = try cache.syncState()
+        // A cache still holding another account's data (it is only reset by the next sync)
+        // is treated as empty, so nothing from that account appears under this one.
+        let holdsAccount = try cache.holds(settings.login)
+        let state = holdsAccount ? try cache.syncState() : SyncState()
         let timeZone = settings.timeZone
         let today = CalendarDay.containing(now, in: timeZone)
         let warmUp = settings.averageWindow
         let span = max(settings.rangeDays + warmUp, WidgetSettings.gridDays)
         let allDays = CalendarDay.range(from: today.adding(days: -(span - 1)), through: today)
         var notices = problems
-        let records = try cache.pullRequests()
+        if !holdsAccount { notices.insert(notSyncedNotice(for: settings.login), at: 0) }
+        let records = holdsAccount ? try cache.pullRequests() : []
         let prCoverageComplete = tokenUsable && !state.pullRequestResultsIncomplete
-        let calendar = try cache.calendar()
+        let calendar = holdsAccount ? try cache.calendar() : [:]
         /// Every surface reads its metric's counts from here, so they agree day by day.
         func dailySeries(_ metric: Metric) -> [DailyCount] {
             if metric == .contributions {
@@ -249,7 +258,7 @@ public enum SnapshotBuilder {
         }
 
         var quota: DashboardSnapshot.Quota?
-        if let goal = settings.goal, goal.isValid, tokenUsable {
+        if let goal = settings.goal, goal.isValid, tokenUsable, holdsAccount {
             let progress = QuotaProgress(
                 goal: goal, repositories: settings.repositories, records: records, today: today,
                 timeZone: timeZone,

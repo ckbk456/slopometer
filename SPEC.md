@@ -47,7 +47,9 @@ before asking for one:
   Private activity appears only as anonymous counts, and only if the account
   shows private contributions on its profile.
 - **Token** reads GitHub's GraphQL contribution calendar and PR search. The token
-  owner must match the configured username; show a mismatch rather than counting.
+  owners decide the account: the owner of the earliest-added verified token is the
+  account, and tokens owned by anyone else are shown as not counted. The typed
+  username is used only while no token is saved.
   PR metrics cover only repositories the token can read. Recommend a fine-grained
   read-only token (metadata and pull requests); never require write access.
   There is no OAuth sign-in flow.

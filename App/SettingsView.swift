@@ -7,6 +7,7 @@ struct SettingsView: View {
     @Binding var focus: SettingsAnchor?
     @FocusState private var focusedField: SettingsAnchor?
     @State private var login = ""
+    @State private var addsToken = false
 
     var body: some View {
         @Bindable var model = model
@@ -18,82 +19,97 @@ struct SettingsView: View {
         .onAppear {
             login = model.settings.login
         }
+        .sheet(isPresented: $addsToken) { AddTokenSheet().environment(model) }
     }
 
     private func form(bindable: Bindable<AppModel>) -> some View {
         Form {
+            // Who is measured first: the account and how it is connected, then its tokens.
             Section {
-                tierHeader(
-                    1, "Public account", systemImage: "person",
-                    caption: "Your public contribution calendar. Nothing secret is stored."
-                ) {
-                    Text(
-                        "Reads the contribution calendar on your public GitHub profile. That page is not an official API, so it can change or break."
-                    )
-                    Text(
-                        "Private activity appears only as anonymous counts, and only if your profile shows private contributions."
-                    )
-                }
+                accountSummary
                 HStack {
                     TextField("Username", text: $login, prompt: Text("Enter username"))
                         .focused($focusedField, equals: .account)
                         .onSubmit(applyLogin)
-                    Button("Save", action: applyLogin)
-                        .disabled(
-                            login == model.settings.login || !GitHubClient.isValidLogin(login))
+                    if !model.hasToken {
+                        Button("Save", action: applyLogin)
+                            .disabled(
+                                login == model.settings.login || !GitHubClient.isValidLogin(login))
+                    }
                 }
+                .disabled(model.hasToken)
                 .id(SettingsAnchor.account)
-
-                tierHeader(
-                    2, "Fine-grained tokens", systemImage: "key",
-                    caption: "Read-only. Unlocks PR stats, the daily quota, and repository filters."
-                ) {
-                    Text("Create the token with:").fontWeight(.semibold)
-                    Text(
-                        """
-                        Resource owner: your account, or an organization
-                        Repository access: All repositories
-                        Permissions: Pull requests, read-only (Metadata is added automatically)
-                        """
-                    )
-                    Text("Organizations").fontWeight(.semibold)
-                    Text(
-                        "A token owned by your account can't see an organization's private repositories. To count those PRs, add another token with the organization as its resource owner. The organization may need to approve it."
-                    )
-                    Text("Tokens are stored in Keychain and only sent to GitHub.")
-                        .foregroundStyle(.secondary)
-                }
-                ForEach(model.tokens.filter { $0.kind == .fineGrained }) { tokenRow($0) }
-                Link(
-                    model.hasToken
-                        ? "Create another fine-grained token on GitHub"
-                        : "Create a fine-grained token on GitHub",
-                    destination: TokenGuide.creationURL)
-                TokenAdder(kind: .fineGrained, focus: $focusedField)
-                    .id(SettingsAnchor.token)
-
-                tierHeader(
-                    3, "InsecuSlopometer™", systemImage: "lock.open",
-                    caption: "Allows classic tokens, which can't be read-only. Not recommended."
-                ) {
-                    Text(
-                        "A classic token needs the repo scope to read private PRs, and that scope also grants write access to every repository you can reach."
-                    )
-                    Text(
-                        "Slopometer only reads, but anyone who copies the token can write. Use a fine-grained token if you can."
-                    )
-                }
-                insecuSlopometer(bindable)
-                if model.allowsClassicTokens {
-                    ForEach(model.tokens.filter { $0.kind == .classic }) { tokenRow($0) }
-                    TokenAdder(kind: .classic, focus: $focusedField)
+                HStack(alignment: .firstTextBaseline) {
+                    Text(usernameCaption)
+                        .font(.caption).foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                    Spacer()
+                    InfoButton("About the public profile") {
+                        Text(
+                            "Without a token, Slopometer reads the contribution calendar on the public GitHub profile. That page is not an official API, so it can change or break."
+                        )
+                        Text(
+                            "Private activity appears only as anonymous counts, and only if the profile shows private contributions."
+                        )
+                        Text(
+                            "With tokens, the account is the tokens' owner and this username is kept for when you remove them."
+                        )
+                    }
                 }
             } header: {
-                VStack(alignment: .leading, spacing: 2) {
-                    Text("GitHub connections")
-                    Text("From least to most access. PR stats need a token.")
-                        .font(.caption).fontWeight(.regular).foregroundStyle(.secondary)
+                sectionHeader(
+                    "Username",
+                    caption: model.hasToken
+                        ? "Not needed while tokens are saved."
+                        : "Public profile only. Nothing secret is stored.")
+            }
+
+            Section {
+                if model.tokens.isEmpty {
+                    Text("No tokens yet. Contributions come from the public profile.")
+                        .foregroundStyle(.secondary)
                 }
+                ForEach(model.tokens) { entry in
+                    TokenSummaryRow(entry: entry) {
+                        Button("Remove", role: .destructive) { model.removeToken(entry.id) }
+                    }
+                }
+                HStack(spacing: 12) {
+                    Button("Add Token…", action: presentAddToken)
+                    Link(
+                        "Create a fine-grained token on GitHub", destination: TokenGuide.creationURL
+                    )
+                    .font(.callout)
+                    Spacer()
+                    InfoButton("About tokens") {
+                        Text("Create the token with:").fontWeight(.semibold)
+                        Text(
+                            """
+                            Resource owner: your account, or an organization
+                            Repository access: All repositories
+                            Permissions: Pull requests, read-only (Metadata is added automatically)
+                            """
+                        )
+                        Text("Organizations").fontWeight(.semibold)
+                        Text(
+                            "A token owned by your account can't see an organization's private repositories. To count those PRs, add another token with the organization as its resource owner. The organization may need to approve it."
+                        )
+                        Text("Account").fontWeight(.semibold)
+                        Text(
+                            "The account is whoever owns your tokens. Organization tokens are still owned by you, so they count. A token owned by someone else is kept but not counted."
+                        )
+                        Text("Tokens are stored in Keychain and only sent to GitHub.")
+                            .foregroundStyle(.secondary)
+                    }
+                }
+                .id(SettingsAnchor.token)
+                insecuSlopometer(bindable)
+            } header: {
+                sectionHeader(
+                    "Tokens",
+                    caption:
+                        "Read-only fine-grained tokens unlock PR stats, the daily quota, and repository filters."
+                )
             }
 
             Section {
@@ -169,79 +185,119 @@ struct SettingsView: View {
         .formStyle(.grouped)
     }
 
-    /// Scrolls to and focuses a section the dashboard asked for, then clears the request.
+    /// Scrolls to a section the dashboard asked for, then clears the request. Asking for
+    /// the token section with no token saved opens Add Token directly.
     private func reveal(_ anchor: SettingsAnchor?, with proxy: ScrollViewProxy) {
         guard let anchor else { return }
         DispatchQueue.main.async {
             withAnimation { proxy.scrollTo(anchor, anchor: .top) }
-            if anchor == .account || !model.hasToken { focusedField = anchor }
+            if anchor == .account, !model.hasToken { focusedField = .account }
+            if anchor == .token, !model.hasToken { presentAddToken() }
             focus = nil
         }
     }
 
-    /// A one-line caption; the longer guidance waits behind the `?` button.
-    private func tierHeader<Info: View>(
-        _ number: Int, _ title: String, systemImage: String, caption: String,
-        @ViewBuilder info: @escaping () -> Info
-    ) -> some View {
-        HStack(alignment: .firstTextBaseline, spacing: 8) {
-            Text("\(number)")
-                .font(.caption.weight(.bold)).monospacedDigit()
-                .frame(width: 18, height: 18)
-                .background(.quaternary, in: Circle())
-            VStack(alignment: .leading, spacing: 2) {
-                Label(title, systemImage: systemImage).font(.headline)
-                Text(caption).font(.caption).foregroundStyle(.secondary)
-                    .fixedSize(horizontal: false, vertical: true)
-            }
-            Spacer()
-            InfoButton("About \(title)", content: info)
-        }
-        .padding(.top, number == 1 ? 0 : 6)
+    private func presentAddToken() {
+        // A sheet takes key status like a popover; see `releaseWindowFocus()`.
+        releaseWindowFocus()
+        addsToken = true
     }
 
-    private func tokenRow(_ entry: TokenEntry) -> some View {
-        let status = model.status(of: entry)
-        return HStack {
-            Image(systemName: status.ok ? "key.fill" : "exclamationmark.triangle")
-                .foregroundStyle(status.ok ? Color.secondary : Color.red)
-            VStack(alignment: .leading, spacing: 2) {
-                HStack(spacing: 6) {
-                    Text(entry.label)
-                    if entry.kind == .classic {
-                        Text("Classic")
-                            .font(.caption2.weight(.semibold))
-                            .padding(.horizontal, 5).padding(.vertical, 1)
-                            .foregroundStyle(.orange)
-                            .background(.orange.opacity(0.15), in: Capsule())
-                    }
+    private func sectionHeader(_ title: String, caption: String) -> some View {
+        VStack(alignment: .leading, spacing: 2) {
+            Text(title)
+            Text(caption).font(.caption).fontWeight(.regular).foregroundStyle(.secondary)
+        }
+    }
+
+    /// Who is measured, how, and how fresh the data is.
+    private var accountSummary: some View {
+        let account = model.accountLogin
+        return HStack(spacing: 12) {
+            ZStack {
+                Circle().fill(.tint.opacity(0.16))
+                if let initial = account.first {
+                    Text(String(initial).uppercased())
+                        .font(.title3.weight(.semibold))
+                        .foregroundStyle(.tint)
+                } else {
+                    Image(systemName: "person.fill").foregroundStyle(.secondary)
                 }
-                Text(status.text).font(.caption)
-                    .foregroundStyle(status.ok ? Color.secondary : Color.red)
+            }
+            .frame(width: 36, height: 36)
+            .accessibilityHidden(true)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(account.isEmpty ? "No account yet" : "@\(account)").font(.headline)
+                Text(accountDetail).font(.callout).foregroundStyle(.secondary)
             }
             Spacer()
-            Button("Remove", role: .destructive) { model.removeToken(entry.id) }
+            syncStatus.font(.caption).foregroundStyle(.secondary)
         }
+        .padding(.vertical, 2)
+        .accessibilityElement(children: .combine)
+    }
+
+    private var accountDetail: String {
+        if !model.accountLogin.isEmpty { return model.connectionLabel }
+        return model.hasToken ? "Checking your tokens…" : "Add a token, or enter a username below."
+    }
+
+    @ViewBuilder
+    private var syncStatus: some View {
+        if model.isSyncing {
+            HStack(spacing: 6) {
+                ProgressView().controlSize(.small)
+                Text("Syncing…")
+            }
+        } else if let synced = model.snapshot.lastSuccessfulSync {
+            Text("Synced \(synced, style: .relative) ago")
+        } else if !model.accountLogin.isEmpty {
+            Text("Not synced yet")
+        }
+    }
+
+    private var usernameCaption: String {
+        guard model.hasToken else {
+            return "Reads the public contribution calendar. Add a token for PR stats."
+        }
+        guard model.accountFromTokens else {
+            return "The account comes from your tokens once GitHub confirms who owns them."
+        }
+        return
+            "Using @\(model.accountLogin) from \(model.accountSource). This username is used again if you remove every token."
     }
 
     /// Opt-in for classic tokens, under the InsecuSlopometer™ headline so nobody turns it
-    /// on by accident.
+    /// on by accident. Classic tokens are listed with the others, marked Classic.
     private func insecuSlopometer(_ bindable: Bindable<AppModel>) -> some View {
         let hasClassic = model.tokens.contains { $0.kind == .classic }
-        return VStack(alignment: .leading, spacing: 4) {
-            Toggle(isOn: bindable.allowsClassicTokens) {
-                Label {
-                    Text("Allow classic tokens")
-                } icon: {
-                    Image(systemName: "lock.open.fill").foregroundStyle(.orange)
-                }
+        return HStack(alignment: .center, spacing: 10) {
+            Image(systemName: "lock.open.fill").foregroundStyle(.orange)
+                .accessibilityHidden(true)
+            VStack(alignment: .leading, spacing: 2) {
+                Text("InsecuSlopometer™")
+                Text(
+                    hasClassic
+                        ? "Remove classic tokens to turn this off."
+                        : "Allows classic tokens, which can't be read-only. Not recommended."
+                )
+                .font(.caption).foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
             }
-            .tint(.orange)
-            .disabled(hasClassic)
-            if hasClassic {
-                Text("Remove classic tokens to turn this off.")
-                    .font(.caption).foregroundStyle(.secondary)
+            Spacer()
+            InfoButton("About InsecuSlopometer™") {
+                Text(
+                    "A classic token needs the repo scope to read private PRs, and that scope also grants write access to every repository you can reach."
+                )
+                Text(
+                    "Slopometer only reads, but anyone who copies the token can write. Use a fine-grained token if you can. When this is on, Add Token also accepts classic tokens."
+                )
             }
+            Toggle("Allow classic tokens", isOn: bindable.allowsClassicTokens)
+                .labelsHidden()
+                .toggleStyle(.switch)
+                .tint(.orange)
+                .disabled(hasClassic)
         }
     }
 
@@ -291,54 +347,77 @@ struct SettingsView: View {
     }
 }
 
-/// Name and paste fields for one kind of token.
-private struct TokenAdder: View {
+/// Names and saves one token. The kind follows GitHub's prefix; classic tokens need the
+/// InsecuSlopometer™ opt-in. The value goes straight to Keychain and is never shown again.
+private struct AddTokenSheet: View {
     @Environment(AppModel.self) private var model
-    let kind: AccessToken.Kind
-    var focus: FocusState<SettingsAnchor?>.Binding
+    @Environment(\.dismiss) private var dismiss
     @State private var label = ""
     @State private var token = ""
     @State private var message: String?
+    @FocusState private var tokenFocused: Bool
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            HStack {
-                TextField("Name", text: $label, prompt: Text(namePrompt))
-                    .labelsHidden()
-                    .frame(width: 150)
-                Group {
-                    if kind == .fineGrained {
-                        SecureField("Token", text: $token, prompt: Text("Paste token"))
-                            .focused(focus, equals: .token)
-                    } else {
-                        SecureField("Token", text: $token, prompt: Text("Paste classic token"))
-                    }
+        VStack(alignment: .leading, spacing: 16) {
+            VStack(alignment: .leading, spacing: 4) {
+                Text("Add a token").font(.title3.weight(.semibold))
+                Text(
+                    "Use a fine-grained token with read-only Pull requests access. It is stored in Keychain and only sent to GitHub."
+                )
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+            }
+            Grid(alignment: .leadingFirstTextBaseline, horizontalSpacing: 10, verticalSpacing: 10) {
+                GridRow {
+                    Text("Name").gridColumnAlignment(.trailing)
+                    TextField("Name", text: $label, prompt: Text(namePrompt))
+                        .labelsHidden()
                 }
-                .labelsHidden()
-                .onSubmit(save)
-                Button("Add", action: save)
+                GridRow {
+                    Text("Token")
+                    SecureField("Token", text: $token, prompt: Text("Paste token"))
+                        .labelsHidden()
+                        .focused($tokenFocused)
+                        .onSubmit(save)
+                }
+            }
+            .textFieldStyle(.roundedBorder)
+            if let message {
+                Label(message, systemImage: "exclamationmark.triangle.fill")
+                    .font(.callout)
+                    .foregroundStyle(.orange)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            HStack {
+                Link("Create one on GitHub", destination: TokenGuide.creationURL)
+                Spacer()
+                Button("Cancel", role: .cancel) { dismiss() }
+                    .keyboardShortcut(.cancelAction)
+                Button("Add Token", action: save)
+                    .keyboardShortcut(.defaultAction)
                     .disabled(token.trimmingCharacters(in: .whitespaces).isEmpty)
             }
-            if let message { Text(message).font(.caption).foregroundStyle(.red) }
         }
+        .padding(20)
+        .frame(width: 440)
+        .onAppear { tokenFocused = true }
     }
 
     private var namePrompt: String {
-        model.hasToken ? "Name, e.g. my-org" : "Name, e.g. Personal"
+        model.hasToken ? "For example, my-org" : "For example, Personal"
     }
 
     private func save() {
         guard !token.trimmingCharacters(in: .whitespaces).isEmpty else { return }
-        switch model.addToken(token, label: label, as: kind) {
+        switch model.addToken(token, label: label) {
         case .saved:
-            message = nil
-            label = ""
+            token = ""
+            dismiss()
+            return
         case .duplicate: message = "That token is already saved."
-        case .wrongKind:
+        case .classicNotAllowed:
             message =
-                kind == .fineGrained
-                ? "That's a classic token. Allow classic tokens under InsecuSlopometer™ below, or use a fine-grained token."
-                : "That's a fine-grained token. Add it under Fine-grained tokens above."
+                "That's a classic token, which can also write. Use a fine-grained token, or allow classic tokens under InsecuSlopometer™."
         case .keychainFailed: message = "Couldn't save the token to Keychain."
         }
         token = ""
@@ -442,7 +521,7 @@ private struct RepositoryPicker: View {
 /// Menus (Timezone, Counts) never take key status, so they never did this. With no first
 /// responder left to restore, nothing is reselected and nothing scrolls.
 @MainActor
-private func releaseWindowFocus() {
+func releaseWindowFocus() {
     guard let window = NSApp.keyWindow else { return }
     if window.firstResponder is NSText || window.firstResponder is NSTextField {
         window.makeFirstResponder(nil)

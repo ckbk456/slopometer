@@ -10,7 +10,7 @@ struct MenuPanel: View {
 
     private var snapshot: DashboardSnapshot { model.snapshot }
     private var metric: Metric { model.menuBarMetric }
-    private var needsLogin: Bool { model.settings.login.isEmpty }
+    private var needsLogin: Bool { model.accountLogin.isEmpty }
     /// A PR metric without a usable token: there is no count to show, only the reason.
     private var needsToken: Bool {
         !needsLogin && snapshot.quota == nil && metric.requiresToken && !model.tokenUsable
@@ -194,14 +194,26 @@ struct MenuPanel: View {
         }
     }
 
+    /// The account and the connection in use, worded as in the app window's badge.
     private var accountRow: some View {
-        let isToken = snapshot.tier == .token
-        return PanelRow(icon: "person.crop.circle", title: "@\(snapshot.login)") {
-            Label(
-                isToken ? "Token" : "Username only", systemImage: isToken ? "key.fill" : "person")
-        } valueStyle: {
-            isToken ? AnyShapeStyle(SlopPalette.mark) : AnyShapeStyle(.secondary)
+        let isToken = model.tokenUsable
+        return HStack(alignment: .firstTextBaseline, spacing: 8) {
+            Image(systemName: "person.crop.circle")
+                .foregroundStyle(.secondary)
+                .frame(width: 18)
+            VStack(alignment: .leading, spacing: 1) {
+                Text("@\(snapshot.login)")
+                Label(model.connectionLabel, systemImage: isToken ? "key.fill" : "person")
+                    .font(.caption)
+                    .foregroundStyle(
+                        isToken ? AnyShapeStyle(SlopPalette.mark) : AnyShapeStyle(.secondary))
+            }
+            Spacer(minLength: 0)
         }
+        .font(.callout)
+        .padding(.horizontal, 10)
+        .padding(.vertical, 5)
+        .accessibilityElement(children: .combine)
     }
 
     /// Snapshot notices the headline does not already explain, plus widget sharing problems.
