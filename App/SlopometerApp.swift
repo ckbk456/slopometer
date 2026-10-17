@@ -18,13 +18,14 @@ struct SlopometerApp: App {
         .windowResizability(.contentMinSize)
 
         MenuBarExtra {
-            MenuContent()
+            MenuPanel()
                 .environment(model)
         } label: {
             MenuBarLabel()
                 .environment(model)
                 .onAppear { delegate.model = model }
         }
+        .menuBarExtraStyle(.window)
     }
 }
 
@@ -43,7 +44,7 @@ private struct MenuBarLabel: View {
 
     var body: some View {
         HStack(spacing: 4) {
-            Image(iconName)
+            Image(MenuPanel.iconName(for: model.menuBarMetric))
                 .renderingMode(.template)
                 .resizable()
                 .frame(width: 16, height: 16)
@@ -54,44 +55,5 @@ private struct MenuBarLabel: View {
         .accessibilityElement(children: .ignore)
         .accessibilityLabel("Slopometer, \(model.menuBarDescription)")
         .onAppear { model.openWindowAction = openWindow }
-    }
-
-    private var iconName: String {
-        switch model.menuBarMetric {
-        case .contributions: "octicon-calendar"
-        case .prsOpened: "octicon-git-pull-request"
-        case .prsMerged: "octicon-git-merge"
-        }
-    }
-}
-
-private struct MenuContent: View {
-    @Environment(AppModel.self) private var model
-
-    var body: some View {
-        if let quota = model.snapshot.quota {
-            Text(quota.headline)
-        }
-        if let today = model.snapshot.todayCount {
-            Text("Today so far: \(today) \(model.snapshot.unit)")
-        }
-        Text(freshness)
-        Divider()
-        Button(model.isSyncing ? "Refreshing…" : "Refresh Now") {
-            Task { await model.refresh() }
-        }
-        .disabled(model.isSyncing || model.settings.login.isEmpty)
-        .keyboardShortcut("r")
-        Button("Open Slopometer…") { model.openMainWindow() }
-            .keyboardShortcut("o")
-        Divider()
-        Text("Version \(BuildInfo.summary)")
-        Button("Quit Slopometer") { NSApplication.shared.terminate(nil) }
-            .keyboardShortcut("q")
-    }
-
-    private var freshness: String {
-        guard let synced = model.snapshot.lastSuccessfulSync else { return "Not synced yet" }
-        return "Synced \(synced.formatted(.relative(presentation: .named)))"
     }
 }

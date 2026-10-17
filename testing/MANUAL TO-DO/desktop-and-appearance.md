@@ -54,6 +54,29 @@ checks below were not separately reported and remain pending.
 - [ ] Check all three icons in light/dark appearance and a selected menu-bar item,
       on Retina and non-Retina displays where available; verify crisp, compact shapes.
 
+## Menu-bar panel (0.8.0): pending
+
+- [ ] Clicking the badge opens a rounded panel (not a menu); the badge itself is unchanged.
+- [ ] With a quota: caption "DAILY SLOP QUOTA" with the quota metric's icon, count / target,
+      "<unit> today in <scope>", status (Target reached / N to go / Coverage incomplete),
+      and the tick meter agree with the dashboard's quota card.
+- [ ] Without a quota: the selected metric's title, icon, and today's count; unknown
+      shows an en dash, never zero.
+- [ ] The last-7-days strip matches the dashboard (or medium widget) for the same metric,
+      shows en dashes for unknown days, and is absent when all seven days are unknown.
+- [ ] No username: the panel asks to open Slopometer and enter a username; its Open
+      button and Open in the footer bring the window forward and close the panel.
+- [ ] PR metric without a token: the headline explains the token requirement and the
+      token notice is not repeated in the rows.
+- [ ] Sync row shows "Syncing with GitHub…" while Refresh spins, then "Synced <time> ago";
+      account row shows @login with Token or Username only; notices are readable.
+- [ ] ⌘R, ⌘O, and ⌘Q work while the panel is open; Refresh is disabled without a username.
+- [ ] VoiceOver reads the headline (headline wording plus status), the meter's "N of M",
+      each day tile, and the Refresh/Open/Quit buttons by name.
+- [ ] Light and dark appearance, Increase Contrast, and Reduce Transparency stay legible.
+- [ ] macOS 26 or later shows Liquid Glass buttons; macOS 14/15 show bordered buttons.
+- [ ] A build from Xcode 16.4 (macOS 15 SDK, as in CI) compiles the non-glass path.
+
 ## Widget and background app: pending
 
 - [ ] App runs from the menu bar without a Dock icon; the window opens on demand.

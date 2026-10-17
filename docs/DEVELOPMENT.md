@@ -65,7 +65,7 @@ The app and widget share one [semantic version](https://semver.org) in `project.
 and the patch version for fixes; regenerate the project after bumping. `make build`
 and `make run` stamp the build number (commits on `HEAD`) and the short commit SHA,
 suffixed `-modified` when the tree had uncommitted edits. Settings › About and the
-menu bar menu show all three, so a running build can be matched to its source.
+menu bar panel show all three, so a running build can be matched to its source.
 Builds started from Xcode keep build `1` and commit `unknown`.
 
 ## Gates and ownership
