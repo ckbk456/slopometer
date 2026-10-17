@@ -8,7 +8,6 @@ struct SettingsView: View {
     @State private var login = ""
     @State private var token = ""
     @State private var tokenMessage: String?
-    @State private var repositories = ""
 
     var body: some View {
         @Bindable var model = model
@@ -19,7 +18,6 @@ struct SettingsView: View {
         }
         .onAppear {
             login = model.settings.login
-            repositories = model.settings.repositories.joined(separator: ", ")
         }
     }
 
@@ -94,11 +92,12 @@ struct SettingsView: View {
             .id(SettingsAnchor.token)
 
             Section("Pull requests (requires a token)") {
-                TextField(
-                    "Repository filter", text: $repositories,
-                    prompt: Text("All readable repositories, or owner/name, owner/other")
-                )
-                .onSubmit(applyRepositories)
+                LabeledContent("Repositories") {
+                    RepositoryPicker(
+                        selection: bindable.settings.repositories,
+                        choices: RepositoryFilter.choices(
+                            records: model.records, selected: model.settings.repositories))
+                }
                 .disabled(!model.hasToken)
                 Toggle("Daily PR quota", isOn: goalEnabled(bindable.settings))
                     .disabled(!model.hasToken)
@@ -184,12 +183,6 @@ struct SettingsView: View {
         model.settings.login = trimmed
     }
 
-    private func applyRepositories() {
-        model.settings.repositories = repositories.split(separator: ",")
-            .map { $0.trimmingCharacters(in: .whitespaces) }
-            .filter { $0.split(separator: "/").count == 2 }
-    }
-
     private func goalEnabled(_ settings: Binding<DashboardSettings>) -> Binding<Bool> {
         Binding(
             get: { settings.wrappedValue.goal != nil },
@@ -219,5 +212,94 @@ struct SettingsView: View {
                 updated[keyPath: keyPath] = value
                 settings.wrappedValue.goal = updated
             })
+    }
+}
+
+/// Dropdown checklist of repositories with synced PRs; all are ticked by default.
+private struct RepositoryPicker: View {
+    @Binding var selection: [String]
+    let choices: [RepositoryChoice]
+    @State private var isPresented = false
+    @State private var search = ""
+
+    var body: some View {
+        Button {
+            isPresented.toggle()
+        } label: {
+            HStack(spacing: 4) {
+                Text(summary)
+                Image(systemName: "chevron.up.chevron.down").imageScale(.small)
+            }
+        }
+        .popover(isPresented: $isPresented, arrowEdge: .bottom) { checklist }
+    }
+
+    private var summary: String {
+        selection.isEmpty ? "All repositories" : Goal.scopeLabel(for: selection)
+    }
+
+    private var checklist: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Toggle(
+                "All repositories",
+                isOn: Binding(get: { selection.isEmpty }, set: { if $0 { selection = [] } })
+            )
+            .disabled(selection.isEmpty)
+            if choices.count > 8 {
+                TextField("Filter", text: $search, prompt: Text("Search repositories"))
+                    .textFieldStyle(.roundedBorder)
+            }
+            Divider()
+            if choices.isEmpty {
+                Text("No PRs synced yet. Repositories appear here after a sync.")
+                    .foregroundStyle(.secondary)
+            } else {
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 6) {
+                        ForEach(visible) { choice in row(choice) }
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                }
+                .frame(maxHeight: 280)
+            }
+            Text(
+                "Lists repositories with your synced PRs. New repositories are included while All is ticked."
+            )
+            .font(.caption).foregroundStyle(.secondary)
+            .fixedSize(horizontal: false, vertical: true)
+        }
+        .toggleStyle(.checkbox)
+        .padding(12)
+        .frame(width: 320)
+    }
+
+    private var visible: [RepositoryChoice] {
+        let query = search.trimmingCharacters(in: .whitespaces)
+        guard !query.isEmpty else { return choices }
+        return choices.filter { $0.name.localizedCaseInsensitiveContains(query) }
+    }
+
+    private func row(_ choice: RepositoryChoice) -> some View {
+        Toggle(
+            isOn: Binding(
+                get: { RepositoryFilter.isIncluded(choice.name, in: selection) },
+                set: { _ in
+                    selection = RepositoryFilter.toggling(
+                        choice.name, in: selection, choices: choices)
+                })
+        ) {
+            HStack {
+                Text(choice.name).lineLimit(1).truncationMode(.middle)
+                Spacer()
+                Text("\(choice.pullRequests) PR\(choice.pullRequests == 1 ? "" : "s")")
+                    .monospacedDigit().foregroundStyle(.secondary)
+            }
+        }
+        .disabled(
+            RepositoryFilter.isLastIncluded(choice.name, in: selection, choices: choices)
+        )
+        .help(
+            RepositoryFilter.isLastIncluded(choice.name, in: selection, choices: choices)
+                ? "At least one repository stays selected." : "")
     }
 }
