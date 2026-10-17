@@ -72,6 +72,7 @@ private struct MenuContent: View {
         Button("Open Slopometer…") { model.openMainWindow() }
             .keyboardShortcut("o")
         Divider()
+        Text("Version \(BuildInfo.summary)")
         Button("Quit Slopometer") { NSApplication.shared.terminate(nil) }
             .keyboardShortcut("q")
     }

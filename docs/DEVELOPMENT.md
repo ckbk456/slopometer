@@ -58,6 +58,16 @@ widget; run `make run` again before checking the widget. The core
 package uses `.build/`; Xcode dependency clones use `.build/SourcePackages/`.
 These are ignored. No global shell config or background service is needed.
 
+## Versioning
+
+The app and widget share one [semantic version](https://semver.org) in `project.yml`
+(`MARKETING_VERSION`). Before 1.0, bump the minor version for user-visible features
+and the patch version for fixes; regenerate the project after bumping. `make build`
+and `make run` stamp the build number (commits on `HEAD`) and the short commit SHA,
+suffixed `-modified` when the tree had uncommitted edits. Settings › About and the
+menu bar menu show all three, so a running build can be matched to its source.
+Builds started from Xcode keep build `1` and commit `unknown`.
+
 ## Gates and ownership
 
 - `make validate` is the deterministic local gate. Do not run it concurrently with

@@ -140,6 +140,13 @@ struct SettingsView: View {
                 )
                 .font(.caption).foregroundStyle(.secondary)
             }
+
+            Section("About") {
+                LabeledContent("Version", value: BuildInfo.version)
+                LabeledContent("Build", value: BuildInfo.build)
+                LabeledContent("Commit", value: BuildInfo.commit)
+                    .textSelection(.enabled)
+            }
         }
         .formStyle(.grouped)
     }

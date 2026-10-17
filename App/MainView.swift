@@ -124,7 +124,9 @@ struct DashboardView: View {
                 }
                 .pickerStyle(.segmented)
                 .labelsHidden()
-                .frame(maxWidth: 220)
+                // Its own width: a max-width frame narrower than the control centers it and
+                // clips the first segment when the selected segment's label widens.
+                .fixedSize()
                 Spacer()
                 Picker("Range", selection: settings.rangeDays) {
                     ForEach(DashboardSettings.ranges, id: \.self) { Text("\($0) days").tag($0) }
