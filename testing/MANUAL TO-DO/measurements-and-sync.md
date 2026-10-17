@@ -7,6 +7,11 @@ Provider integration and PR quotas are not yet implemented. All gates are pendin
 - [ ] Confirm a PR opened earlier and merged today counts once today for merged activity.
 - [ ] Username-only: calendar matches the public profile and is labeled unofficial.
 - [ ] Token: mismatched owner is reported; repository filters, private access, and revoked token behave.
+- [ ] Several tokens: add an account token and an organization-owned token; private org
+      PRs appear once (not duplicated); removing or revoking one names it in the notice and
+      marks counts as possibly low. An upgraded install keeps its earlier token as "Personal".
+- [ ] Classic token: refused with InsecuSlopometer™ off; accepted and labeled "Classic" when
+      on; the toggle cannot be turned off while a classic token is saved.
 - [ ] Repository checklist: lists synced repositories ticked by default; unticking one updates
       counts, quota, and widget; the last one cannot be unticked; "All repositories" restores all.
 - [ ] Verify missing/partial permissions and pagination never turn unknown activity into zero.

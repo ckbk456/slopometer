@@ -263,7 +263,7 @@ private struct TokenGate: View {
                     .fixedSize(horizontal: false, vertical: true)
             }
             HStack(spacing: 12) {
-                Button(model.hasToken ? "Review Token" : "Add Token", action: openTokenSettings)
+                Button(model.hasToken ? "Review Tokens" : "Add Token", action: openTokenSettings)
                     .buttonStyle(.borderedProminent)
                     .keyboardShortcut(.defaultAction)
                 if !model.hasToken {
@@ -288,7 +288,7 @@ private struct TokenGate: View {
     private var message: String {
         switch model.lastReport?.pullRequestError {
         case .tokenOwnerMismatch(_, let actual):
-            "The saved token is for @\(actual), not @\(model.settings.login). Replace it with a token created on @\(model.settings.login)."
+            "A saved token is for @\(actual), not @\(model.settings.login). Replace it with a token created on @\(model.settings.login)."
         case .unauthorized:
             "It may have expired or been revoked. Create a new one and replace it in Settings."
         default:

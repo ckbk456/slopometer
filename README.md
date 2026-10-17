@@ -16,8 +16,9 @@ MVP for testing. Slopometer runs from the menu bar (no Dock icon), syncs one
 GitHub account, and shows a dashboard window and a desktop widget.
 
 - **Username only:** the account's contribution calendar from its public profile.
-- **Optional read-only token:** official calendar, PRs opened, authored PRs merged,
-  the exact PRs behind each count, a repository filter, and a daily PR quota.
+- **Optional read-only tokens:** official calendar, PRs opened, authored PRs merged,
+  the exact PRs behind each count, a repository filter, and a daily PR quota. Add one
+  token per organization to include its private repositories.
 
 Grid, column, and line views; 30/90/365-day ranges; 7/30-day averages. Theme
 editing, saved configurations, launch at login, and notifications are planned. See

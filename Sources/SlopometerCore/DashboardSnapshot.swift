@@ -146,7 +146,9 @@ public enum SnapshotBuilder {
             scopeLabel = Goal.scopeLabel(for: settings.repositories)
             lastSync = state.lastPullRequestSync
             if state.pullRequestResultsIncomplete {
-                notices.append("GitHub returned incomplete search results; PR counts may be low.")
+                notices.append(
+                    "Some PRs may be missing (incomplete GitHub search, or a token that failed); counts may be low."
+                )
             }
         } else {
             series = allDays.map { DailyCount(day: $0, count: nil) }

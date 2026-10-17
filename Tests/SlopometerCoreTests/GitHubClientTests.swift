@@ -244,6 +244,71 @@ struct SyncCoordinatorTests {
         #expect(try cache.calendar().count == 3)
     }
 
+    /// Answers as GitHub would for tokens `personal` and `org`, which see different PRs.
+    func twoOwnerTransport(rejecting rejected: String? = nil) -> FakeTransport {
+        FakeTransport { request in
+            let token = request.value(forHTTPHeaderField: "Authorization")?
+                .replacingOccurrences(of: "Bearer ", with: "")
+            if token == rejected { return (401, [:], Data()) }
+            if request.url?.path == "/graphql" {
+                let body = String(data: request.httpBody ?? Data(), encoding: .utf8) ?? ""
+                if body.contains("viewer") {
+                    return (200, [:], json(["data": ["viewer": ["login": "me"]]]))
+                }
+                let calendar = ["contributionCalendar": ["weeks": [] as [Any]]]
+                return (200, [:], json(["data": ["user": ["contributionsCollection": calendar]]]))
+            }
+            let items =
+                token == "personal"
+                ? [searchItem("shared", created: "2026-10-15T01:00:00Z")]
+                : [
+                    searchItem("shared", created: "2026-10-15T01:00:00Z"),
+                    searchItem("org-only", created: "2026-10-15T02:00:00Z"),
+                ]
+            return (200, [:], searchPage(total: items.count, items: items))
+        }
+    }
+
+    @Test func pullRequestsFromEveryTokenAreMergedOnce() async throws {
+        let cache = try MeasurementCache()
+        let transport = twoOwnerTransport()
+        let report = await SyncCoordinator(client: client(transport), cache: cache).sync(
+            SyncRequest(
+                login: "me",
+                tokens: [
+                    AccessToken(id: "a", value: "personal"), AccessToken(id: "b", value: "org"),
+                ], timeZone: bangkok, now: now))
+        #expect(report.verifiedTokenIDs == ["a", "b"])
+        #expect(report.pullRequestError == nil)
+        #expect(try cache.pullRequests().map(\.id).sorted() == ["org-only", "shared"])
+        #expect(try !cache.syncState().pullRequestResultsIncomplete)
+        #expect(transport.searchQueries.count == 4)
+    }
+
+    @Test func aFailedTokenKeepsTheOthersButMarksCoverageIncomplete() async throws {
+        let cache = try MeasurementCache()
+        let report = await SyncCoordinator(
+            client: client(twoOwnerTransport(rejecting: "org")), cache: cache
+        ).sync(
+            SyncRequest(
+                login: "me",
+                tokens: [
+                    AccessToken(id: "a", value: "personal"), AccessToken(id: "b", value: "org"),
+                ], timeZone: bangkok, now: now))
+        #expect(report.tokenVerified)
+        #expect(report.tokenErrors == ["b": .unauthorized])
+        #expect(report.pullRequestError == nil)
+        #expect(try cache.pullRequests().map(\.id) == ["shared"])
+        #expect(try cache.syncState().pullRequestResultsIncomplete)
+        #expect(try cache.syncState().calendarSource == .graphQL)
+    }
+
+    @Test func tokenKindFollowsGitHubPrefixes() {
+        #expect(AccessToken.Kind(of: "github_pat_11ABC") == .fineGrained)
+        #expect(AccessToken.Kind(of: "ghp_abc") == .classic)
+        #expect(AccessToken.Kind(of: "0123456789abcdef0123456789abcdef01234567") == .classic)
+    }
+
     @Test func failedSyncKeepsCachedDataAndLastSuccess() async throws {
         let cache = try MeasurementCache()
         try cache.reset(for: "me")
