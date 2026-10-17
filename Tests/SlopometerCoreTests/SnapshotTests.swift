@@ -67,6 +67,27 @@ struct SnapshotTests {
         #expect(snapshot.scopeLabel == "Account-wide")
     }
 
+    @Test func widgetSeriesHasAFixedWindowThatAgreesWithTheChart() throws {
+        let cache = try MeasurementCache()
+        var counts: [CalendarDay: Int] = [:]
+        for offset in 0..<400 { counts[day("2026-10-16").adding(days: -offset)] = offset % 5 }
+        try cache.replaceCalendar(counts, source: .graphQL, at: now)
+        for range in DashboardSettings.ranges {
+            let snapshot = try SnapshotBuilder.build(
+                settings: settings(.contributions, average: 7, range: range), cache: cache,
+                tokenUsable: true, problems: [], now: now)
+            #expect(snapshot.recentPoints.count == SnapshotBuilder.recentDays)
+            #expect(snapshot.recentPoints.last?.day == day("2026-10-16"))
+            #expect(snapshot.recentPoints.last?.isIncomplete == true)
+            #expect(snapshot.recentPoints.allSatisfy { $0.average == nil })
+            let recent = Dictionary(
+                uniqueKeysWithValues: snapshot.recentPoints.map { ($0.day, $0.count) })
+            for point in snapshot.points where recent[point.day] != nil {
+                #expect(recent[point.day] == point.count)
+            }
+        }
+    }
+
     @Test func quotaAndEvidenceComeFromTheSameRecords() throws {
         let cache = try MeasurementCache()
         try cache.replacePullRequests(

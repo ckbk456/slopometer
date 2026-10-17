@@ -75,6 +75,9 @@ public struct DashboardSnapshot: Codable, Equatable, Sendable {
     public let sourceLabel: String
     public let scopeLabel: String
     public let points: [Point]
+    /// The last `SnapshotBuilder.recentDays` days of the same series, whatever the selected
+    /// range, so each widget size can show a fixed window. No averages.
+    public let recentPoints: [Point]
     public let todayCount: Int?
     public let quota: Quota?
     public let lastSuccessfulSync: Date?
@@ -86,12 +89,15 @@ public struct DashboardSnapshot: Codable, Equatable, Sendable {
     public static let placeholder = DashboardSnapshot(
         generatedAt: Date(), login: "", tier: .notConfigured, metric: .contributions,
         chartStyle: .grid, rangeDays: 30, averageWindow: 0, sourceLabel: "Not configured",
-        scopeLabel: "", points: [], todayCount: nil, quota: nil, lastSuccessfulSync: nil,
+        scopeLabel: "", points: [], recentPoints: [], todayCount: nil, quota: nil,
+        lastSuccessfulSync: nil,
         notices: ["Open Slopometer and enter a GitHub username."])
 }
 
 public enum SnapshotBuilder {
     public static let staleAfter: TimeInterval = 45 * 60
+    /// 26 weeks: the large widget's grid.
+    public static let recentDays = 26 * 7
 
     /// Lets surfaces that explain the token requirement themselves drop the duplicate.
     public static func tokenNeededNotice(for metric: Metric) -> String {
@@ -110,8 +116,8 @@ public enum SnapshotBuilder {
         let timeZone = settings.timeZone
         let today = CalendarDay.containing(now, in: timeZone)
         let warmUp = settings.averageWindow
-        let allDays = CalendarDay.range(
-            from: today.adding(days: -(settings.rangeDays - 1 + warmUp)), through: today)
+        let span = max(settings.rangeDays + warmUp, recentDays)
+        let allDays = CalendarDay.range(from: today.adding(days: -(span - 1)), through: today)
         var notices = problems
         let records = try cache.pullRequests()
         let prCoverageComplete = tokenUsable && !state.pullRequestResultsIncomplete
@@ -168,6 +174,10 @@ public enum SnapshotBuilder {
                 day: daily.day, count: daily.count, average: average,
                 isIncomplete: daily.day == today)
         }
+        let recentPoints = series.suffix(recentDays).map { daily in
+            DashboardSnapshot.Point(
+                day: daily.day, count: daily.count, average: nil, isIncomplete: daily.day == today)
+        }
 
         var quota: DashboardSnapshot.Quota?
         if let goal = settings.goal, goal.isValid, tokenUsable {
@@ -193,7 +203,8 @@ public enum SnapshotBuilder {
             tier: tokenUsable ? .token : .usernameOnly, metric: settings.metric,
             chartStyle: settings.chartStyle, rangeDays: settings.rangeDays,
             averageWindow: settings.averageWindow, sourceLabel: sourceLabel,
-            scopeLabel: scopeLabel, points: points, todayCount: points.last?.count, quota: quota,
+            scopeLabel: scopeLabel, points: points, recentPoints: recentPoints,
+            todayCount: points.last?.count, quota: quota,
             lastSuccessfulSync: lastSync, notices: notices)
     }
 }
@@ -246,7 +257,7 @@ extension DashboardSnapshot {
             generatedAt: lastSuccessfulSync ?? Date(timeIntervalSince1970: 0), login: login,
             tier: tier, metric: metric, chartStyle: chartStyle, rangeDays: rangeDays,
             averageWindow: averageWindow, sourceLabel: sourceLabel, scopeLabel: scopeLabel,
-            points: points, todayCount: todayCount, quota: quota,
+            points: points, recentPoints: recentPoints, todayCount: todayCount, quota: quota,
             lastSuccessfulSync: lastSuccessfulSync, notices: notices)
     }
 }

@@ -1,4 +1,5 @@
 import SwiftUI
+import WidgetKit
 
 /// The quota as a row of ticks, one per unit of the target, so progress reads like an
 /// instrument rather than a loading bar. Counts past the target extend as an overflow
@@ -38,6 +39,7 @@ struct QuotaMeter: View {
             ForEach(0..<target, id: \.self) { index in
                 Capsule()
                     .fill(index < count ? SlopPalette.mark : SlopPalette.track)
+                    .widgetAccentable(index < count)
                     .frame(width: side)
             }
         }
@@ -47,7 +49,7 @@ struct QuotaMeter: View {
         let fraction = min(1, Double(count) / Double(max(target, 1)))
         return ZStack(alignment: .leading) {
             Capsule().fill(SlopPalette.track)
-            Capsule().fill(SlopPalette.mark).frame(width: width * fraction)
+            Capsule().fill(SlopPalette.mark).widgetAccentable().frame(width: width * fraction)
         }
     }
 }

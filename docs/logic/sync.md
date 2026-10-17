@@ -50,6 +50,14 @@ macOS refuses App Group access to unsigned builds and to a copy signed different
 from the one that owns the container. A failed write is shown in the app window as
 a widget notice (not a cache error); it does not block the dashboard.
 
+The snapshot also carries `recentPoints`: the last 182 days (26 weeks) of the selected
+metric, built from the same daily series as `points` whatever the selected range, so
+widgets can show fixed windows without fetching. Small shows the headline and the
+sync time; medium shows a 7-day tile strip; large shows the 26-week grid, or up to 90
+days of the range for columns and line, without the average. The widget distinguishes
+no readable snapshot ("No data yet"), no username, and a PR metric without a token.
+Activity marks are accent-tinted so levels survive the tinted desktop rendering.
+
 The dashboard replaces the chart with a token explanation when a PR metric is
 selected without a usable token (missing, rejected, or owned by another account)
 and links to the token section in Settings, so `tokenNeededNotice` is not repeated.
