@@ -90,18 +90,53 @@ The snapshot also carries `widgets`: one entry per size, built from
 view. The tab previews each size by rendering the shared `WidgetContent` view on the
 same snapshot the widget reads. Each entry holds its headline choice, metric, view, today's
 count, and a fixed window cut from the same daily series as `points` (history always
-spans at least 182 days), without averages. Small shows the headline and the sync time;
-medium shows a 7-day tile strip; large shows the 26-week grid, or the last 30 or 90 days
-as columns or line. A quota headline falls back to today's count when no quota is
+spans at least `WidgetSettings.minimumHistoryDays`, 90 days), without averages. Small shows
+the headline and the sync time; medium shows a 7-day tile strip; large shows a calendar
+grid of the last 5 weeks, or the last 30 or 90 days as columns or line. A quota headline falls back to today's count when no quota is
 active. The widget distinguishes no readable snapshot ("No data yet"), no username, and
 a size whose PR metric has no usable token. Settings saved before widget settings
 existed decode with every size following the saved dashboard metric and view.
+The large calendar grid has a column per weekday, starting from the locale's first
+weekday (`Calendar.firstWeekday`, passed to `SnapshotBuilder.build`), and a row per week
+with the current week last. Its window is the four earlier full weeks plus the current week
+through today (29–35 days), so the first point starts a week; `WidgetSettings.calendarRows`
+lays the points out and leaves days after today empty rather than zero. A weekday header row
+sits above the rows, which share the remaining height evenly (about 44 × 44 pt tiles at the
+large size). Tiles are the medium strip's `DayTile`: the count on the level fill, an en dash
+for unknown days, today outlined and its weekday bold. A snapshot from an earlier version (26-week window)
+still renders: the grid keeps its last 5 weeks.
 Activity marks are accent-tinted so levels survive the tinted desktop rendering. Medium
 and large footers read `SyncAgeLabel` ("Synced 21:47 (00:02 ago)", naming the day when
 the sync was not today); the timeline holds one entry per minute for an hour so the age
-advances without the app. In the unfocused (non-full-color) desktop rendering, the
-medium strip's busiest tiles (levels 3–4) cut their number out of the tile instead of
-drawing near-white text on a near-white tile, and today's weekday is bold.
+advances without the app. In the unfocused or tinted (non-full-color) desktop rendering,
+`DayTile` fills levels with white at fixed opacities (12, 30, 50, 75, 100 %) instead of the
+green, so levels do not depend on the hue's brightness; from level 2 up the number is cut
+out of the tile (`.destinationOut` in a compositing group) instead of drawing near-white
+text on a bright tile, and today's weekday is bold. Bars, line, and filled quota ticks are
+white there too.
+
+## Palette roles
+
+`SlopTheme` (`Sources/SlopometerCore/SlopTheme.swift`) is the single source of colors, with
+one set per appearance: `activity` (fills, bars, lines, meter ticks, control tint),
+`activityText` (text and icons in the activity color), `trend` (moving average and warning
+accents), and the reference `background` that contrast is measured against. `SlopPalette`
+in `Shared/SlopChart.swift` exposes them as `mark`, `markText`, and `average` (adaptive
+through AppKit, for app views) and as `colors(_:)` resolved from the environment's color
+scheme (shared and widget views). Levels 1–4 draw `activity` at 35, 55, 75, and 100 %
+opacity; each tile's number is white or black, whichever contrasts more with its fill.
+
+| Role | Light (vs #F5F5F5) | Dark (vs #1E1E1E) |
+| --- | --- | --- |
+| activity / activityText | #116329, 6.78:1 | #2EA043, 4.94:1 |
+| trend | #8A5C00, 5.33:1 | #D29922, 6.60:1 |
+
+Light appearance is darker than the earlier rgb(0.18, 0.63, 0.26), which measured 3.07:1 on
+#F5F5F5; dark appearance keeps nearly that green, which already read at 4.98:1 there. Tile
+numbers reach at least 4.9:1 on every level in both appearances; `SlopThemeTests` checks
+the targets (text 4.5:1, fills 3:1). The menu bar panel draws the window background at 82 %
+opacity behind its content, so the wallpaper no longer shows through enough to wash out
+the green.
 
 The dashboard replaces the chart with a token explanation when a PR metric is
 selected without a usable token (missing, still being checked, rejected, or owned by another account)

@@ -76,14 +76,17 @@ struct SnapshotTests {
             var configured = settings(.contributions, average: 7, range: range)
             configured.chartStyle = .line
             let snapshot = try SnapshotBuilder.build(
-                settings: configured, cache: cache, tokenUsable: true, problems: [], now: now)
+                settings: configured, cache: cache, tokenUsable: true, problems: [], now: now,
+                firstWeekday: 2)
             #expect(snapshot.widget(.small)?.points.isEmpty == true)
             #expect(snapshot.widget(.small)?.todayCount == snapshot.todayCount)
             #expect(snapshot.widget(.medium)?.points.count == WidgetSettings.stripDays)
             let large = try #require(snapshot.widget(.large))
             #expect(large.chartStyle == .grid)
-            #expect(large.points.count == WidgetSettings.gridDays)
-            #expect(large.windowLabel == "Last 26 weeks")
+            // Four full Monday-first weeks plus Monday through Friday the 16th.
+            #expect(large.points.count == 4 * 7 + 5)
+            #expect(large.points.first?.day == day("2026-09-14"))
+            #expect(large.windowLabel == "Last 5 weeks")
             #expect(large.points.last?.day == day("2026-10-16"))
             #expect(large.points.last?.isIncomplete == true)
             #expect(large.points.allSatisfy { $0.average == nil })
@@ -92,6 +95,54 @@ struct SnapshotTests {
                 #expect(recent[point.day] == point.count)
             }
         }
+    }
+
+    @Test func largeCalendarStartsOnTheFirstWeekdayFiveWeeksBack() throws {
+        let cache = try MeasurementCache()
+        var counts: [CalendarDay: Int] = [:]
+        for offset in 0..<60 { counts[day("2026-10-16").adding(days: -offset)] = 1 }
+        try cache.replaceCalendar(counts, source: .graphQL, at: now)
+        // The shortest dashboard range without an average still covers every widget window.
+        let configured = settings(.contributions, average: 0, range: 30)
+        for (firstWeekday, start) in [(1, "2026-09-13"), (2, "2026-09-14"), (6, "2026-09-18")] {
+            let snapshot = try SnapshotBuilder.build(
+                settings: configured, cache: cache, tokenUsable: true, problems: [], now: now,
+                firstWeekday: firstWeekday)
+            let large = try #require(snapshot.widget(.large))
+            #expect(large.points.first?.day == day(start))
+            #expect(large.points.first?.day.weekday == firstWeekday)
+            #expect(large.points.last?.day == day("2026-10-16"))
+            #expect(large.points.allSatisfy { $0.count == 1 })
+            let rows = WidgetSettings.calendarRows(
+                large.points, firstWeekday: firstWeekday, day: \.day)
+            #expect(rows.count == WidgetSettings.calendarWeeks)
+            #expect(rows.allSatisfy { $0.count == 7 })
+            #expect(rows.first?.allSatisfy { $0 != nil } == true)
+            // Days after today are empty placeholders, not zero counts.
+            let lastRow = try #require(rows.last)
+            let todayColumn = try #require(lastRow.lastIndex { $0 != nil })
+            #expect(lastRow[todayColumn]?.isIncomplete == true)
+            #expect(lastRow[(todayColumn + 1)...].allSatisfy { $0 == nil })
+        }
+    }
+
+    @Test func calendarRowsAlignAnyDaysToWeekdayColumns() {
+        // Monday-first: Friday 2026-10-16 is column 4, so the week ends with two blanks.
+        let days = CalendarDay.range(from: day("2026-10-01"), through: day("2026-10-16"))
+        let rows = WidgetSettings.calendarRows(days, firstWeekday: 2, day: { $0 })
+        #expect(rows.count == 3)
+        #expect(rows[0].prefix(3).allSatisfy { $0 == nil })
+        #expect(rows[0][3] == day("2026-10-01"))
+        #expect(rows[2][4] == day("2026-10-16"))
+        #expect(rows[2][5] == nil && rows[2][6] == nil)
+        // Longer input keeps only the last weeks, ending with today's.
+        let long = CalendarDay.range(from: day("2026-04-01"), through: day("2026-10-16"))
+        let kept = WidgetSettings.calendarRows(long, firstWeekday: 1, day: { $0 })
+        #expect(kept.count == WidgetSettings.calendarWeeks)
+        #expect(kept[0][0] == day("2026-09-13"))
+        #expect(WidgetSettings.calendarRows([CalendarDay](), firstWeekday: 1, day: { $0 }).isEmpty)
+        #expect(WidgetSettings.calendarDays(through: day("2026-10-11"), firstWeekday: 1) == 29)
+        #expect(WidgetSettings.calendarDays(through: day("2026-10-17"), firstWeekday: 1) == 35)
     }
 
     @Test func widgetSizesFollowTheirOwnSettingsNotTheDashboard() throws {

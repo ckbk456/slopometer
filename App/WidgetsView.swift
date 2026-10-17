@@ -22,7 +22,7 @@ struct WidgetsView: View {
                 summary: "Headline and the last 7 days as tiles.")
             sizeSection(
                 .large, settings: $model.settings,
-                summary: "Headline and a chart.")
+                summary: "Headline and a calendar grid, columns, or line.")
         }
         .formStyle(.grouped)
     }
@@ -68,7 +68,9 @@ struct WidgetsView: View {
                 }
                 .pickerStyle(.segmented)
                 if panel.wrappedValue.chartStyle == .grid {
-                    LabeledContent("Window", value: "Last \(WidgetSettings.gridDays / 7) weeks")
+                    LabeledContent(
+                        "Window",
+                        value: "Last \(WidgetSettings.calendarWeeks) weeks")
                 } else {
                     Picker("Window", selection: panel.windowDays) {
                         ForEach(WidgetSettings.windows, id: \.self) {

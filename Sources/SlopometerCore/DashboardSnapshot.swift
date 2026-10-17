@@ -105,7 +105,7 @@ public struct DashboardSnapshot: Codable, Equatable, Sendable {
             case .medium: "Last \(WidgetSettings.stripDays) days"
             case .large:
                 chartStyle == .grid
-                    ? "Last \(WidgetSettings.gridDays / 7) weeks" : "Last \(points.count) days"
+                    ? "Last \(WidgetSettings.calendarWeeks) weeks" : "Last \(points.count) days"
             }
         }
     }
@@ -162,9 +162,11 @@ public enum SnapshotBuilder {
     /// - Parameters:
     ///   - tokenUsable: a token verified for `settings.login` exists.
     ///   - problems: user-facing sync problems to surface alongside cached data.
+    ///   - firstWeekday: the week start for the large widget's calendar (1 is Sunday).
     public static func build(
         settings: DashboardSettings, cache: MeasurementCache, tokenUsable: Bool,
-        problems: [String], now: Date = Date()
+        problems: [String], now: Date = Date(),
+        firstWeekday: Int = Calendar.current.firstWeekday
     ) throws -> DashboardSnapshot {
         guard !settings.login.isEmpty else { return .placeholder }
         // A cache still holding another account's data (it is only reset by the next sync)
@@ -174,7 +176,7 @@ public enum SnapshotBuilder {
         let timeZone = settings.timeZone
         let today = CalendarDay.containing(now, in: timeZone)
         let warmUp = settings.averageWindow
-        let span = max(settings.rangeDays + warmUp, WidgetSettings.gridDays)
+        let span = max(settings.rangeDays + warmUp, WidgetSettings.minimumHistoryDays)
         let allDays = CalendarDay.range(from: today.adding(days: -(span - 1)), through: today)
         var notices = problems
         if !holdsAccount { notices.insert(notSyncedNotice(for: settings.login), at: 0) }
@@ -250,7 +252,9 @@ public enum SnapshotBuilder {
             return DashboardSnapshot.Widget(
                 size: size, headline: panel.headline, metric: panel.metric,
                 chartStyle: panel.chartStyle,
-                points: daily.suffix(panel.days(for: size)).map {
+                points: daily.suffix(
+                    panel.days(for: size, through: today, firstWeekday: firstWeekday)
+                ).map {
                     DashboardSnapshot.Point(
                         day: $0.day, count: $0.count, average: nil, isIncomplete: $0.day == today)
                 },

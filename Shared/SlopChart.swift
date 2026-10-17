@@ -1,3 +1,4 @@
+import AppKit
 import Charts
 import SlopometerCore
 import SwiftUI
@@ -27,11 +28,20 @@ struct SlopChart: View {
     }
 }
 
-/// One fixed palette for every surface: green is measured activity, amber is the trend.
-/// Controls are tinted with `mark` so they do not compete with the chart.
+/// The app's colors, read from `SlopTheme` (the single source; custom colors replace the
+/// theme later). Green is measured activity, amber the trend and warnings.
+///
+/// Views in this folder also render in widgets, so they resolve colors for the
+/// environment's color scheme with `colors(_:)`. The adaptive constants (`mark`,
+/// `markText`, `average`) follow the appearance through AppKit for app-only views.
 enum SlopPalette {
-    static let mark = Color(red: 0.18, green: 0.63, blue: 0.26)
-    static let average = Color(red: 0.86, green: 0.6, blue: 0.13)
+    static let theme = SlopTheme.standard
+
+    /// Fills, bars, meter ticks, and control tint.
+    static let mark = adaptive(\.activity)
+    /// Text and icons drawn in the activity color.
+    static let markText = adaptive(\.activityText)
+    static let average = adaptive(\.trend)
     static let unknown = Color.secondary.opacity(0.25)
     static let track = Color.secondary.opacity(0.18)
 
@@ -41,8 +51,56 @@ enum SlopPalette {
         return Swift.min(4, Swift.max(1, Int((Double(count) / Double(max) * 4).rounded(.up))))
     }
 
-    static func fill(level: Int) -> Color {
-        level == 0 ? Color.secondary.opacity(0.12) : mark.opacity(0.25 + 0.1875 * Double(level))
+    static func colors(_ scheme: ColorScheme) -> SlopColors {
+        SlopColors(appearance: theme.appearance(isDark: scheme == .dark))
+    }
+
+    /// Level fills for widgets the desktop draws in one color (unfocused or tinted): white
+    /// at a fixed opacity per level, so levels never depend on the hue's brightness.
+    static func monochromeFill(level: Int) -> Color {
+        Color.white.opacity([0.12, 0.3, 0.5, 0.75, 1][Swift.min(Swift.max(level, 0), 4)])
+    }
+
+    private static func adaptive(_ role: KeyPath<SlopTheme.Appearance, ThemeColor>) -> Color {
+        let light = theme.light[keyPath: role]
+        let dark = theme.dark[keyPath: role]
+        return Color(
+            nsColor: NSColor(name: nil) { appearance in
+                NSColor(appearance.bestMatch(from: [.aqua, .darkAqua]) == .darkAqua ? dark : light)
+            })
+    }
+}
+
+/// One appearance's colors, resolved without AppKit so widgets render them as drawn.
+struct SlopColors {
+    let appearance: SlopTheme.Appearance
+
+    var mark: Color { Color(appearance.activity) }
+    var markText: Color { Color(appearance.activityText) }
+    var average: Color { Color(appearance.trend) }
+
+    func fill(level: Int) -> Color {
+        level == 0
+            ? Color.secondary.opacity(0.12)
+            : mark.opacity(SlopTheme.opacity(level: level))
+    }
+
+    /// White or black, whichever reads better on the level's fill; primary on level 0.
+    func number(level: Int) -> Color {
+        guard level > 0 else { return .primary }
+        return appearance.numberIsLight(level: level) ? .white : .black
+    }
+}
+
+extension Color {
+    init(_ color: ThemeColor) {
+        self.init(.sRGB, red: color.red, green: color.green, blue: color.blue)
+    }
+}
+
+extension NSColor {
+    convenience init(_ color: ThemeColor) {
+        self.init(srgbRed: color.red, green: color.green, blue: color.blue, alpha: 1)
     }
 }
 
@@ -52,6 +110,7 @@ private struct HeatmapGrid: View {
     let selection: Binding<CalendarDay?>?
 
     let maxHeight: CGFloat?
+    @Environment(\.colorScheme) private var colorScheme
 
     var body: some View {
         let weeks = Self.weeks(points)
@@ -76,8 +135,11 @@ private struct HeatmapGrid: View {
         Group {
             if let count = point.count {
                 // In tinted desktop widgets the levels survive as opacity of the accent.
-                shape.fill(SlopPalette.fill(level: SlopPalette.level(count, max: busiest)))
-                    .widgetAccentable()
+                shape.fill(
+                    SlopPalette.colors(colorScheme).fill(
+                        level: SlopPalette.level(count, max: busiest))
+                )
+                .widgetAccentable()
             } else {
                 shape.strokeBorder(SlopPalette.unknown, style: StrokeStyle(lineWidth: 1, dash: [2]))
             }
@@ -168,6 +230,14 @@ private struct TrendChart: View {
     let showsAverage: Bool
     let compact: Bool
     let selection: Binding<CalendarDay?>?
+    @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.widgetRenderingMode) private var renderingMode
+
+    /// Unfocused or tinted desktop widgets draw in one color; full white keeps the marks
+    /// at full strength there instead of the green's luminance.
+    private var markColor: Color {
+        renderingMode == .fullColor ? SlopPalette.colors(colorScheme).mark : .white
+    }
 
     var body: some View {
         Chart {
@@ -176,7 +246,7 @@ private struct TrendChart: View {
                 if let count = point.count {
                     if style == .columns {
                         BarMark(x: .value("Day", date, unit: .day), y: .value(unit, count))
-                            .foregroundStyle(SlopPalette.mark.opacity(point.isIncomplete ? 0.4 : 1))
+                            .foregroundStyle(markColor.opacity(point.isIncomplete ? 0.4 : 1))
                     } else {
                         LineMark(x: .value("Day", date, unit: .day), y: .value(unit, count))
                             .foregroundStyle(by: .value("Series", "Daily"))
@@ -194,7 +264,9 @@ private struct TrendChart: View {
                 }
             }
         }
-        .chartForegroundStyleScale(["Daily": SlopPalette.mark, "Average": SlopPalette.average])
+        .chartForegroundStyleScale([
+            "Daily": markColor, "Average": SlopPalette.colors(colorScheme).average,
+        ])
         .chartLegend(compact ? .hidden : .automatic)
         .chartYAxisLabel(compact ? "" : unit)
         .chartYAxis {
