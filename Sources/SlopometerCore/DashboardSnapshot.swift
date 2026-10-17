@@ -93,6 +93,11 @@ public struct DashboardSnapshot: Codable, Equatable, Sendable {
 public enum SnapshotBuilder {
     public static let staleAfter: TimeInterval = 45 * 60
 
+    /// Lets surfaces that explain the token requirement themselves drop the duplicate.
+    public static func tokenNeededNotice(for metric: Metric) -> String {
+        "\(metric.title) needs a GitHub token. Add one in Settings."
+    }
+
     /// - Parameters:
     ///   - tokenUsable: a token exists and the last sync verified its owner.
     ///   - problems: user-facing sync problems to surface alongside cached data.
@@ -142,7 +147,7 @@ public enum SnapshotBuilder {
             sourceLabel = "Needs a GitHub token"
             scopeLabel = ""
             lastSync = nil
-            notices.append("\(settings.metric.title) needs a GitHub token. Add one in Settings.")
+            notices.append(tokenNeededNotice(for: settings.metric))
         }
 
         if let lastSync, now.timeIntervalSince(lastSync) > staleAfter {

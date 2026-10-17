@@ -28,6 +28,8 @@ final class AppModel {
     private(set) var lastReport: SyncReport?
     private(set) var lastAttempt: Date?
     private(set) var startupError: String?
+    /// Set when the snapshot could not be shared, so the widget is showing stale or no data.
+    private(set) var widgetProblem: String?
 
     var openWindowAction: OpenWindowAction?
 
@@ -147,11 +149,24 @@ final class AppModel {
             records = try cache.pullRequests()
             snapshot = try SnapshotBuilder.build(
                 settings: settings, cache: cache, tokenUsable: tokenUsable, problems: problems)
+        } catch {
+            startupError = "Could not read the local cache: \(error.localizedDescription)"
+            return
+        }
+        shareWithWidget()
+    }
+
+    /// The widget only sees what lands in the App Group container. Unsigned builds, or a
+    /// second copy of the app signed differently, are refused access by macOS.
+    private func shareWithWidget() {
+        do {
             if try SharedSnapshot.write(snapshot) {
                 WidgetCenter.shared.reloadAllTimelines()
             }
+            widgetProblem = nil
         } catch {
-            startupError = "Could not read the local cache: \(error.localizedDescription)"
+            widgetProblem =
+                "The widget can't be updated because macOS blocked access to Slopometer's shared folder. Quit every other copy of Slopometer and launch a signed build (make run)."
         }
     }
 

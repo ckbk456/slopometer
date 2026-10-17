@@ -3,6 +3,8 @@ import SwiftUI
 
 struct SettingsView: View {
     @Environment(AppModel.self) private var model
+    @Binding var focus: SettingsAnchor?
+    @FocusState private var focusedField: SettingsAnchor?
     @State private var login = ""
     @State private var token = ""
     @State private var tokenMessage: String?
@@ -10,10 +12,23 @@ struct SettingsView: View {
 
     var body: some View {
         @Bindable var model = model
+        ScrollViewReader { proxy in
+            form(bindable: $model)
+                .onAppear { reveal(focus, with: proxy) }
+                .onChange(of: focus) { _, anchor in reveal(anchor, with: proxy) }
+        }
+        .onAppear {
+            login = model.settings.login
+            repositories = model.settings.repositories.joined(separator: ", ")
+        }
+    }
+
+    private func form(bindable: Bindable<AppModel>) -> some View {
         Form {
             Section("GitHub account") {
                 HStack {
-                    TextField("Username", text: $login, prompt: Text("octocat"))
+                    TextField("Username", text: $login, prompt: Text("Enter username"))
+                        .focused($focusedField, equals: .account)
                         .onSubmit(applyLogin)
                     Button("Save", action: applyLogin)
                         .disabled(
@@ -24,16 +39,32 @@ struct SettingsView: View {
                 )
                 .font(.caption).foregroundStyle(.secondary)
             }
+            .id(SettingsAnchor.account)
 
-            Section("GitHub token (optional)") {
+            Section {
                 Text(
-                    "A token unlocks PRs opened, authored PRs merged, the daily PR quota, the exact PRs behind each count, and repository filters. Create a fine-grained token with read-only Pull requests and Metadata access for the repositories you want counted. It is stored in Keychain and only sent to GitHub."
+                    "A token unlocks PRs opened, authored PRs merged, the daily PR quota, the exact PRs behind each count, and repository filters. It is stored in Keychain and only sent to GitHub."
                 )
                 .font(.caption).foregroundStyle(.secondary)
-                Link(
-                    "Create a fine-grained token on GitHub",
-                    destination: URL(
-                        string: "https://github.com/settings/personal-access-tokens/new")!)
+                if !model.hasToken {
+                    VStack(alignment: .leading, spacing: 6) {
+                        Link(
+                            "Create a fine-grained token on GitHub",
+                            destination: TokenGuide.creationURL)
+                        Text(
+                            """
+                            Resource owner: your account
+                            Repository access: All repositories
+                            Permissions: Pull requests, read-only (Metadata is added automatically)
+                            """
+                        )
+                        .font(.caption).foregroundStyle(.secondary)
+                        Text(
+                            "PRs in private repositories owned by an organization are counted only if the token's resource owner is that organization."
+                        )
+                        .font(.caption).foregroundStyle(.secondary)
+                    }
+                }
                 if model.hasToken {
                     HStack {
                         Label(
@@ -45,41 +76,63 @@ struct SettingsView: View {
                     }
                 } else {
                     HStack {
-                        SecureField("Token", text: $token)
-                        Button("Save") {
-                            tokenMessage =
-                                model.saveToken(token)
-                                ? nil : "Could not save the token to Keychain."
-                            token = ""
-                        }
-                        .disabled(token.trimmingCharacters(in: .whitespaces).isEmpty)
+                        SecureField("Token", text: $token, prompt: Text("Paste token"))
+                            .focused($focusedField, equals: .token)
+                            .onSubmit(saveToken)
+                        Button("Save", action: saveToken)
+                            .disabled(token.trimmingCharacters(in: .whitespaces).isEmpty)
                     }
                 }
                 if let tokenMessage { Text(tokenMessage).foregroundStyle(.red) }
+            } header: {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("GitHub token")
+                    Text("Optional for contributions. Required for PR stats and the daily quota.")
+                        .font(.caption).fontWeight(.regular).foregroundStyle(.secondary)
+                }
             }
+            .id(SettingsAnchor.token)
 
-            Section("Pull requests (token)") {
+            Section("Pull requests (requires a token)") {
                 TextField(
                     "Repository filter", text: $repositories,
                     prompt: Text("All readable repositories, or owner/name, owner/other")
                 )
                 .onSubmit(applyRepositories)
                 .disabled(!model.hasToken)
-                Toggle("Daily PR quota", isOn: goalEnabled($model.settings))
+                Toggle("Daily PR quota", isOn: goalEnabled(bindable.settings))
                     .disabled(!model.hasToken)
+                if !model.hasToken {
+                    Text("Add a token above to filter repositories and set a daily PR quota.")
+                        .font(.caption).foregroundStyle(.secondary)
+                }
                 if let goal = model.settings.goal {
-                    Picker("Counts", selection: goalBinding($model.settings, \.metric, goal)) {
+                    Picker("Counts", selection: goalBinding(bindable.settings, \.metric, goal)) {
                         Text(Metric.prsMerged.unit).tag(Metric.prsMerged)
                         Text(Metric.prsOpened.unit).tag(Metric.prsOpened)
                     }
-                    Stepper(
-                        "Target: \(goal.target) per day",
-                        value: goalBinding($model.settings, \.target, goal), in: 1...100)
+                    LabeledContent("Daily target") {
+                        HStack(spacing: 6) {
+                            TextField(
+                                "Daily target", value: targetBinding(bindable.settings, goal),
+                                format: .number.grouping(.never)
+                            )
+                            .labelsHidden()
+                            .multilineTextAlignment(.trailing)
+                            .frame(width: 56)
+                            Stepper(
+                                "Daily target", value: targetBinding(bindable.settings, goal),
+                                in: Goal.targetRange
+                            )
+                            .labelsHidden()
+                            Text(goal.metric.unit).foregroundStyle(.secondary)
+                        }
+                    }
                 }
             }
 
             Section("Days") {
-                Picker("Timezone", selection: $model.settings.timeZoneID) {
+                Picker("Timezone", selection: bindable.settings.timeZoneID) {
                     ForEach(TimeZone.knownTimeZoneIdentifiers, id: \.self) { Text($0).tag($0) }
                 }
                 Text(
@@ -87,12 +140,31 @@ struct SettingsView: View {
                 )
                 .font(.caption).foregroundStyle(.secondary)
             }
+
+            Section("About") {
+                LabeledContent("Version", value: BuildInfo.version)
+                LabeledContent("Build", value: BuildInfo.build)
+                LabeledContent("Commit", value: BuildInfo.commit)
+                    .textSelection(.enabled)
+            }
         }
         .formStyle(.grouped)
-        .onAppear {
-            login = model.settings.login
-            repositories = model.settings.repositories.joined(separator: ", ")
+    }
+
+    /// Scrolls to and focuses a section the dashboard asked for, then clears the request.
+    private func reveal(_ anchor: SettingsAnchor?, with proxy: ScrollViewProxy) {
+        guard let anchor else { return }
+        DispatchQueue.main.async {
+            withAnimation { proxy.scrollTo(anchor, anchor: .top) }
+            if anchor == .account || !model.hasToken { focusedField = anchor }
+            focus = nil
         }
+    }
+
+    private func saveToken() {
+        guard !token.trimmingCharacters(in: .whitespaces).isEmpty else { return }
+        tokenMessage = model.saveToken(token) ? nil : "Could not save the token to Keychain."
+        token = ""
     }
 
     private var tokenStatus: String {
@@ -122,6 +194,18 @@ struct SettingsView: View {
         Binding(
             get: { settings.wrappedValue.goal != nil },
             set: { settings.wrappedValue.goal = $0 ? Goal() : nil })
+    }
+
+    /// Typed targets outside the allowed range snap to its nearest end.
+    private func targetBinding(_ settings: Binding<DashboardSettings>, _ goal: Goal) -> Binding<Int>
+    {
+        let raw = goalBinding(settings, \.target, goal)
+        return Binding(
+            get: { raw.wrappedValue },
+            set: {
+                raw.wrappedValue = min(
+                    max($0, Goal.targetRange.lowerBound), Goal.targetRange.upperBound)
+            })
     }
 
     private func goalBinding<Value>(

@@ -9,12 +9,15 @@
 /* Begin PBXBuildFile section */
 		27355E91D3F0D148402F3A7C /* SlopometerCore in Frameworks */ = {isa = PBXBuildFile; productRef = 14F18CD2E45DA1E0B4AFBD02 /* SlopometerCore */; };
 		446D228ACFA5B9E9D255D051 /* MainView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E01B7F1D13FF129C1B3877CE /* MainView.swift */; };
+		59F7189D91F09A7B448DDF29 /* QuotaMeter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FA4514AA2C3D0088573E5A6 /* QuotaMeter.swift */; };
 		5E1A783D176203CD4C6A9450 /* TokenStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CE86D6528E0B4B124751C3E /* TokenStore.swift */; };
 		6B047609193F8335AD141E3C /* SlopChart.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4BD827FF20CC2FB09AC22E9 /* SlopChart.swift */; };
 		6CDEFD6165BBE05510CF9AE1 /* SlopometerApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 78D9D6EB3FDC6DB8A4AA442B /* SlopometerApp.swift */; };
 		6F309BE3F7C3BB11C16DDAD8 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66E709D3A0DD9070BE504A7A /* SettingsView.swift */; };
 		70C22BC55BFF67B9D144560C /* AppModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4293BFD7B2150A12590C6C3E /* AppModel.swift */; };
+		888E53BC5853E784F4857160 /* QuotaMeter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FA4514AA2C3D0088573E5A6 /* QuotaMeter.swift */; };
 		9C3F41BB24455980D51207E8 /* SlopometerWidget.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 9B1059BB2AB5A145DE46984F /* SlopometerWidget.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		A138EFD2A03DB78FBB9EA276 /* BuildInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 325C0AB1F343F8C48BED92F2 /* BuildInfo.swift */; };
 		A5A435FDED70B5F176AD5A20 /* SlopometerWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2A1C16357B72A82B74B9BD5 /* SlopometerWidget.swift */; };
 		AE6910F4607758AF7D66F8BE /* SlopChart.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4BD827FF20CC2FB09AC22E9 /* SlopChart.swift */; };
 		EFC776F9AC77B1CFAC0B7E79 /* SlopometerCore in Frameworks */ = {isa = PBXBuildFile; productRef = 959F817C77169F96EBED29B8 /* SlopometerCore */; };
@@ -46,7 +49,9 @@
 
 /* Begin PBXFileReference section */
 		181AD593328CA6011FFD3AC5 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
+		1FA4514AA2C3D0088573E5A6 /* QuotaMeter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuotaMeter.swift; sourceTree = "<group>"; };
 		2CE86D6528E0B4B124751C3E /* TokenStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TokenStore.swift; sourceTree = "<group>"; };
+		325C0AB1F343F8C48BED92F2 /* BuildInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BuildInfo.swift; sourceTree = "<group>"; };
 		4293BFD7B2150A12590C6C3E /* AppModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppModel.swift; sourceTree = "<group>"; };
 		4CE6ACBCDE098C02149B86A4 /* SCOPE.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = SCOPE.md; sourceTree = "<group>"; };
 		66E709D3A0DD9070BE504A7A /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
@@ -85,6 +90,7 @@
 			isa = PBXGroup;
 			children = (
 				4293BFD7B2150A12590C6C3E /* AppModel.swift */,
+				325C0AB1F343F8C48BED92F2 /* BuildInfo.swift */,
 				E01B7F1D13FF129C1B3877CE /* MainView.swift */,
 				66E709D3A0DD9070BE504A7A /* SettingsView.swift */,
 				78D9D6EB3FDC6DB8A4AA442B /* SlopometerApp.swift */,
@@ -113,6 +119,7 @@
 		B5C9B3E86851ECBEC8938F51 /* Shared */ = {
 			isa = PBXGroup;
 			children = (
+				1FA4514AA2C3D0088573E5A6 /* QuotaMeter.swift */,
 				B4BD827FF20CC2FB09AC22E9 /* SlopChart.swift */,
 			);
 			path = Shared;
@@ -232,7 +239,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				70C22BC55BFF67B9D144560C /* AppModel.swift in Sources */,
+				A138EFD2A03DB78FBB9EA276 /* BuildInfo.swift in Sources */,
 				446D228ACFA5B9E9D255D051 /* MainView.swift in Sources */,
+				888E53BC5853E784F4857160 /* QuotaMeter.swift in Sources */,
 				6F309BE3F7C3BB11C16DDAD8 /* SettingsView.swift in Sources */,
 				AE6910F4607758AF7D66F8BE /* SlopChart.swift in Sources */,
 				6CDEFD6165BBE05510CF9AE1 /* SlopometerApp.swift in Sources */,
@@ -244,6 +253,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				59F7189D91F09A7B448DDF29 /* QuotaMeter.swift in Sources */,
 				6B047609193F8335AD141E3C /* SlopChart.swift in Sources */,
 				A5A435FDED70B5F176AD5A20 /* SlopometerWidget.swift in Sources */,
 			);
@@ -295,6 +305,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEVELOPMENT_TEAM = 5U4584QFCQ;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -315,11 +326,13 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MARKETING_VERSION = 0.2.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
+				SLOPOMETER_COMMIT = unknown;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 6.0;
@@ -361,6 +374,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = 5U4584QFCQ;
 				ENABLE_NS_ASSERTIONS = NO;
@@ -375,10 +389,12 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MARKETING_VERSION = 0.2.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
+				SLOPOMETER_COMMIT = unknown;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				SWIFT_VERSION = 6.0;
@@ -391,14 +407,12 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = App/Slopometer.entitlements;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_APP_SANDBOX = YES;
 				INFOPLIST_FILE = App/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 0.1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = dev.slopometer.app;
 				PRODUCT_NAME = Slopometer;
 				SDKROOT = macosx;
@@ -410,7 +424,6 @@
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = Widget/SlopometerWidget.entitlements;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_APP_SANDBOX = YES;
 				INFOPLIST_FILE = Widget/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -418,7 +431,6 @@
 					"@executable_path/../Frameworks",
 					"@executable_path/../../../../Frameworks",
 				);
-				MARKETING_VERSION = 0.1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = dev.slopometer.app.widget;
 				PRODUCT_NAME = SlopometerWidget;
 				SDKROOT = macosx;
@@ -431,7 +443,6 @@
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = Widget/SlopometerWidget.entitlements;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_APP_SANDBOX = YES;
 				INFOPLIST_FILE = Widget/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -439,7 +450,6 @@
 					"@executable_path/../Frameworks",
 					"@executable_path/../../../../Frameworks",
 				);
-				MARKETING_VERSION = 0.1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = dev.slopometer.app.widget;
 				PRODUCT_NAME = SlopometerWidget;
 				SDKROOT = macosx;
@@ -453,14 +463,12 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = App/Slopometer.entitlements;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_APP_SANDBOX = YES;
 				INFOPLIST_FILE = App/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 0.1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = dev.slopometer.app;
 				PRODUCT_NAME = Slopometer;
 				SDKROOT = macosx;

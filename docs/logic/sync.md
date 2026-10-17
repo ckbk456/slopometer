@@ -46,6 +46,14 @@ The app writes the snapshot as JSON to the App Group container
 The widget decodes it and never fetches or reads Keychain. The token lives only in
 Keychain (service `dev.slopometer.github-token`).
 
+macOS refuses App Group access to unsigned builds and to a copy signed differently
+from the one that owns the container. A failed write is shown in the app window as
+a widget notice (not a cache error); it does not block the dashboard.
+
+The dashboard replaces the chart with a token explanation when a PR metric is
+selected without a usable token (missing, rejected, or owned by another account)
+and links to the token section in Settings, so `tokenNeededNotice` is not repeated.
+
 ## Known limits
 
 - In timezones ahead of the profile page's day labels, username-only "today" can be

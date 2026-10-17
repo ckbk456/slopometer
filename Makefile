@@ -4,6 +4,10 @@ SHELL := /bin/bash
 
 PROJECT := Slopometer.xcodeproj
 XCODE_ARGS := -project $(PROJECT) -scheme Slopometer -configuration Debug -destination 'platform=macOS' -derivedDataPath .build/xcode -clonedSourcePackagesDirPath .build/SourcePackages
+# Build number = commits on HEAD; commit = short SHA, marked when the tree has edits.
+BUILD_NUMBER := $(shell git rev-list --count HEAD 2>/dev/null || echo 1)
+BUILD_COMMIT := $(shell git rev-parse --short HEAD 2>/dev/null || echo unknown)$(shell git diff --quiet HEAD 2>/dev/null || echo -modified)
+VERSION_ARGS := CURRENT_PROJECT_VERSION=$(BUILD_NUMBER) SLOPOMETER_COMMIT=$(BUILD_COMMIT)
 LOCKED_PACKAGES := -disableAutomaticPackageResolution -onlyUsePackageVersionsFromResolvedFile
 SWIFT_FORMAT := swift run --package-path Tools --scratch-path .build/tools-build --disable-automatic-resolution -c release swift-format
 FORMATTED := Package.swift Tools/Package.swift App Shared Widget Sources Tests
@@ -45,7 +49,7 @@ test:
 	swift test --disable-automatic-resolution --jobs 4
 
 build:
-	xcodebuild $(XCODE_ARGS) $(LOCKED_PACKAGES) -jobs 4 CODE_SIGNING_ALLOWED=NO build
+	xcodebuild $(XCODE_ARGS) $(LOCKED_PACKAGES) $(VERSION_ARGS) -jobs 4 CODE_SIGNING_ALLOWED=NO build
 
 validate:
 	@$(MAKE) lint
@@ -57,7 +61,8 @@ open:
 	open $(PROJECT)
 
 build-signed:
-	xcodebuild $(XCODE_ARGS) $(LOCKED_PACKAGES) -jobs 4 -allowProvisioningUpdates build
+	xcodebuild $(XCODE_ARGS) $(LOCKED_PACKAGES) $(VERSION_ARGS) -jobs 4 -allowProvisioningUpdates build
 
 run: build-signed
+	@bash scripts/register_build.sh
 	open .build/xcode/Build/Products/Debug/Slopometer.app

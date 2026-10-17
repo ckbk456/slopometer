@@ -10,11 +10,14 @@ struct SlopChart: View {
     var showsAverage = true
     var compact = false
     var selection: Binding<CalendarDay?>? = nil
+    /// Caps the grid's height; nil lets it use all the height it is offered.
+    var gridMaxHeight: CGFloat? = nil
 
     var body: some View {
         switch style {
         case .grid:
-            HeatmapGrid(points: points, unit: unit, selection: selection)
+            HeatmapGrid(
+                points: points, unit: unit, selection: selection, maxHeight: gridMaxHeight)
         case .columns, .line:
             TrendChart(
                 points: points, style: style, unit: unit, showsAverage: showsAverage,
@@ -23,10 +26,13 @@ struct SlopChart: View {
     }
 }
 
+/// One fixed palette for every surface: green is measured activity, amber is the trend.
+/// Controls are tinted with `mark` so they do not compete with the chart.
 enum SlopPalette {
-    static let mark = Color.green
-    static let average = Color.orange
+    static let mark = Color(red: 0.18, green: 0.63, blue: 0.26)
+    static let average = Color(red: 0.86, green: 0.6, blue: 0.13)
     static let unknown = Color.secondary.opacity(0.25)
+    static let track = Color.secondary.opacity(0.18)
 
     /// GitHub-style levels 0–4, scaled to the busiest visible day.
     static func level(_ count: Int, max: Int) -> Int {
@@ -44,27 +50,18 @@ private struct HeatmapGrid: View {
     let unit: String
     let selection: Binding<CalendarDay?>?
 
+    let maxHeight: CGFloat?
+
     var body: some View {
         let weeks = Self.weeks(points)
         let busiest = points.compactMap(\.count).max() ?? 0
-        GeometryReader { geometry in
-            let gap: CGFloat = 2
-            let side = max(
-                3,
-                min(
-                    (geometry.size.width - gap * CGFloat(weeks.count - 1))
-                        / CGFloat(max(weeks.count, 1)),
-                    (geometry.size.height - gap * 6) / 7))
-            HStack(alignment: .top, spacing: gap) {
-                ForEach(weeks.indices, id: \.self) { column in
-                    VStack(spacing: gap) {
-                        ForEach(0..<7, id: \.self) { row in
-                            if let point = weeks[column][row] {
-                                cell(point, busiest: busiest, side: side)
-                            } else {
-                                Color.clear.frame(width: side, height: side)
-                            }
-                        }
+        WeekGridLayout(columns: weeks.count, gap: 2, maxHeight: maxHeight) {
+            ForEach(weeks.indices, id: \.self) { column in
+                ForEach(0..<7, id: \.self) { row in
+                    if let point = weeks[column][row] {
+                        cell(point, busiest: busiest)
+                    } else {
+                        Color.clear
                     }
                 }
             }
@@ -72,8 +69,8 @@ private struct HeatmapGrid: View {
     }
 
     @ViewBuilder
-    private func cell(_ point: DashboardSnapshot.Point, busiest: Int, side: CGFloat) -> some View {
-        let shape = RoundedRectangle(cornerRadius: max(1, side / 5))
+    private func cell(_ point: DashboardSnapshot.Point, busiest: Int) -> some View {
+        let shape = RoundedRectangle(cornerRadius: 2)
         let label = HeatmapLabel.describe(point, unit: unit)
         Group {
             if let count = point.count {
@@ -87,7 +84,6 @@ private struct HeatmapGrid: View {
                 shape.strokeBorder(Color.primary.opacity(0.6), lineWidth: 1)
             }
         }
-        .frame(width: side, height: side)
         .help(label)
         .accessibilityElement()
         .accessibilityLabel(label)
@@ -104,6 +100,52 @@ private struct HeatmapGrid: View {
         var cells: [DashboardSnapshot.Point?] = Array(repeating: nil, count: weekday) + points
         cells += Array(repeating: nil, count: (7 - cells.count % 7) % 7)
         return stride(from: 0, to: cells.count, by: 7).map { Array(cells[$0..<$0 + 7]) }
+    }
+}
+
+/// Lays cells out column by column, seven per week, with square cells sized from the
+/// width actually offered. It never reports more width than proposed, so a long range
+/// cannot widen its container, and its height follows the cells so short ranges leave
+/// no empty space below.
+private struct WeekGridLayout: Layout {
+    let columns: Int
+    let gap: CGFloat
+    let maxHeight: CGFloat?
+
+    /// Used only when no width is proposed. Small enough that a full year (54 weeks) stays
+    /// narrower than the app window's minimum content width.
+    private static let idealSide: CGFloat = 8
+
+    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
+        let side = side(width: proposal.width, height: proposal.height)
+        return CGSize(width: span(side, count: columns), height: span(side, count: 7))
+    }
+
+    func placeSubviews(
+        in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()
+    ) {
+        let side = side(width: bounds.width, height: bounds.height)
+        let cell = ProposedViewSize(width: side, height: side)
+        for (index, subview) in subviews.enumerated() {
+            let column = CGFloat(index / 7)
+            let row = CGFloat(index % 7)
+            subview.place(
+                at: CGPoint(
+                    x: bounds.minX + column * (side + gap), y: bounds.minY + row * (side + gap)),
+                proposal: cell)
+        }
+    }
+
+    private func side(width: CGFloat?, height: CGFloat?) -> CGFloat {
+        let count = CGFloat(max(columns, 1))
+        let heightLimit = min(height ?? .infinity, maxHeight ?? .infinity)
+        let byWidth = width.map { ($0 - gap * (count - 1)) / count } ?? Self.idealSide
+        let byHeight = heightLimit.isFinite ? (heightLimit - gap * 6) / 7 : .infinity
+        return max(1, min(byWidth, byHeight))
+    }
+
+    private func span(_ side: CGFloat, count: Int) -> CGFloat {
+        CGFloat(count) * side + CGFloat(max(count - 1, 0)) * gap
     }
 }
 
