@@ -10,6 +10,7 @@ struct WidgetContent: View {
     let size: WidgetSize
     /// The moment the widget shows, so the sync age can advance between snapshots.
     var now = Date()
+    @Environment(\.colorScheme) private var colorScheme
 
     var body: some View {
         Group {
@@ -39,7 +40,7 @@ struct WidgetContent: View {
         VStack(alignment: .leading, spacing: 4) {
             Image(systemName: "gauge.with.dots.needle.50percent")
                 .font(.title3)
-                .foregroundStyle(SlopPalette.mark)
+                .foregroundStyle(SlopPalette.colors(colorScheme).markText)
                 .widgetAccentable()
             Spacer(minLength: 0)
             Text(title).font(.headline).lineLimit(2)
@@ -83,6 +84,9 @@ struct WidgetContent: View {
     private func largeChart(_ panel: DashboardSnapshot.Widget) -> some View {
         if panel.points.isEmpty {
             Spacer(minLength: 0)
+        } else if panel.chartStyle == .grid {
+            CalendarGrid(points: panel.points, unit: panel.unit)
+                .frame(maxHeight: .infinity)
         } else {
             SlopChart(
                 points: panel.points, style: panel.chartStyle, unit: panel.unit,
@@ -182,55 +186,142 @@ struct WidgetContent: View {
 private struct WeekStrip: View {
     let points: [DashboardSnapshot.Point]
     let unit: String
-    @Environment(\.widgetRenderingMode) private var renderingMode
 
     var body: some View {
         let busiest = points.compactMap(\.count).max() ?? 0
         HStack(spacing: 5) {
             ForEach(points) { point in
                 VStack(spacing: 3) {
-                    tile(point, busiest: busiest)
-                    // Today is also named in bold: its outline vanishes on a bright tile
-                    // when the desktop draws the widget in one color.
-                    Text(point.day.start(in: .current), format: .dateTime.weekday(.abbreviated))
-                        .font(.caption2.weight(point.isIncomplete ? .bold : .regular))
-                        .foregroundStyle(point.isIncomplete ? .primary : .secondary)
+                    DayTile(point: point, busiest: busiest)
+                        .frame(height: 30)
+                    WeekdayLabel(date: point.day.start(in: .current), isToday: point.isIncomplete)
                 }
                 .accessibilityElement(children: .ignore)
                 .accessibilityLabel(HeatmapLabel.describe(point, unit: unit))
             }
         }
     }
+}
 
-    private func tile(_ point: DashboardSnapshot.Point, busiest: Int) -> some View {
+/// The large widget's grid as a calendar: a column per weekday in the locale's order and a
+/// row per week, the current week last. Tiles share the medium strip's look and fill the
+/// height they are given; days after today are left empty.
+private struct CalendarGrid: View {
+    let points: [DashboardSnapshot.Point]
+    let unit: String
+
+    private static let gap: CGFloat = 4
+
+    var body: some View {
+        let calendar = Calendar.current
+        let rows = WidgetSettings.calendarRows(
+            points, firstWeekday: calendar.firstWeekday, day: \.day)
+        let busiest = points.compactMap(\.count).max() ?? 0
+        let today = rows.last?.lastIndex { $0?.isIncomplete == true }
+        VStack(spacing: Self.gap) {
+            HStack(spacing: Self.gap) {
+                ForEach(0..<7, id: \.self) { column in
+                    WeekdayLabel(
+                        symbol: Self.symbol(column, calendar: calendar),
+                        isToday: column == today
+                    )
+                    .frame(maxWidth: .infinity)
+                }
+            }
+            .accessibilityHidden(true)
+            ForEach(rows.indices, id: \.self) { row in
+                HStack(spacing: Self.gap) {
+                    ForEach(0..<7, id: \.self) { column in
+                        if let point = rows[row][column] {
+                            DayTile(point: point, busiest: busiest, textStyle: .title3)
+                                .accessibilityElement(children: .ignore)
+                                .accessibilityLabel(HeatmapLabel.describe(point, unit: unit))
+                        } else {
+                            Color.clear.accessibilityHidden(true)
+                        }
+                    }
+                }
+                // Every row is flexible, so the rows split the height evenly with no gap.
+                .frame(maxHeight: .infinity)
+            }
+        }
+    }
+
+    /// The column's abbreviated weekday, starting from the locale's first weekday.
+    private static func symbol(_ column: Int, calendar: Calendar) -> String {
+        let symbols = calendar.shortStandaloneWeekdaySymbols
+        return symbols[(calendar.firstWeekday - 1 + column) % symbols.count]
+    }
+}
+
+/// A weekday caption; today's is bold in the primary color, because its tile outline can
+/// vanish on a bright tile when the desktop draws the widget in one color.
+private struct WeekdayLabel: View {
+    let text: Text
+    let isToday: Bool
+
+    init(date: Date, isToday: Bool) {
+        text = Text(date, format: .dateTime.weekday(.abbreviated))
+        self.isToday = isToday
+    }
+
+    init(symbol: String, isToday: Bool) {
+        text = Text(symbol)
+        self.isToday = isToday
+    }
+
+    var body: some View {
+        text
+            .font(.caption2.weight(isToday ? .bold : .regular))
+            .foregroundStyle(isToday ? .primary : .secondary)
+            .lineLimit(1)
+    }
+}
+
+/// One day's tile with its count: the level fill, an en dash for unknown, today outlined.
+/// Shared by the medium strip, the large calendar, and the menu bar panel.
+struct DayTile: View {
+    let point: DashboardSnapshot.Point
+    let busiest: Int
+    var textStyle: Font.TextStyle = .callout
+    @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.widgetRenderingMode) private var renderingMode
+
+    var body: some View {
         let shape = RoundedRectangle(cornerRadius: 6)
-        return ZStack {
+        ZStack {
             if let count = point.count {
                 let level = SlopPalette.level(count, max: busiest)
-                let fill = shape.fill(SlopPalette.fill(level: level))
                 let label = Text("\(count)")
-                    .font(.system(.callout, design: .rounded, weight: .semibold))
+                    .font(.system(textStyle, design: .rounded, weight: .semibold))
                     .monospacedDigit()
                     .minimumScaleFactor(0.6)
-                if renderingMode != .fullColor, level >= 3 {
-                    // Unfocused desktop widgets draw text and bright tiles in the same
-                    // near-white, so the busiest days cut their number out of the tile.
-                    fill.overlay { label.blendMode(.destinationOut) }
+                    .lineLimit(1)
+                    .padding(.horizontal, 2)
+                if renderingMode == .fullColor {
+                    let colors = SlopPalette.colors(colorScheme)
+                    shape.fill(colors.fill(level: level))
+                    label.foregroundStyle(colors.number(level: level))
+                } else if level >= 2 {
+                    // Unfocused and tinted desktop widgets draw text and bright tiles in the
+                    // same near-white, so from half brightness up the number is cut out of
+                    // the tile and the desktop shows through it.
+                    shape.fill(SlopPalette.monochromeFill(level: level))
+                        .overlay { label.blendMode(.destinationOut) }
                         .compositingGroup()
                         .widgetAccentable()
                 } else {
-                    fill.widgetAccentable()
+                    shape.fill(SlopPalette.monochromeFill(level: level)).widgetAccentable()
                     label
                 }
             } else {
                 shape.strokeBorder(SlopPalette.unknown, style: StrokeStyle(lineWidth: 1, dash: [2]))
-                Text("–").font(.callout).foregroundStyle(.secondary)
+                Text("–").font(.system(textStyle)).foregroundStyle(.secondary)
             }
             if point.isIncomplete {
                 shape.strokeBorder(Color.primary.opacity(0.6), lineWidth: 1)
             }
         }
-        .frame(maxWidth: .infinity)
-        .frame(height: 30)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 }

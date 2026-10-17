@@ -102,6 +102,26 @@ checks below were not separately reported and remain pending.
 - [ ] macOS 26 or later shows Liquid Glass buttons; macOS 14/15 show bordered buttons.
 - [ ] A build from Xcode 16.4 (macOS 15 SDK, as in CI) compiles the non-glass path.
 
+## Widget calendar and readable green (0.10.0): pending
+
+- [ ] Large widget, Grid view: a weekday header row in the locale's order (Monday first in
+      a Monday-first region), then 5 week rows with the current week last; tiles fill the
+      height with even gaps and no empty band above or below; days after today are empty,
+      unknown days show an en dash, today is outlined and its weekday bold. Footer reads
+      "Last 5 weeks"; the Widgets tab's Window row says the same and its preview matches.
+- [ ] Counts fit their tiles (including three-digit counts) and match the Activity tab for
+      the same days and metric. The Activity tab's own grid is unchanged.
+- [ ] Unfocused desktop widget (desktop not active): medium and large tiles from level 2 up
+      show their number cut out and readable; low levels show a readable number; levels stay
+      distinguishable; bars, line, and quota ticks stay visible. Repeat on a light and a dark
+      wallpaper, and with a tinted/accented widget style if the system offers one.
+- [ ] Light appearance: the green in the app (Target reached, Token badge, key icon, tiles,
+      columns, segmented/toggle tint, the prominent Add Token button) reads as a darker green;
+      dark appearance looks as before. Tile numbers are readable on every level.
+- [ ] Menu bar panel over a busy or bright wallpaper, light and dark: background is mostly
+      opaque, "Target reached", "Token", meter ticks, and 7-day tiles are readable; Increase
+      Contrast and Reduce Transparency still look right.
+
 ## Widget and background app: pending
 
 - [ ] App runs from the menu bar without a Dock icon; the window opens on demand.
@@ -109,7 +129,7 @@ checks below were not separately reported and remain pending.
       shows data in each size (unsigned or duplicate copies are refused the App Group).
 - [ ] Widget can be added to the desktop and Notification Center in each size.
 - [ ] Small shows the headline and "Synced <time>"; medium shows 7 labeled day tiles;
-      large shows 26 weeks for grid and the chosen 30 or 90 days for columns/line, with
+      large shows a 5-week calendar for grid and the chosen 30 or 90 days for columns/line, with
       no average line. Footer age is left, window label right, and does not shift.
 - [ ] The window's tabs read Activity, Widgets, Settings. The Widgets tab shows a Small,
       Medium, and Large section, each with a preview matching the desktop widget. Changing

@@ -104,7 +104,7 @@ Display last successful sync and incomplete coverage alongside cached data.
   window's Widgets tab, and does not follow the Activity tab's metric or view. Every size chooses its headline (the daily PR
   quota when one is active, else today's count) and its metric. Small shows the
   headline only; medium shows the last 7 days as daily tiles; large chooses grid
-  (last 26 weeks) or columns/line (last 30 or 90 days). Each window is labeled.
+  (a calendar of the last 5 weeks, one tile per day) or columns/line (last 30 or 90 days). Each window is labeled.
   Widgets omit the moving average, which stays in the app window.
 - Date ranges: 30, 90, and 365 days. Contributions may retain provider-calendar
   layout; PR series use the selected goal timezone.

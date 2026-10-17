@@ -272,7 +272,7 @@ private struct ConnectionBadge: View {
                 .font(.caption.weight(.medium))
                 .padding(.horizontal, 8)
                 .padding(.vertical, 3)
-                .foregroundStyle(usesTokens ? SlopPalette.mark : .secondary)
+                .foregroundStyle(usesTokens ? SlopPalette.markText : .secondary)
                 .glassCapsule(tint: usesTokens ? SlopPalette.mark : Color.secondary)
                 .contentShape(Capsule())
         }
@@ -396,7 +396,7 @@ private struct TokenGate: View {
         VStack(spacing: 14) {
             Image(systemName: "key.horizontal")
                 .font(.system(size: 30, weight: .regular))
-                .foregroundStyle(SlopPalette.mark)
+                .foregroundStyle(SlopPalette.markText)
             VStack(spacing: 6) {
                 Text(title).font(.title3.weight(.semibold))
                 Text(message)
@@ -517,7 +517,7 @@ private struct QuotaCard: View {
                 .foregroundStyle(.secondary)
         } else if quota.isReached {
             Label("Target reached", systemImage: "checkmark.seal.fill")
-                .foregroundStyle(SlopPalette.mark)
+                .foregroundStyle(SlopPalette.markText)
         } else {
             Label("\(quota.target - quota.count) to go", systemImage: "hourglass")
                 .foregroundStyle(.secondary)
@@ -556,7 +556,7 @@ private struct EvidenceRow: View {
     private var content: some View {
         HStack(alignment: .firstTextBaseline, spacing: 8) {
             Image(systemName: "arrow.triangle.pull")
-                .foregroundStyle(SlopPalette.mark)
+                .foregroundStyle(SlopPalette.markText)
                 .font(.callout)
             Text(title).lineLimit(1)
             if isDraft {

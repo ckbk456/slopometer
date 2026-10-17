@@ -38,6 +38,11 @@ struct MenuPanel: View {
                 .padding(.bottom, 6)
         }
         .frame(width: 300)
+        // The window's own material lets the wallpaper through; a mostly opaque window
+        // background behind the content keeps green text and tiles legible on any desktop.
+        .background {
+            Color(nsColor: .windowBackgroundColor).opacity(0.82).ignoresSafeArea()
+        }
     }
 
     // MARK: Headline
@@ -126,7 +131,7 @@ struct MenuPanel: View {
                 .foregroundStyle(SlopPalette.average)
         } else if quota.isReached {
             Label(statusText(quota), systemImage: "checkmark.seal.fill")
-                .foregroundStyle(SlopPalette.mark)
+                .foregroundStyle(SlopPalette.markText)
         } else {
             Label(statusText(quota), systemImage: "hourglass")
         }
@@ -206,7 +211,7 @@ struct MenuPanel: View {
                 Label(model.connectionLabel, systemImage: isToken ? "key.fill" : "person")
                     .font(.caption)
                     .foregroundStyle(
-                        isToken ? AnyShapeStyle(SlopPalette.mark) : AnyShapeStyle(.secondary))
+                        isToken ? AnyShapeStyle(SlopPalette.markText) : AnyShapeStyle(.secondary))
             }
             Spacer(minLength: 0)
         }
@@ -349,7 +354,8 @@ private struct WeekRow: View {
             HStack(spacing: 5) {
                 ForEach(points) { point in
                     VStack(spacing: 3) {
-                        tile(point, busiest: busiest)
+                        DayTile(point: point, busiest: busiest)
+                            .frame(height: 28)
                         Text(
                             point.day.start(in: .current),
                             format: .dateTime.weekday(.abbreviated)
@@ -362,27 +368,6 @@ private struct WeekRow: View {
                 }
             }
         }
-    }
-
-    private func tile(_ point: DashboardSnapshot.Point, busiest: Int) -> some View {
-        let shape = RoundedRectangle(cornerRadius: 6)
-        return ZStack {
-            if let count = point.count {
-                shape.fill(SlopPalette.fill(level: SlopPalette.level(count, max: busiest)))
-                Text("\(count)")
-                    .font(.system(.callout, design: .rounded, weight: .semibold))
-                    .monospacedDigit()
-                    .minimumScaleFactor(0.6)
-            } else {
-                shape.strokeBorder(SlopPalette.unknown, style: StrokeStyle(lineWidth: 1, dash: [2]))
-                Text("–").font(.callout).foregroundStyle(.secondary)
-            }
-            if point.isIncomplete {
-                shape.strokeBorder(Color.primary.opacity(0.6), lineWidth: 1)
-            }
-        }
-        .frame(maxWidth: .infinity)
-        .frame(height: 28)
     }
 }
 

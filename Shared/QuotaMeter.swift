@@ -8,8 +8,16 @@ struct QuotaMeter: View {
     let count: Int
     let target: Int
     var height: CGFloat = 10
+    @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.widgetRenderingMode) private var renderingMode
 
     private static let maxTicks = 20
+
+    /// Full white when the desktop draws the widget in one color, so filled ticks stay
+    /// clearly brighter than the track.
+    private var filled: Color {
+        renderingMode == .fullColor ? SlopPalette.colors(colorScheme).mark : .white
+    }
 
     var body: some View {
         HStack(spacing: 8) {
@@ -25,7 +33,9 @@ struct QuotaMeter: View {
                 Text("+\(count - target)")
                     .font(.caption.weight(.semibold))
                     .monospacedDigit()
-                    .foregroundStyle(SlopPalette.mark)
+                    .foregroundStyle(
+                        renderingMode == .fullColor
+                            ? SlopPalette.colors(colorScheme).markText : .primary)
             }
         }
         .accessibilityElement()
@@ -38,7 +48,7 @@ struct QuotaMeter: View {
         return HStack(spacing: gap) {
             ForEach(0..<target, id: \.self) { index in
                 Capsule()
-                    .fill(index < count ? SlopPalette.mark : SlopPalette.track)
+                    .fill(index < count ? filled : SlopPalette.track)
                     .widgetAccentable(index < count)
                     .frame(width: side)
             }
@@ -49,7 +59,7 @@ struct QuotaMeter: View {
         let fraction = min(1, Double(count) / Double(max(target, 1)))
         return ZStack(alignment: .leading) {
             Capsule().fill(SlopPalette.track)
-            Capsule().fill(SlopPalette.mark).widgetAccentable().frame(width: width * fraction)
+            Capsule().fill(filled).widgetAccentable().frame(width: width * fraction)
         }
     }
 }

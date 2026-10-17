@@ -60,3 +60,14 @@ Username section led by the account summary, then a token list with an Add Token
 ending in an InsecuSlopometer™ switch row; the Activity badge names the connection and lists tokens in a
 popover. Core tests cover the identity, gating, and queueing rules; every UI and provider
 check in the manual guides is pending.
+
+Widget calendar and readable green (0.10.0): implemented on `codex/widget-calendar-green`.
+The large widget's grid is a 5-week calendar (a column per weekday in the locale's order, a
+row per week, the current week last) with the medium strip's numbered tiles filling the
+height; its window aligns to whole weeks. Palette colors come from one `SlopTheme` with
+roles for fills, text, and trend: light appearance uses a darker green (#116329, 6.78:1 on
+#F5F5F5), dark keeps #2EA043 (4.94:1 on #1E1E1E), and tile numbers pick white or black per
+level. Unfocused desktop tiles use white level fills and cut their number out from level 2.
+The menu bar panel's background is mostly opaque. Core tests cover week alignment and
+contrast targets; every rendering check in the
+[desktop guide](testing/MANUAL%20TO-DO/desktop-and-appearance.md) is pending.
