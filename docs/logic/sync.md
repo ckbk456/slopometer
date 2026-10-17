@@ -156,17 +156,19 @@ Owners: `App/MainView.swift`, `App/SettingsView.swift`, `App/Glass.swift`.
   from the content, so resizing does not feed back into the layout. The grid keeps
   square cells, sized by the smaller of width and height, so a long range that is
   limited by width leaves its spare height below the notices rather than between rows.
-- Settings (0.9.0) has no numbered tiers. **GitHub** shows one summary row: an initial,
-  @account (or "No account yet"), the connection wording, and sync status. **Tokens**
+- Settings (0.9.0) has no numbered tiers and no separate GitHub heading. **Username**
+  comes first: one summary row (an initial, @account or "No account yet", the connection
+  wording, and sync status), then the username field. **Tokens**
   lists every saved token (name, Fine-grained or Classic chip, then "Owned by @x, counted",
   "Belongs to @x, not counted", "Rejected by GitHub, not counted", "Not checked: …", or
   "Checking…") with Remove, then one Add Token… button, the creation link, and a `?`.
   Add Token… opens a sheet with Name and Token fields; the kind follows the prefix, and a
   classic token is refused unless InsecuSlopometer™ is on. Asking for the token section
-  from the dashboard with no token saved opens the sheet. **Username** is editable only
+  from the dashboard with no token saved opens the sheet. The username is editable only
   without tokens; with tokens it is grayed out and says "Using @x from your fine-grained
-  tokens". **InsecuSlopometer™** is last, folded in a disclosure (open while the opt-in is
-  on), with the "Allow classic tokens" toggle, disabled while classic tokens are saved.
+  tokens". **InsecuSlopometer™** is the last row of Tokens: its name, a one-line caption,
+  a `?`, and the "Allow classic tokens" switch on the right, disabled while classic tokens
+  are saved.
   Longer guidance (token setup, organizations, account rule, public-profile limits,
   classic-token write access, timezone day labels) sits behind `?` popovers.
 - The Activity header's connection badge shows the connection wording. Clicking it opens a

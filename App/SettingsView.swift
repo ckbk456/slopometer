@@ -8,7 +8,6 @@ struct SettingsView: View {
     @FocusState private var focusedField: SettingsAnchor?
     @State private var login = ""
     @State private var addsToken = false
-    @State private var showsAdvanced = false
 
     var body: some View {
         @Bindable var model = model
@@ -19,16 +18,50 @@ struct SettingsView: View {
         }
         .onAppear {
             login = model.settings.login
-            showsAdvanced = model.allowsClassicTokens
         }
         .sheet(isPresented: $addsToken) { AddTokenSheet().environment(model) }
     }
 
     private func form(bindable: Bindable<AppModel>) -> some View {
         Form {
-            // The account being measured and how it is connected: the one thing to read first.
-            Section("GitHub") {
+            // Who is measured first: the account and how it is connected, then its tokens.
+            Section {
                 accountSummary
+                HStack {
+                    TextField("Username", text: $login, prompt: Text("Enter username"))
+                        .focused($focusedField, equals: .account)
+                        .onSubmit(applyLogin)
+                    if !model.hasToken {
+                        Button("Save", action: applyLogin)
+                            .disabled(
+                                login == model.settings.login || !GitHubClient.isValidLogin(login))
+                    }
+                }
+                .disabled(model.hasToken)
+                .id(SettingsAnchor.account)
+                HStack(alignment: .firstTextBaseline) {
+                    Text(usernameCaption)
+                        .font(.caption).foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                    Spacer()
+                    InfoButton("About the public profile") {
+                        Text(
+                            "Without a token, Slopometer reads the contribution calendar on the public GitHub profile. That page is not an official API, so it can change or break."
+                        )
+                        Text(
+                            "Private activity appears only as anonymous counts, and only if the profile shows private contributions."
+                        )
+                        Text(
+                            "With tokens, the account is the tokens' owner and this username is kept for when you remove them."
+                        )
+                    }
+                }
+            } header: {
+                sectionHeader(
+                    "Username",
+                    caption: model.hasToken
+                        ? "Not needed while tokens are saved."
+                        : "Public profile only. Nothing secret is stored.")
             }
 
             Section {
@@ -70,76 +103,13 @@ struct SettingsView: View {
                     }
                 }
                 .id(SettingsAnchor.token)
+                insecuSlopometer(bindable)
             } header: {
                 sectionHeader(
                     "Tokens",
                     caption:
                         "Read-only fine-grained tokens unlock PR stats, the daily quota, and repository filters."
                 )
-            }
-
-            Section {
-                HStack {
-                    TextField("Username", text: $login, prompt: Text("Enter username"))
-                        .focused($focusedField, equals: .account)
-                        .onSubmit(applyLogin)
-                    if !model.hasToken {
-                        Button("Save", action: applyLogin)
-                            .disabled(
-                                login == model.settings.login || !GitHubClient.isValidLogin(login))
-                    }
-                }
-                .disabled(model.hasToken)
-                .id(SettingsAnchor.account)
-                HStack(alignment: .firstTextBaseline) {
-                    Text(usernameCaption)
-                        .font(.caption).foregroundStyle(.secondary)
-                        .fixedSize(horizontal: false, vertical: true)
-                    Spacer()
-                    InfoButton("About the public profile") {
-                        Text(
-                            "Without a token, Slopometer reads the contribution calendar on the public GitHub profile. That page is not an official API, so it can change or break."
-                        )
-                        Text(
-                            "Private activity appears only as anonymous counts, and only if the profile shows private contributions."
-                        )
-                        Text(
-                            "With tokens, the account is the tokens' owner and this username is kept for when you remove them."
-                        )
-                    }
-                }
-            } header: {
-                sectionHeader(
-                    "Username",
-                    caption: model.hasToken
-                        ? "Not needed while tokens are saved."
-                        : "Public profile only. Nothing secret is stored.")
-            }
-
-            // Classic tokens are an exception, so they sit last, folded away.
-            Section {
-                DisclosureGroup(isExpanded: $showsAdvanced) {
-                    insecuSlopometer(bindable)
-                } label: {
-                    HStack(alignment: .firstTextBaseline) {
-                        VStack(alignment: .leading, spacing: 2) {
-                            Label("InsecuSlopometer™", systemImage: "lock.open")
-                            Text(
-                                "Allows classic tokens, which can't be read-only. Not recommended."
-                            )
-                            .font(.caption).foregroundStyle(.secondary)
-                        }
-                        Spacer()
-                        InfoButton("About InsecuSlopometer™") {
-                            Text(
-                                "A classic token needs the repo scope to read private PRs, and that scope also grants write access to every repository you can reach."
-                            )
-                            Text(
-                                "Slopometer only reads, but anyone who copies the token can write. Use a fine-grained token if you can."
-                            )
-                        }
-                    }
-                }
             }
 
             Section {
@@ -301,24 +271,34 @@ struct SettingsView: View {
     /// on by accident. Classic tokens are listed with the others, marked Classic.
     private func insecuSlopometer(_ bindable: Bindable<AppModel>) -> some View {
         let hasClassic = model.tokens.contains { $0.kind == .classic }
-        return VStack(alignment: .leading, spacing: 4) {
-            Toggle(isOn: bindable.allowsClassicTokens) {
-                Label {
-                    Text("Allow classic tokens")
-                } icon: {
-                    Image(systemName: "lock.open.fill").foregroundStyle(.orange)
-                }
+        return HStack(alignment: .center, spacing: 10) {
+            Image(systemName: "lock.open.fill").foregroundStyle(.orange)
+                .accessibilityHidden(true)
+            VStack(alignment: .leading, spacing: 2) {
+                Text("InsecuSlopometer™")
+                Text(
+                    hasClassic
+                        ? "Remove classic tokens to turn this off."
+                        : "Allows classic tokens, which can't be read-only. Not recommended."
+                )
+                .font(.caption).foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
             }
-            .tint(.orange)
-            .disabled(hasClassic)
-            Text(
-                hasClassic
-                    ? "Remove classic tokens to turn this off."
-                    : "When on, Add Token also accepts classic tokens."
-            )
-            .font(.caption).foregroundStyle(.secondary)
+            Spacer()
+            InfoButton("About InsecuSlopometer™") {
+                Text(
+                    "A classic token needs the repo scope to read private PRs, and that scope also grants write access to every repository you can reach."
+                )
+                Text(
+                    "Slopometer only reads, but anyone who copies the token can write. Use a fine-grained token if you can. When this is on, Add Token also accepts classic tokens."
+                )
+            }
+            Toggle("Allow classic tokens", isOn: bindable.allowsClassicTokens)
+                .labelsHidden()
+                .toggleStyle(.switch)
+                .tint(.orange)
+                .disabled(hasClassic)
         }
-        .padding(.top, 4)
     }
 
     private func applyLogin() {

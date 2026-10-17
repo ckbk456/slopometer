@@ -11,7 +11,7 @@
 - [ ] Without a token, PRs opened / Authored PRs merged show the token explanation; Add
       Token opens Settings scrolled to the token field. Rejected or mismatched tokens show
       their own wording.
-- [ ] Settings order: GitHub, Tokens, Username, InsecuSlopometer™ (see 0.9.0 below), Pull
+- [ ] Settings order: Username, Tokens (InsecuSlopometer™ last; see 0.9.0 below), Pull
       requests, Timezone, About. Pull requests is
       grayed out without a token; Counts and Daily target stay visible but grayed out while
       the quota is off, and turning it back on restores their earlier values.
@@ -39,10 +39,11 @@
 
 ## GitHub connections (0.9.0): pending
 
-- [ ] Settings shows no numbered markers. GitHub: one row with the account's initial,
-      @account, the connection wording, and sync status. Tokens: one row per token (name,
-      Fine-grained/Classic chip, standing line, Remove), then Add Token…, the creation link,
-      and `?`. Username, then a folded InsecuSlopometer™ section, last.
+- [ ] Settings shows no numbered markers and no GitHub heading. Username comes first: a row
+      with the account's initial, @account, the connection wording, and sync status, then
+      the username field. Tokens: one row per token (name, Fine-grained/Classic chip,
+      standing line, Remove), then Add Token…, the creation link, and `?`, then the
+      InsecuSlopometer™ row with its switch on the right.
 - [ ] Add Token… opens a sheet focused on the token field; Esc cancels; an empty token
       disables Add Token; a classic token with InsecuSlopometer™ off shows the refusal; a
       duplicate says it is already saved. The token value never appears afterwards.
@@ -57,7 +58,7 @@
       standing (counted, not counted with reason, or checking) with no secrets; "Manage in
       Settings" closes it and opens the token section. VoiceOver reads the badge as
       "Connection: …".
-- [ ] The InsecuSlopometer™ disclosure opens and closes; the toggle is disabled while classic
+- [ ] The InsecuSlopometer™ switch turns classic tokens on and off; it is disabled while classic
       tokens are saved; scroll position stays put when `?` popovers or the sheet close.
 - [ ] Light/dark, Increase Contrast, and macOS 14/15 versus 26+ rendering stay legible.
 

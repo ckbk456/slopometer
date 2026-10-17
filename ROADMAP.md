@@ -56,7 +56,7 @@ are kept but not counted), so a username is needed only without tokens; SPEC was
 the user's direction. Fixed a stale "Verified for @x" after a username change, previous-account
 PR data shown under a new account until the next sync, and refreshes dropped while a sync was
 running (now queued to run right after). Settings drops the numbered tiers for an account
-summary, a token list with an Add Token sheet, the username fallback, and a folded
-InsecuSlopometer™ section; the Activity badge names the connection and lists tokens in a
+Username section led by the account summary, then a token list with an Add Token sheet
+ending in an InsecuSlopometer™ switch row; the Activity badge names the connection and lists tokens in a
 popover. Core tests cover the identity, gating, and queueing rules; every UI and provider
 check in the manual guides is pending.
