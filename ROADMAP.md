@@ -27,3 +27,8 @@ wording. `make validate` passed locally on 2026-10-17 (formatting, documentation
 39 core tests, unsigned native build); project regeneration is stable with
 XcodeGen 2.46.0. The user accepted the menu-bar fix on 2026-10-17; the full
 appearance/accessibility matrix remains pending.
+
+Widget sync age and tinted contrast (0.6.1): medium and large footers show the sync
+clock time with an hh:mm age that advances per minute from the widget's own timeline;
+busiest medium tiles cut their number out when the desktop renders the widget in one
+color. Implemented with core tests for the label; desktop rendering checks are pending.

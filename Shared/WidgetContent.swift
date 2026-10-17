@@ -8,6 +8,8 @@ struct WidgetContent: View {
     /// Nil when no readable snapshot exists.
     let snapshot: DashboardSnapshot?
     let size: WidgetSize
+    /// The moment the widget shows, so the sync age can advance between snapshots.
+    var now = Date()
 
     var body: some View {
         Group {
@@ -17,15 +19,14 @@ struct WidgetContent: View {
                 if panel.metric.requiresToken, snapshot.tier != .token {
                     message(
                         "\(panel.metric.title) needs a GitHub token",
-                        detail:
-                            "Add one in Slopometer's Settings, or pick Contributions in its Widgets tab."
+                        detail: "Add one in Settings, or show Contributions instead."
                     )
                 } else {
                     measured(snapshot, panel)
                 }
             } else if snapshot == nil {
                 message(
-                    "No data yet", detail: "Open Slopometer to share your latest numbers here.")
+                    "No data yet", detail: "Open Slopometer to fill this in.")
             } else if snapshot?.tier == .notConfigured {
                 message("Slopometer", detail: "Open the app and enter a GitHub username.")
             } else {
@@ -150,7 +151,8 @@ struct WidgetContent: View {
     }
 
     /// Changing text on the left, the constant window label on the right, so the age's
-    /// width never shifts anything. Names the chart's metric when it differs from the quota.
+    /// width never shifts anything. The age is fixed-width hours:minutes, not a ticking
+    /// relative string. Names the chart's metric when it differs from the quota.
     private func footer(
         _ snapshot: DashboardSnapshot, _ quota: DashboardSnapshot.Quota?,
         _ panel: DashboardSnapshot.Widget
@@ -161,11 +163,7 @@ struct WidgetContent: View {
             ? "\(panel.metric.title), \(window.prefix(1).lowercased() + window.dropFirst())"
             : window
         return HStack(spacing: 8) {
-            if let synced = snapshot.lastSuccessfulSync {
-                Text("Synced \(synced, style: .relative) ago")
-            } else {
-                Text("Not synced yet")
-            }
+            Text(SyncAgeLabel.text(synced: snapshot.lastSuccessfulSync, now: now))
             Spacer(minLength: 8)
             Text(label).layoutPriority(1)
         }
@@ -184,6 +182,7 @@ struct WidgetContent: View {
 private struct WeekStrip: View {
     let points: [DashboardSnapshot.Point]
     let unit: String
+    @Environment(\.widgetRenderingMode) private var renderingMode
 
     var body: some View {
         let busiest = points.compactMap(\.count).max() ?? 0
@@ -191,9 +190,11 @@ private struct WeekStrip: View {
             ForEach(points) { point in
                 VStack(spacing: 3) {
                     tile(point, busiest: busiest)
+                    // Today is also named in bold: its outline vanishes on a bright tile
+                    // when the desktop draws the widget in one color.
                     Text(point.day.start(in: .current), format: .dateTime.weekday(.abbreviated))
-                        .font(.caption2)
-                        .foregroundStyle(.secondary)
+                        .font(.caption2.weight(point.isIncomplete ? .bold : .regular))
+                        .foregroundStyle(point.isIncomplete ? .primary : .secondary)
                 }
                 .accessibilityElement(children: .ignore)
                 .accessibilityLabel(HeatmapLabel.describe(point, unit: unit))
@@ -205,12 +206,22 @@ private struct WeekStrip: View {
         let shape = RoundedRectangle(cornerRadius: 6)
         return ZStack {
             if let count = point.count {
-                shape.fill(SlopPalette.fill(level: SlopPalette.level(count, max: busiest)))
-                    .widgetAccentable()
-                Text("\(count)")
+                let level = SlopPalette.level(count, max: busiest)
+                let fill = shape.fill(SlopPalette.fill(level: level))
+                let label = Text("\(count)")
                     .font(.system(.callout, design: .rounded, weight: .semibold))
                     .monospacedDigit()
                     .minimumScaleFactor(0.6)
+                if renderingMode != .fullColor, level >= 3 {
+                    // Unfocused desktop widgets draw text and bright tiles in the same
+                    // near-white, so the busiest days cut their number out of the tile.
+                    fill.overlay { label.blendMode(.destinationOut) }
+                        .compositingGroup()
+                        .widgetAccentable()
+                } else {
+                    fill.widgetAccentable()
+                    label
+                }
             } else {
                 shape.strokeBorder(SlopPalette.unknown, style: StrokeStyle(lineWidth: 1, dash: [2]))
                 Text("–").font(.callout).foregroundStyle(.secondary)

@@ -19,9 +19,14 @@ struct SnapshotProvider: TimelineProvider {
     }
 
     func getTimeline(in context: Context, completion: @escaping (Timeline<SnapshotEntry>) -> Void) {
-        let entry = SnapshotEntry(date: Date(), snapshot: SharedSnapshot.read())
-        // The app requests reloads when data changes; this only refreshes the age label.
-        completion(Timeline(entries: [entry], policy: .after(Date().addingTimeInterval(30 * 60))))
+        let snapshot = SharedSnapshot.read()
+        // The app requests reloads when data changes. Entries only advance the sync age,
+        // one per minute for the next hour, without rereading the snapshot.
+        let dates = SyncAgeLabel.updates(
+            synced: snapshot?.lastSuccessfulSync, from: Date(), count: 60)
+        let entries = dates.map { SnapshotEntry(date: $0, snapshot: snapshot) }
+        let reload = dates.last.map { max($0, Date().addingTimeInterval(30 * 60)) }
+        completion(Timeline(entries: entries, policy: .after(reload ?? Date())))
     }
 }
 
@@ -30,7 +35,7 @@ struct SlopometerWidgetView: View {
     let entry: SnapshotEntry
 
     var body: some View {
-        WidgetContent(snapshot: entry.snapshot, size: size)
+        WidgetContent(snapshot: entry.snapshot, size: size, now: entry.date)
             .widgetURL(URL(string: "slopometer://open"))
             .containerBackground(.fill.tertiary, for: .widget)
     }
@@ -52,7 +57,7 @@ struct SlopometerWidget: Widget {
         }
         .configurationDisplayName("Slopometer")
         .description(
-            "Your daily slop, quantified. Choose what each size shows in Slopometer's Settings."
+            "Your daily slop, quantified. Set up each size in Slopometer's Widgets tab."
         )
         .supportedFamilies([.systemSmall, .systemMedium, .systemLarge])
     }

@@ -52,6 +52,10 @@ checks below were not separately reported and remain pending.
 - [ ] With the desktop widget unfocused (tinted), grid levels, today's outline, tiles,
       and the quota meter stay distinguishable.
 - [ ] Widget matches the app's counts and shows snapshot age when the app is quit.
+- [ ] Medium and large footers read "Synced <time> (hh:mm ago)", the age advances each
+      minute with the app quit, and a sync from an earlier day names that day.
+- [ ] Unfocused desktop widget: medium tiles for the busiest days show their number cut
+      out of the tile and readable; today's weekday label is bold in both renderings.
 - [ ] Check Spaces, multiple displays, sleep/wake, and restart.
 - [ ] Inspect custom palettes, density, contrast, and Reduce Motion.
 - [ ] Verify login launch only after opting in; no orphan helper remains after quit.

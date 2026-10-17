@@ -95,14 +95,16 @@ private struct WidgetPreview: View {
 
     var body: some View {
         let shape = RoundedRectangle(cornerRadius: 20, style: .continuous)
-        WidgetContent(snapshot: snapshot, size: size)
-            .padding(16)
-            .frame(width: dimensions.width, height: dimensions.height)
-            .background(.fill.tertiary, in: shape)
-            .overlay(shape.strokeBorder(.separator))
-            .allowsHitTesting(false)
-            .accessibilityElement(children: .contain)
-            .accessibilityLabel("Preview of the \(size.rawValue) widget")
+        TimelineView(.everyMinute) { context in
+            WidgetContent(snapshot: snapshot, size: size, now: context.date)
+        }
+        .padding(16)
+        .frame(width: dimensions.width, height: dimensions.height)
+        .background(.fill.tertiary, in: shape)
+        .overlay(shape.strokeBorder(.separator))
+        .allowsHitTesting(false)
+        .accessibilityElement(children: .contain)
+        .accessibilityLabel("Preview of the \(size.rawValue) widget")
     }
 
     private var dimensions: CGSize {
