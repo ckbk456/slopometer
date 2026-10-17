@@ -40,9 +40,15 @@ checks below were not separately reported and remain pending.
 - [ ] With only one signed copy running, the app shows no widget notice and the widget
       shows data in each size (unsigned or duplicate copies are refused the App Group).
 - [ ] Widget can be added to the desktop and Notification Center in each size.
-- [ ] Small shows the headline and "Synced <time>"; medium shows 7 labeled day tiles in
-      every view; large shows 26 weeks for grid and up to 90 days for columns/line, with
+- [ ] Small shows the headline and "Synced <time>"; medium shows 7 labeled day tiles;
+      large shows 26 weeks for grid and the chosen 30 or 90 days for columns/line, with
       no average line. Footer age is left, window label right, and does not shift.
+- [ ] The window's tabs read Activity, Widgets, Settings. The Widgets tab shows a Small,
+      Medium, and Large section, each with a preview matching the desktop widget. Changing
+      a size's headline, metric, view, or window updates only that size and its preview;
+      changing the Activity tab's metric or view changes no widget. Quota headline without an active quota shows
+      today's count; a PR metric without a token shows the token message in that size.
+- [ ] After upgrading from 0.5.0, each widget keeps the metric and view it showed before.
 - [ ] With the desktop widget unfocused (tinted), grid levels, today's outline, tiles,
       and the quota meter stay distinguishable.
 - [ ] Widget matches the app's counts and shows snapshot age when the app is quit.

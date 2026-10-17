@@ -96,12 +96,14 @@ Display last successful sync and incomplete coverage alongside cached data.
 - Columns: daily counts, optional average overlay, zero baseline.
 - Line: the same daily counts and optional average overlay. Avoid smoothing that
   suggests negative counts or activity between events.
-- Views share the same selected metric, scope, and data completeness policy.
-  Each widget size shows a fixed window suited to its shape and labels it: small
-  shows today's count or quota only; medium shows the last 7 days as daily tiles,
-  whatever the selected view; large shows the last 26 weeks for the grid and up to
-  90 days of the selected range for columns and line. Widgets omit the moving
-  average, which stays in the app window.
+- Views share the same scope and data completeness policy, and every surface
+  reads a metric's counts from the same daily series.
+- Each widget size has its own settings, with a live preview, in the app
+  window's Widgets tab, and does not follow the Activity tab's metric or view. Every size chooses its headline (the daily PR
+  quota when one is active, else today's count) and its metric. Small shows the
+  headline only; medium shows the last 7 days as daily tiles; large chooses grid
+  (last 26 weeks) or columns/line (last 30 or 90 days). Each window is labeled.
+  Widgets omit the moving average, which stays in the app window.
 - Date ranges: 30, 90, and 365 days. Contributions may retain provider-calendar
   layout; PR series use the selected goal timezone.
 - Trailing simple moving average: off, 7 days, or 30 days. Include confirmed

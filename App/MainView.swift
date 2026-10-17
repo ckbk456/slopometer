@@ -12,7 +12,7 @@ struct MainView: View {
     @State private var tab = Tab.dashboard
     @State private var settingsFocus: SettingsAnchor?
 
-    enum Tab { case dashboard, settings }
+    enum Tab { case dashboard, widgets, settings }
 
     var body: some View {
         TabView(selection: $tab) {
@@ -20,8 +20,11 @@ struct MainView: View {
                 settingsFocus = anchor
                 tab = .settings
             })
-            .tabItem { Label("Dashboard", systemImage: "chart.bar") }
+            .tabItem { Label("Activity", systemImage: "chart.bar") }
             .tag(Tab.dashboard)
+            WidgetsView()
+                .tabItem { Label("Widgets", systemImage: "square.grid.2x2") }
+                .tag(Tab.widgets)
             SettingsView(focus: $settingsFocus)
                 .tabItem { Label("Settings", systemImage: "gearshape") }
                 .tag(Tab.settings)
