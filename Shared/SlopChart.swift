@@ -23,10 +23,13 @@ struct SlopChart: View {
     }
 }
 
+/// One fixed palette for every surface: green is measured activity, amber is the trend.
+/// Controls are tinted with `mark` so they do not compete with the chart.
 enum SlopPalette {
-    static let mark = Color.green
-    static let average = Color.orange
+    static let mark = Color(red: 0.18, green: 0.63, blue: 0.26)
+    static let average = Color(red: 0.86, green: 0.6, blue: 0.13)
     static let unknown = Color.secondary.opacity(0.25)
+    static let track = Color.secondary.opacity(0.18)
 
     /// GitHub-style levels 0–4, scaled to the busiest visible day.
     static func level(_ count: Int, max: Int) -> Int {
@@ -47,8 +50,8 @@ private struct HeatmapGrid: View {
     var body: some View {
         let weeks = Self.weeks(points)
         let busiest = points.compactMap(\.count).max() ?? 0
+        let gap: CGFloat = 2
         GeometryReader { geometry in
-            let gap: CGFloat = 2
             let side = max(
                 3,
                 min(
@@ -69,6 +72,16 @@ private struct HeatmapGrid: View {
                 }
             }
         }
+        // Sized by its week count, so short ranges don't leave empty space below the grid.
+        .aspectRatio(Self.aspectRatio(columns: weeks.count, gap: gap), contentMode: .fit)
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    /// Width over height for square cells, assuming cells around 12 points wide.
+    static func aspectRatio(columns: Int, gap: CGFloat) -> CGFloat {
+        let columns = CGFloat(max(columns, 1))
+        let cell: CGFloat = 12
+        return (columns * cell + (columns - 1) * gap) / (7 * cell + 6 * gap)
     }
 
     @ViewBuilder

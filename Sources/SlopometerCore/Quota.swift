@@ -10,6 +10,9 @@ public struct Goal: Codable, Equatable, Sendable {
         self.target = target
     }
 
+    /// Targets a person can type or step to; typed values are clamped into it.
+    public static let targetRange = 1...999
+
     public var isValid: Bool { metric.requiresToken && target > 0 }
 
     /// Describes a repository filter; empty means every repository the token can read.
