@@ -1,6 +1,7 @@
 import Charts
 import SlopometerCore
 import SwiftUI
+import WidgetKit
 
 /// Renders a snapshot's points. Shared by the app window and the widget so both agree.
 struct SlopChart: View {
@@ -74,7 +75,9 @@ private struct HeatmapGrid: View {
         let label = HeatmapLabel.describe(point, unit: unit)
         Group {
             if let count = point.count {
+                // In tinted desktop widgets the levels survive as opacity of the accent.
                 shape.fill(SlopPalette.fill(level: SlopPalette.level(count, max: busiest)))
+                    .widgetAccentable()
             } else {
                 shape.strokeBorder(SlopPalette.unknown, style: StrokeStyle(lineWidth: 1, dash: [2]))
             }
@@ -194,6 +197,16 @@ private struct TrendChart: View {
         .chartForegroundStyleScale(["Daily": SlopPalette.mark, "Average": SlopPalette.average])
         .chartLegend(compact ? .hidden : .automatic)
         .chartYAxisLabel(compact ? "" : unit)
+        .chartYAxis {
+            // Compact charts keep the scale but drop gridlines so the marks stand out.
+            AxisMarks(values: .automatic(desiredCount: compact ? 3 : 5)) { _ in
+                if !compact {
+                    AxisGridLine()
+                    AxisTick()
+                }
+                AxisValueLabel()
+            }
+        }
         .chartYScale(domain: .automatic(includesZero: true))
         .chartXAxis(compact ? .hidden : .automatic)
         .chartOverlay { proxy in

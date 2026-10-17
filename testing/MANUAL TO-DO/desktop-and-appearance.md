@@ -19,6 +19,11 @@
 - [ ] With only one signed copy running, the app shows no widget notice and the widget
       shows data in each size (unsigned or duplicate copies are refused the App Group).
 - [ ] Widget can be added to the desktop and Notification Center in each size.
+- [ ] Small shows the headline and "Synced <time>"; medium shows 7 labeled day tiles in
+      every view; large shows 26 weeks for grid and up to 90 days for columns/line, with
+      no average line. Footer age is left, window label right, and does not shift.
+- [ ] With the desktop widget unfocused (tinted), grid levels, today's outline, tiles,
+      and the quota meter stay distinguishable.
 - [ ] Widget matches the app's counts and shows snapshot age when the app is quit.
 - [ ] Check Spaces, multiple displays, sleep/wake, and restart.
 - [ ] Inspect custom palettes, density, contrast, and Reduce Motion.
