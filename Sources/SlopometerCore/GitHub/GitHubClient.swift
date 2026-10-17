@@ -65,17 +65,15 @@ public struct GitHubClient: Sendable {
     private static let pageSize = 100
 
     private let transport: HTTPTransport
-    /// Awaited before every search request to stay under the search rate limit.
-    private let searchPause: @Sendable () async throws -> Void
+    /// Shared by every token: GitHub counts search requests per account.
+    private let searchLimiter: SearchRateLimiter
 
     public init(
         transport: HTTPTransport = URLSessionTransport(),
-        searchPause: @escaping @Sendable () async throws -> Void = {
-            try await Task.sleep(for: .milliseconds(2100))
-        }
+        searchLimiter: SearchRateLimiter = SearchRateLimiter()
     ) {
         self.transport = transport
-        self.searchPause = searchPause
+        self.searchLimiter = searchLimiter
     }
 
     public static func isValidLogin(_ login: String) -> Bool {
@@ -143,35 +141,55 @@ public struct GitHubClient: Sendable {
     }
 
     /// PRs authored by `login` that were created or merged in `[from, to]`, deduplicated.
+    /// The merged search excludes PRs created in the window, which the created search
+    /// already returns, so overlapping results are not downloaded twice.
     public func authoredPullRequests(login: String, token: String, from: Date, to: Date)
         async throws -> PullRequestFetch
     {
         guard Self.isValidLogin(login) else { throw GitHubError.invalidLogin }
+        let created = try await search(
+            login: login, token: token, window: "created", from: from, to: to)
+        let merged = try await search(
+            login: login, token: token, window: "merged", from: from, to: to,
+            extra: "created:<\(Self.iso(from))")
+        return Self.merge([created, merged])
+    }
+
+    /// PRs authored by `login` that GitHub updated in `[since, to]`: new PRs plus changes to
+    /// older ones, such as a merge. Used for incremental refreshes.
+    public func updatedPullRequests(login: String, token: String, since: Date, to: Date)
+        async throws -> PullRequestFetch
+    {
+        guard Self.isValidLogin(login) else { throw GitHubError.invalidLogin }
+        return Self.merge([
+            try await search(login: login, token: token, window: "updated", from: since, to: to)
+        ])
+    }
+
+    static func merge(_ fetches: [PullRequestFetch]) -> PullRequestFetch {
         var byID: [String: PullRequestRecord] = [:]
-        var incomplete = false
-        for qualifier in ["created", "merged"] {
-            let result = try await search(
-                login: login, token: token, qualifier: qualifier, from: from, to: to)
-            incomplete = incomplete || result.isIncomplete
-            for record in result.records { byID[record.id] = record }
+        for fetch in fetches {
+            for record in fetch.records { byID[record.id] = record }
         }
         return PullRequestFetch(
-            records: byID.values.sorted { $0.createdAt < $1.createdAt }, isIncomplete: incomplete)
+            records: byID.values.sorted { $0.createdAt < $1.createdAt },
+            isIncomplete: fetches.contains { $0.isIncomplete })
     }
 
     /// Splits the window until each query fits under GitHub's search result cap.
     private func search(
-        login: String, token: String, qualifier: String, from: Date, to: Date
+        login: String, token: String, window: String, from: Date, to: Date, extra: String = ""
     ) async throws -> PullRequestFetch {
-        let query = "author:\(login) type:pr \(qualifier):\(Self.iso(from))..\(Self.iso(to))"
+        var query = "author:\(login) type:pr \(window):\(Self.iso(from))..\(Self.iso(to))"
+        if !extra.isEmpty { query += " \(extra)" }
         let first = try await searchPage(query: query, token: token, page: 1)
         if first.total_count > Self.searchResultCap, to.timeIntervalSince(from) > 3600 {
             let middle = from.addingTimeInterval(to.timeIntervalSince(from) / 2)
             let early = try await search(
-                login: login, token: token, qualifier: qualifier, from: from, to: middle)
+                login: login, token: token, window: window, from: from, to: middle, extra: extra)
             let late = try await search(
-                login: login, token: token, qualifier: qualifier,
-                from: middle.addingTimeInterval(1), to: to)
+                login: login, token: token, window: window,
+                from: middle.addingTimeInterval(1), to: to, extra: extra)
             return PullRequestFetch(
                 records: early.records + late.records,
                 isIncomplete: early.isIncomplete || late.isIncomplete)
@@ -195,7 +213,7 @@ public struct GitHubClient: Sendable {
     private func searchPage(query: String, token: String, page: Int) async throws
         -> SearchResponse
     {
-        try await searchPause()
+        try await searchLimiter.acquire()
         var components = URLComponents(string: "https://api.github.com/search/issues")!
         components.queryItems = [
             URLQueryItem(name: "q", value: query),
@@ -206,7 +224,13 @@ public struct GitHubClient: Sendable {
         ]
         var request = URLRequest(url: components.url!)
         Self.authorize(&request, token: token)
-        return try Self.decode(SearchResponse.self, from: try await send(request))
+        let (data, response) = try await transport.send(request)
+        await searchLimiter.observe(
+            remaining: response.value(forHTTPHeaderField: "X-RateLimit-Remaining")
+                .flatMap(Int.init),
+            resetAt: response.value(forHTTPHeaderField: "X-RateLimit-Reset").flatMap(Double.init)
+                .map { Date(timeIntervalSince1970: $0) })
+        return try Self.decode(SearchResponse.self, from: try Self.body(data, response))
     }
 
     // MARK: Transport
@@ -234,6 +258,11 @@ public struct GitHubClient: Sendable {
 
     private func send(_ request: URLRequest) async throws -> Data {
         let (data, response) = try await transport.send(request)
+        return try Self.body(data, response)
+    }
+
+    /// The body of a successful response, or the error GitHub's status code means.
+    private static func body(_ data: Data, _ response: HTTPURLResponse) throws -> Data {
         switch response.statusCode {
         case 200..<300:
             return data

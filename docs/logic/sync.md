@@ -39,18 +39,48 @@ Owners: `Sources/SlopometerCore/SyncCoordinator.swift`, `Connection.swift`, `Git
 
 ## PR fetch
 
-Two searches cover the history window: `author:<login> type:pr created:<from>..<to>`
-and the same with `merged:`, run per verified token. Results from every token are
-merged by node ID. If any saved token could not be used, coverage is marked
-incomplete because its repositories are missing. A window reporting more
-than 1,000 results is split in half recursively; pages are fetched up to the
-reported total. `incomplete_results` marks coverage incomplete. Each search request
-waits 2.1 s to stay under the 30 requests/minute search limit, so a first sync of
-about 900 PRs takes roughly a minute.
+Two searches cover a window: `author:<login> type:pr created:<from>..<to>` and
+`merged:<from>..<to> created:<<from>` (PRs created before the window and merged in it,
+so the two searches do not return the same PRs twice). They run per verified token
+and results from every token are merged by node ID. If any saved token could not be
+used, coverage is marked incomplete because its repositories are missing. A window
+reporting more than 1,000 results is split in half recursively; pages are fetched up
+to the reported total. `incomplete_results` marks coverage incomplete.
 
-Every sync refetches the whole window (395 days: 365-day range plus 30-day warm-up)
-and replaces cached records in one transaction. This reconciles delayed merges and
-PRs that were deleted or became inaccessible, at the cost of repeated requests.
+`SearchRateLimiter`, shared by every token because GitHub counts search requests per
+account, sends up to 28 search requests per rolling minute without waiting and sleeps
+only when that budget, or the budget GitHub reports in `X-RateLimit-Remaining`, is
+spent. A first sync of about 900 PRs is bounded by network time, not by pauses.
+
+**Full reconcile** (first sync for an account, a verified token without a checkpoint,
+a window that starts earlier than the cached coverage, or at least 24 hours since the
+last full reconcile): the last 30 days are fetched for every token and written first,
+so today's counts and the widget update within a few requests, then the rest of the
+395-day window (365-day range plus 30-day warm-up). When every verified token covered
+the whole window, the cached records are replaced in one transaction, which removes
+PRs that were deleted or became inaccessible. Until older history is in, or when it
+fails, coverage starts at the recent window, so older days are unknown rather than
+zero, and the failed token has no checkpoint, so the next sync refetches the window.
+
+**Changes only** (every other sync): one search per token,
+`updated:<checkpoint − 6 h>..<now>`, returns PRs created or changed since that
+token's checkpoint, including an older PR merged today. The overlap covers GitHub's
+search indexing delay. Records are inserted or updated by node ID; nothing is deleted.
+PRs outside the window that were touched for other reasons are ignored. A token whose
+fetch fails keeps its records and checkpoint and is reported in `pullRequestError`;
+`rateLimited` and `offline` stop the remaining tokens. Checkpoints advance only after
+a token's fetch succeeds. `SyncReport.pullRequestSyncMode` records which path ran.
+
+Deleted PRs and lost repository access are only reconciled by the daily full pass.
+
+## Progress
+
+`SyncCoordinator.sync` reports each stage as it starts (`SyncProgress`: checking
+tokens, updating calendar, fetching recent PRs, loading older PRs, fetching PR
+changes) with whether an earlier stage already wrote to the cache. `AppModel` shows
+the stage in the refresh controls and rebuilds the snapshot, including the widget's,
+whenever the cache changed, so the calendar and recent PRs appear before older
+history finishes.
 
 ## Scheduling (app)
 
@@ -223,7 +253,8 @@ Owners: `App/MainView.swift`, `App/SettingsView.swift`, `App/Glass.swift`.
 
 - In timezones ahead of the profile page's day labels, username-only "today" can be
   unknown until GitHub starts that day.
-- No incremental sync yet; each sync repeats the full window.
+- Incremental syncs cannot see deleted PRs or lost repository access; those wait for
+  the daily full reconcile.
 
 Deterministic evidence: `Tests/SlopometerCoreTests/GitHubClientTests.swift` and
 `SnapshotTests.swift`. Human/provider checklist: [measurements and sync](../../testing/MANUAL%20TO-DO/measurements-and-sync.md).

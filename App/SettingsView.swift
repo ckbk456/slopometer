@@ -247,7 +247,7 @@ struct SettingsView: View {
         if model.isSyncing {
             HStack(spacing: 6) {
                 ProgressView().controlSize(.small)
-                Text("Syncing…")
+                Text(model.syncStage?.label ?? "Syncing…")
             }
         } else if let synced = model.snapshot.lastSuccessfulSync {
             Text("Synced \(synced, style: .relative) ago")
