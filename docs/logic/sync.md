@@ -96,6 +96,31 @@ label spell out the count and unit, or the metric with "no data yet". The app
 bundles the original vector assets and their [Octicons license](../../App/Resources/Octicons-LICENSE.txt);
 provenance is recorded in [third-party notices](../../THIRD_PARTY_NOTICES.md).
 
+## App window layout and appearance (0.7.0)
+
+Owners: `App/MainView.swift`, `App/SettingsView.swift`, `App/Glass.swift`.
+
+- The Activity tab lays its content out with `FillingStack`: every item keeps its own
+  height and the chart gets the rest of the visible height, never less than 220 pt.
+  When the quota, day detail, or notices leave less than that, the chart keeps 220 pt
+  and the tab scrolls. The available height comes from the scroll view's frame, not
+  from the content, so resizing does not feed back into the layout. The grid keeps
+  square cells, sized by the smaller of width and height, so a long range that is
+  limited by width leaves its spare height below the notices rather than between rows.
+- Settings keeps a one-line caption per access tier; the longer guidance (public-profile
+  limits, fine-grained token setup and organization tokens, classic-token write access,
+  timezone day labels) sits behind a `?` popover. Tier 3 is headed InsecuSlopometer™;
+  its toggle reads "Allow classic tokens" and behaves as before.
+- Before the repository picker or a `?` popover opens, a focused text field in the
+  window gives up focus. A popover takes key status, and when it closed the window
+  restored focus to the Username field, which selected its text and scrolled the form
+  to the top. Menus do not take key status, so other pickers never did this.
+- On macOS 26 and later the app's own cards (quota, token explanation, day detail), the
+  tier badge, and the refresh and `?` buttons use Liquid Glass; controls inside a glass
+  card stay borderless or bordered so glass is not stacked on glass. macOS 14 and 15, and
+  builds made with an SDK before macOS 26 (CI uses Xcode 16.4), keep the earlier fills.
+  Widgets are unchanged.
+
 ## Known limits
 
 - In timezones ahead of the profile page's day labels, username-only "today" can be

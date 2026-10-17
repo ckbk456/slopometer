@@ -10,19 +10,19 @@ struct WidgetsView: View {
         Form {
             Section {
                 Text(
-                    "Each widget size has its own settings; none follows the Activity tab's metric or view. Add widgets from Edit Widgets on the desktop or in Notification Center."
+                    "Each size has its own settings, separate from the Activity tab. Add widgets with Edit Widgets on the desktop or in Notification Center."
                 )
                 .font(.caption).foregroundStyle(.secondary)
             }
             sizeSection(
                 .small, settings: $model.settings,
-                summary: "The headline and the last sync time. No chart.")
+                summary: "Headline and last sync time.")
             sizeSection(
                 .medium, settings: $model.settings,
-                summary: "A one-line headline and the last 7 days as daily tiles.")
+                summary: "Headline and the last 7 days as tiles.")
             sizeSection(
                 .large, settings: $model.settings,
-                summary: "The headline and a chart with its own view and window.")
+                summary: "Headline and a chart.")
         }
         .formStyle(.grouped)
     }
@@ -40,7 +40,7 @@ struct WidgetsView: View {
             }
             if panel.wrappedValue.headline == .quota, model.snapshot.quota == nil {
                 Text(
-                    "No daily PR quota is active, so this size shows today's count instead. Turn one on in Settings → Pull requests."
+                    "No daily PR quota is on, so this shows today's count. Turn one on in Settings."
                 )
                 .font(.caption).foregroundStyle(.secondary)
             }
@@ -48,12 +48,12 @@ struct WidgetsView: View {
                 ForEach(Metric.allCases) { Text($0.title).tag($0) }
             }
             if size == .small {
-                Text("Shown when the headline is today's count.")
+                Text("Used when the headline is today's count.")
                     .font(.caption).foregroundStyle(.secondary)
             }
             if panel.wrappedValue.metric.requiresToken, !model.tokenUsable {
                 Text(
-                    "\(panel.wrappedValue.metric.title) needs a GitHub token. Until then this size asks for one."
+                    "\(panel.wrappedValue.metric.title) needs a GitHub token."
                 )
                 .font(.caption).foregroundStyle(.orange)
             }

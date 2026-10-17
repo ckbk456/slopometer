@@ -32,3 +32,12 @@ Widget sync age and tinted contrast (0.6.1): medium and large footers show the s
 clock time with an hh:mm age that advances per minute from the widget's own timeline;
 busiest medium tiles cut their number out when the desktop renders the widget in one
 color. Implemented with core tests for the label; desktop rendering checks are pending.
+
+App window polish (0.7.0): implemented on `codex/app-glass-polish`. The Activity chart
+fills tall windows (minimum 220 pt, scrolling when content is taller); Settings captions
+are condensed to one line per tier with longer guidance behind `?` popovers; tier 3 is
+headed InsecuSlopometer™ with an "Allow classic tokens" toggle; the repository picker no
+longer refocuses the Username field when it closes (root cause reasoned from AppKit
+focus behavior, not yet observed fixed); the app's cards, badge, and small buttons use
+Liquid Glass on macOS 26+ with the earlier look as fallback. Local validation is recorded
+in the handoff; every UI check in the desktop manual guide remains pending.

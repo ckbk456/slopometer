@@ -11,11 +11,31 @@
 - [ ] Without a token, PRs opened / Authored PRs merged show the token explanation; Add
       Token opens Settings scrolled to the token field. Rejected or mismatched tokens show
       their own wording.
-- [ ] Settings order: GitHub connections (1 public account, 2 fine-grained tokens, 3 classic
-      tokens behind InsecuSlopometer™), Pull requests, Timezone, About. Pull requests is
+- [ ] Settings order: GitHub connections (1 public account, 2 fine-grained tokens, 3
+      InsecuSlopometer™ with an "Allow classic tokens" toggle), Pull requests, Timezone, About. Pull requests is
       grayed out without a token; Counts and Daily target stay visible but grayed out while
       the quota is off, and turning it back on restores their earlier values.
 - [ ] Type a daily quota target (for example 100); values outside 1–999 snap into range.
+
+## App window polish (0.7.0): pending
+
+- [ ] Focus the Username field, scroll Settings down, open Pull requests › Repositories
+      (with and without more than 8 repositories, so with and without the search field),
+      then click elsewhere to close it. The form keeps its scroll position and the
+      Username text is not selected. Repeat with each `?` popover.
+- [ ] Each GitHub connections tier shows a one-line caption and a `?` button; each `?`
+      (and the Timezone `?`) opens readable guidance, closes with Esc or a click outside,
+      and is announced by VoiceOver as "About …". The fine-grained token link stays visible.
+- [ ] Tier 3 reads InsecuSlopometer™; "Allow classic tokens" keeps its orange tint, is
+      disabled while classic tokens are saved, and shows its note.
+- [ ] Resize the window from 640×540 to full-screen height: columns and line charts fill
+      the height smoothly without jitter; the grid grows with square cells and never
+      overflows the width for 30, 90, and 365 days. With the quota card, day detail, or
+      notices showing, the chart keeps at least its minimum height and the tab scrolls.
+- [ ] On macOS 26+: quota card, token explanation, day detail, tier badge, refresh and `?`
+      buttons render as Liquid Glass, legible in light/dark and with Reduce Transparency
+      and Increase Contrast. On macOS 14/15: the earlier gray cards and borderless buttons.
+- [ ] Condensed wording reads clearly and still says which features need a token.
 
 ## Menu-bar metric icons (0.3.1): pending
 

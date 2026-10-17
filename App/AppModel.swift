@@ -238,7 +238,7 @@ final class AppModel {
             widgetProblem = nil
         } catch {
             widgetProblem =
-                "The widget can't be updated because macOS blocked access to Slopometer's shared folder. Quit every other copy of Slopometer and launch a signed build (make run)."
+                "macOS blocked the widget's shared folder, so the widget can't update. Quit other copies of Slopometer and run a signed build (make run)."
         }
     }
 

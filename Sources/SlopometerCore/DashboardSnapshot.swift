@@ -194,7 +194,7 @@ public enum SnapshotBuilder {
             lastSync = state.lastCalendarSync
             if state.calendarSource == .profilePage {
                 notices.append(
-                    "Username-only mode reads the public profile page. Add a token for PR metrics and quotas."
+                    "Username only: read from your public profile page. Add a token for PR stats."
                 )
             }
         } else if tokenUsable {
@@ -204,7 +204,7 @@ public enum SnapshotBuilder {
             lastSync = state.lastPullRequestSync
             if state.pullRequestResultsIncomplete {
                 notices.append(
-                    "Some PRs may be missing (incomplete GitHub search, or a token that failed); counts may be low."
+                    "Some PRs may be missing (incomplete search or a failed token), so counts may be low."
                 )
             }
         } else {
