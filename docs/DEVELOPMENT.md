@@ -37,7 +37,7 @@ controlled. Agents must still inspect for separately running commands.
 | Signed app: `make build-signed` | `project.yml` team, `Makefile` | 10s–5m cold | Yes | Automatic signing with the project team; needs a signed-in Xcode account; required for the sandbox and widget |
 | Complete local gate: `make validate` | `Makefile` | 15s–8m cold | Yes | Sequential lint, docs, tests, build; internet if caches empty |
 | Open Xcode: `make open` | `Makefile` | <10s | No | Human-owned GUI action |
-| Preview app: `make run` | `Makefile` | Build + launch | Yes | Signed build, so it matches Xcode runs; human-owned app process; quit via menu bar |
+| Preview app: `make run` | `Makefile`, `scripts/register_build.sh` | Build + launch | Yes | Signed build, so it matches Xcode runs; unregisters (does not delete) Slopometer builds from other checkouts that are not running, so the widget and `slopometer://` use this one; human-owned app process; quit via menu bar |
 
 There is no separate JS lint, typecheck, codegen service, migration CLI, dev
 server, deployment command, release job, or UI test suite. Swift compilation
@@ -52,7 +52,9 @@ targets or file membership. `Package.resolved` is canonical. Xcode 27.1 did not
 emit a separate workspace lockfile for this local-package layout; if another
 supported Xcode emits one, the structural check verifies its pins agree.
 
-Build output is `.build/xcode/Build/Products/Debug/Slopometer.app`. The core
+Build output is `.build/xcode/Build/Products/Debug/Slopometer.app`. `make build` and
+`make validate` write an unsigned app to the same path, which macOS will not load as a
+widget; run `make run` again before checking the widget. The core
 package uses `.build/`; Xcode dependency clones use `.build/SourcePackages/`.
 These are ignored. No global shell config or background service is needed.
 

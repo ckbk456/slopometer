@@ -60,4 +60,5 @@ build-signed:
 	xcodebuild $(XCODE_ARGS) $(LOCKED_PACKAGES) -jobs 4 -allowProvisioningUpdates build
 
 run: build-signed
+	@bash scripts/register_build.sh
 	open .build/xcode/Build/Products/Debug/Slopometer.app

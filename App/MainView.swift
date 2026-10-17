@@ -63,10 +63,7 @@ struct DashboardView: View {
                         SlopChart(
                             points: snapshot.points, style: snapshot.chartStyle,
                             unit: snapshot.unit, showsAverage: snapshot.averageWindow > 0,
-                            selection: $selectedDay
-                        )
-                        .frame(
-                            maxHeight: 220, alignment: .topLeading
+                            selection: $selectedDay, gridMaxHeight: 220
                         )
                         .frame(height: snapshot.chartStyle == .grid ? nil : 220)
                         footnote(snapshot)
