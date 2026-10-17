@@ -67,25 +67,68 @@ struct SnapshotTests {
         #expect(snapshot.scopeLabel == "Account-wide")
     }
 
-    @Test func widgetSeriesHasAFixedWindowThatAgreesWithTheChart() throws {
+    @Test func eachWidgetSizeHasAFixedWindowThatAgreesWithTheChart() throws {
         let cache = try MeasurementCache()
         var counts: [CalendarDay: Int] = [:]
         for offset in 0..<400 { counts[day("2026-10-16").adding(days: -offset)] = offset % 5 }
         try cache.replaceCalendar(counts, source: .graphQL, at: now)
         for range in DashboardSettings.ranges {
+            var configured = settings(.contributions, average: 7, range: range)
+            configured.chartStyle = .line
             let snapshot = try SnapshotBuilder.build(
-                settings: settings(.contributions, average: 7, range: range), cache: cache,
-                tokenUsable: true, problems: [], now: now)
-            #expect(snapshot.recentPoints.count == SnapshotBuilder.recentDays)
-            #expect(snapshot.recentPoints.last?.day == day("2026-10-16"))
-            #expect(snapshot.recentPoints.last?.isIncomplete == true)
-            #expect(snapshot.recentPoints.allSatisfy { $0.average == nil })
-            let recent = Dictionary(
-                uniqueKeysWithValues: snapshot.recentPoints.map { ($0.day, $0.count) })
+                settings: configured, cache: cache, tokenUsable: true, problems: [], now: now)
+            #expect(snapshot.widget(.small)?.points.isEmpty == true)
+            #expect(snapshot.widget(.small)?.todayCount == snapshot.todayCount)
+            #expect(snapshot.widget(.medium)?.points.count == WidgetSettings.stripDays)
+            let large = try #require(snapshot.widget(.large))
+            #expect(large.chartStyle == .grid)
+            #expect(large.points.count == WidgetSettings.gridDays)
+            #expect(large.windowLabel == "Last 26 weeks")
+            #expect(large.points.last?.day == day("2026-10-16"))
+            #expect(large.points.last?.isIncomplete == true)
+            #expect(large.points.allSatisfy { $0.average == nil })
+            let recent = Dictionary(uniqueKeysWithValues: large.points.map { ($0.day, $0.count) })
             for point in snapshot.points where recent[point.day] != nil {
                 #expect(recent[point.day] == point.count)
             }
         }
+    }
+
+    @Test func widgetSizesFollowTheirOwnSettingsNotTheDashboard() throws {
+        let cache = try MeasurementCache()
+        try cache.replaceCalendar([day("2026-10-16"): 4], source: .graphQL, at: now)
+        try cache.replacePullRequests(
+            [pr("a", created: "2026-10-16T02:00:00Z", merged: "2026-10-16T03:00:00Z")],
+            coveringFrom: date("2025-09-01T00:00:00Z"), incomplete: false, at: now)
+        var configured = settings(.prsMerged)
+        configured.widgets.small = WidgetPanelSettings(headline: .today, metric: .contributions)
+        configured.widgets.large = WidgetPanelSettings(
+            headline: .today, metric: .prsOpened, chartStyle: .columns, windowDays: 30)
+        let snapshot = try SnapshotBuilder.build(
+            settings: configured, cache: cache, tokenUsable: true, problems: [], now: now)
+        #expect(snapshot.todayCount == 1)
+        #expect(snapshot.widget(.small)?.metric == .contributions)
+        #expect(snapshot.widget(.small)?.todayCount == 4)
+        #expect(snapshot.widget(.small)?.headline == .today)
+        let large = try #require(snapshot.widget(.large))
+        #expect(large.chartStyle == .columns)
+        #expect(large.points.count == 30)
+        #expect(large.windowLabel == "Last 30 days")
+        #expect(large.todayCount == 1)
+    }
+
+    @Test func settingsSavedBeforeWidgetSettingsKeepTheirValues() throws {
+        let saved = Data(
+            #"{"login":"me","metric":"prsOpened","chartStyle":"columns","rangeDays":30,"averageWindow":0,"timeZoneID":"Asia/Bangkok","repositories":[]}"#
+                .utf8)
+        let decoded = try JSONDecoder().decode(DashboardSettings.self, from: saved)
+        #expect(decoded.login == "me")
+        #expect(decoded.rangeDays == 30)
+        for size in WidgetSize.allCases { #expect(decoded.widgets[size].metric == .prsOpened) }
+        #expect(decoded.widgets.large.chartStyle == .columns)
+        let roundTrip = try JSONDecoder().decode(
+            DashboardSettings.self, from: JSONEncoder().encode(decoded))
+        #expect(roundTrip == decoded)
     }
 
     @Test func quotaAndEvidenceComeFromTheSameRecords() throws {

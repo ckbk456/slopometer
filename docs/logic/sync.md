@@ -58,12 +58,17 @@ macOS refuses App Group access to unsigned builds and to a copy signed different
 from the one that owns the container. A failed write is shown in the app window as
 a widget notice (not a cache error); it does not block the dashboard.
 
-The snapshot also carries `recentPoints`: the last 182 days (26 weeks) of the selected
-metric, built from the same daily series as `points` whatever the selected range, so
-widgets can show fixed windows without fetching. Small shows the headline and the
-sync time; medium shows a 7-day tile strip; large shows the 26-week grid, or up to 90
-days of the range for columns and line, without the average. The widget distinguishes
-no readable snapshot ("No data yet"), no username, and a PR metric without a token.
+The snapshot also carries `widgets`: one entry per size, built from
+`DashboardSettings.widgets` (the Widgets tab), never from the Activity tab's metric or
+view. The tab previews each size by rendering the shared `WidgetContent` view on the
+same snapshot the widget reads. Each entry holds its headline choice, metric, view, today's
+count, and a fixed window cut from the same daily series as `points` (history always
+spans at least 182 days), without averages. Small shows the headline and the sync time;
+medium shows a 7-day tile strip; large shows the 26-week grid, or the last 30 or 90 days
+as columns or line. A quota headline falls back to today's count when no quota is
+active. The widget distinguishes no readable snapshot ("No data yet"), no username, and
+a size whose PR metric has no usable token. Settings saved before widget settings
+existed decode with every size following the saved dashboard metric and view.
 Activity marks are accent-tinted so levels survive the tinted desktop rendering.
 
 The dashboard replaces the chart with a token explanation when a PR metric is
