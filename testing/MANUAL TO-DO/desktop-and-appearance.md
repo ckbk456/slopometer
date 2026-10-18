@@ -241,7 +241,7 @@ checks below were not separately reported and remain pending.
 
 - [ ] Settings › Timezone shows "City · GMT±h" (for example "Ho Chi Minh · GMT+7") and opens a
       popover with the search field focused and the current zone scrolled into view.
-- [ ] Typing "ho chi", "saigon"-style partial names, "asia", "Indochina", "+7", or "UTC+7"
+- [ ] Typing "ho chi" (partial names), "asia", "Indochina", "+7", or "UTC+7"
       narrows the list; Return picks the first match; clicking a row picks it and closes.
 - [ ] "Use This Mac's Timezone" appears only when the setting differs from the Mac's zone.
 - [ ] Offsets show half hours (Kolkata GMT+5:30) and current daylight saving (New York).
