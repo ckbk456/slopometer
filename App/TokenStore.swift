@@ -15,7 +15,7 @@ struct TokenEntry: Codable, Equatable, Identifiable {
 /// GitHub tokens kept in Keychain, one item per token. The list of entries is
 /// nonsecret and kept in preferences.
 enum TokenStore {
-    private static let service = "dev.slopometer.github-token"
+    private static let service = "vn.infinitex.slopometer.github-token"
     /// The Keychain account used when only one token could be saved.
     private static let legacyID = "default"
     private static let entriesKey = "tokenEntries"

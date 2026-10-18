@@ -63,12 +63,18 @@ These are ignored. No global shell config or background service is needed.
 ## Versioning
 
 The app and widget share one [semantic version](https://semver.org) in `project.yml`
-(`MARKETING_VERSION`). Before 1.0, bump the minor version for user-visible features
-and the patch version for fixes; regenerate the project after bumping. `make build`
+(`MARKETING_VERSION`). From 1.0.0, bump the patch version for fixes, the minor version
+for new features, and the major version for changes that drop saved data or settings;
+regenerate the project after bumping. Sparkle orders releases by the build number, which
+must only increase between published builds. `make build`
 and `make run` stamp the build number (commits on `HEAD`) and the short commit SHA,
 suffixed `-modified` when the tree had uncommitted edits. Settings › About and the
 menu bar panel show all three, so a running build can be matched to its source.
 Builds started from Xcode keep build `1` and commit `unknown`.
+
+The app's identity (`vn.infinitex.slopometer`, App Group, Keychain service, update feed)
+is listed in [Updates](logic/updates.md). Debug builds share it with releases, including
+preferences and the cache, but default to no scheduled update checks.
 
 ## Gates and ownership
 

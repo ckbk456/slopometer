@@ -166,6 +166,14 @@ Tokens belong in Keychain. Never place tokens in source, preferences, logs,
 the shared snapshot, or chart exports. The sample-data scaffold needs no
 credentials.
 
+## Updates
+
+Releases are signed with Developer ID, notarized, and offered through an in-app
+updater that reads a signed static feed. Release builds check on a schedule the
+person can turn off and can check on demand; an update installs only after the person
+accepts it, and only when its signature matches the key built into the app. The check
+sends no account, token, or usage data. See the [updates guide](docs/logic/updates.md).
+
 ## Acceptance gates
 
 - Each chart and the widget agree on the same daily data and explain missing or

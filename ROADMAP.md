@@ -9,7 +9,7 @@ milestones, not date estimates or authorization to publish/merge/release.
 | 1 · Harden the bench | Single CI run per change, project drift check, consistent formatter and signing, widget extension with App Group and shared snapshot format | CI gate; widget appears from a locally signed build (manual) | Toolchain merged (#2); widget built and signed locally; manual widget check pending |
 | 2 · Measure real slop | Source records, timezone bucketing, cache v2, public-profile calendar, optional token with GraphQL calendar and PR search, recorded fixtures | Reconciliation, deduplication, removed-PR, timezone, search-window, rate-limit, and token-mismatch tests | MVP: tests pass locally; live sync exercised on one account; manual provider checks pending |
 | 3 · Set the daily quota | PR goals, evidence inspector, three charts, 7/30-day averages, widget views | Same-series chart/widget agreement; boundary, missing-data and quota tests | MVP: implemented without login launch or notifications; token gate, typed quota target, and fitted grid added; size-specific widget windows and per-size widget settings added; repository filter is a checklist of synced repositories; several tokens (one per organization) and opt-in classic tokens (InsecuSlopometer™); manual checks pending |
-| 4 · Calibrate and package | Theme editor, saved configurations, accessibility, login launch, optional notification | Consolidated manual gates and explicit license/signing/distribution decisions | Theme editor implemented (0.12.0); the rest planned; manual checks pending |
+| 4 · Calibrate and package | Theme editor, saved configurations, accessibility, login launch, optional notification | Consolidated manual gates and explicit license/signing/distribution decisions | Theme editor implemented (0.12.0); release identity and in-app updater implemented (1.0.0); release job, login launch, notification, saved configurations, and accessibility planned; manual checks pending |
 
 First technical priority: settle data contracts and widget plumbing before
 visual polish. First data priority: agree on what counts before celebrating a
@@ -105,3 +105,14 @@ Saved theme tiles with their own dark colors show light above dark; "Same colors
 mode" sets the dark colors aside instead of discarding them, so turning it off restores
 them. The widget sync age now reads "2m ago" or "1h 05m ago" instead of "00:02".
 Core tests cover the new settings and snapshot fields; rendering checks are pending.
+
+Release identity and updater (1.0.0): implemented on `codex/sparkle-updater` on the user's
+direction (SCOPE updated). The app, widget, App Group, and Keychain service moved to
+`vn.infinitex.slopometer`, so earlier development data is not carried over. Sparkle 2.10.0
+checks `https://updates.infinitex.vn/slopometer/appcast.xml` daily in release builds (off
+by default in Debug), with Settings › Updates and a menu bar panel reminder; the EdDSA key
+was generated in the release machine's Keychain. The version is 1.0.0 on the user's
+direction, although SCOPE's login launch, notification, and saved configurations are not
+yet implemented. Next: a tagged-release job (Developer ID archive, notarization, appcast,
+upload to R2). Updater and identity checks in the
+[desktop guide](testing/MANUAL%20TO-DO/desktop-and-appearance.md) are pending.

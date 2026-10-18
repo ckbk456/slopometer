@@ -12,6 +12,7 @@
 | Implemented calculation behavior | [Measurements](logic/measurements.md) |
 | Implemented SQLite cache behavior | [Storage](logic/storage.md) |
 | Implemented sync, tiers, and snapshot | [Sync](logic/sync.md) |
+| Implemented updates and release identity | [Updates](logic/updates.md) |
 | GitHub data-source evidence | [GitHub data sources](research/github-data-sources.md) |
 | Consolidated human gates | [Manual testing](../testing/MANUAL%20TO-DO/README.md) |
 

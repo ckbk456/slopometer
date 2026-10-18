@@ -173,6 +173,23 @@ checks below were not separately reported and remain pending.
 - [ ] VoiceOver names each preset and control; the selected preset is marked by more
       than color; Increase Contrast and Reduce Transparency remain legible.
 
+## Release identity and updates (1.0.0): pending
+
+- [ ] After `make run`, only the 1.0.0 build is registered: the widget gallery offers one
+      Slopometer, and `slopometer://` links open it. Earlier `dev.slopometer.app` widgets
+      are gone or show no data and must be re-added.
+- [ ] The app starts empty (new identity): enter the username and tokens again; sync,
+      the menu bar, and the widget work as before.
+- [ ] Settings › Updates shows "Check for updates automatically" (off in Debug) and
+      "Check for Updates…". Before a feed is published, checking reports that the update
+      server cannot be reached, with no crash or hang.
+- [ ] Settings › About and the menu bar panel read version 1.0.0.
+- [ ] After a feed is published: an older release finds the newer one, the alert shows
+      release notes, Install relaunches into the new version, and data and widgets are kept.
+- [ ] A scheduled check (release build) shows a Dock icon and the menu bar panel row
+      "Slopometer x is available"; clicking the row brings the alert forward; both clear
+      after the alert is dismissed.
+
 ## Widget and background app: pending
 
 - [ ] App runs from the menu bar without a Dock icon; the window opens on demand.

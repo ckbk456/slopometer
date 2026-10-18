@@ -6,7 +6,9 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 
 APP="$PWD/.build/xcode/Build/Products/Debug/Slopometer.app"
-BUNDLE_ID=dev.slopometer.app
+BUNDLE_ID=vn.infinitex.slopometer
+# Builds made before the 1.0.0 identity change still register under this ID.
+OLD_BUNDLE_ID=dev.slopometer.app
 LSREGISTER=/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister
 
 [ -d "$APP" ] || { printf 'No build at %s\n' "$APP" >&2; exit 1; }
@@ -16,7 +18,7 @@ LSREGISTER=/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchSe
     | while IFS= read -r other; do
         [ "$other" = "$APP" ] && continue
         id=$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "$other/Contents/Info.plist" 2>/dev/null || true)
-        [ -z "$id" ] || [ "$id" = "$BUNDLE_ID" ] || continue
+        [ -z "$id" ] || [ "$id" = "$BUNDLE_ID" ] || [ "$id" = "$OLD_BUNDLE_ID" ] || continue
         if pgrep -f "$other/Contents/" >/dev/null; then
             printf 'Still running, quit it first: %s\n' "$other" >&2
             continue

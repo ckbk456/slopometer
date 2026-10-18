@@ -5,6 +5,11 @@
     <key>com.apple.security.app-sandbox</key><true/>
     <key>com.apple.security.network.client</key><true/>
     <key>com.apple.security.application-groups</key>
-    <array><string>5U4584QFCQ.dev.slopometer</string></array>
+    <array><string>5U4584QFCQ.vn.infinitex.slopometer</string></array>
+    <key>com.apple.security.temporary-exception.mach-lookup.global-name</key>
+    <array>
+        <string>$(PRODUCT_BUNDLE_IDENTIFIER)-spks</string>
+        <string>$(PRODUCT_BUNDLE_IDENTIFIER)-spki</string>
+    </array>
 </dict>
 </plist>

@@ -3,7 +3,8 @@
 ## Implemented MVP
 
 - `App/`: menu-bar accessory app (`LSUIElement`), `AppModel` (settings, polling,
-  snapshot publishing), window with Activity, Widgets, and Settings tabs, Keychain token store (several tokens).
+  snapshot publishing), window with Activity, Widgets, and Settings tabs, Keychain token store (several tokens),
+  and `Updater` (Sparkle 2; see [Updates](logic/updates.md)).
 - `Widget/`: WidgetKit extension that only decodes the shared snapshot.
 - `Shared/`: chart views and the widget content view, compiled into both the app and
   the widget so the Widgets tab previews exactly what the widget renders.

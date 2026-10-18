@@ -331,7 +331,7 @@ public enum SnapshotBuilder {
 
 /// The snapshot file shared with the widget through the App Group container.
 public enum SharedSnapshot {
-    public static let appGroup = "5U4584QFCQ.dev.slopometer"
+    public static let appGroup = "5U4584QFCQ.vn.infinitex.slopometer"
     private static let fileName = "snapshot.json"
 
     public static func url() -> URL? {

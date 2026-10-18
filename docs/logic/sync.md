@@ -105,9 +105,9 @@ PR evidence, the last successful sync, and plain-language notices for missing to
 stale data (older than 45 minutes), incomplete coverage, and sync errors.
 
 The app writes the snapshot as JSON to the App Group container
-`5U4584QFCQ.dev.slopometer` and reloads widget timelines only when the bytes change.
+`5U4584QFCQ.vn.infinitex.slopometer` and reloads widget timelines only when the bytes change.
 The widget decodes it and never fetches or reads Keychain. Tokens live only in
-Keychain (service `dev.slopometer.github-token`, one item per token ID); their names
+Keychain (service `vn.infinitex.slopometer.github-token`, one item per token ID); their names
 and kinds are nonsecret preferences (`tokenEntries`). The single token saved by
 earlier versions (account `default`) is adopted as "Personal".
 

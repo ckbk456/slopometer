@@ -16,10 +16,14 @@
     <key>NSPrincipalClass</key><string>NSApplication</string>
     <key>LSUIElement</key><true/>
     <key>LSApplicationCategoryType</key><string>public.app-category.developer-tools</string>
+    <key>SUFeedURL</key><string>https://updates.infinitex.vn/slopometer/appcast.xml</string>
+    <key>SUPublicEDKey</key><string>SK0o6/oHyo1roZXs4XG2qI0ZrKFK8hjCcG8prdAr0pY=</string>
+    <key>SUEnableAutomaticChecks</key><string>$(SLOPOMETER_AUTOMATIC_UPDATE_CHECKS)</string>
+    <key>SUEnableInstallerLauncherService</key><true/>
     <key>CFBundleURLTypes</key>
     <array>
         <dict>
-            <key>CFBundleURLName</key><string>dev.slopometer.app</string>
+            <key>CFBundleURLName</key><string>vn.infinitex.slopometer</string>
             <key>CFBundleURLSchemes</key><array><string>slopometer</string></array>
         </dict>
     </array>

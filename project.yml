@@ -11,7 +11,7 @@ settings:
     DEVELOPMENT_TEAM: 5U4584QFCQ
     CODE_SIGN_STYLE: Automatic
     # Semantic version shared by the app and widget; bump here, then `make generate`.
-    MARKETING_VERSION: 0.12.0
+    MARKETING_VERSION: 1.0.0
     # Overridden by the Makefile with the commit count and short SHA of the build.
     CURRENT_PROJECT_VERSION: 1
     SLOPOMETER_COMMIT: unknown
@@ -20,6 +20,10 @@ packages:
     # Equivalent to the repository root, but the generated reference is not named after
     # the checkout folder, so every clone generates an identical project.
     path: Sources/..
+  # In-app updates. Pinned exactly; the Xcode workspace lockfile records the resolution.
+  Sparkle:
+    url: https://github.com/sparkle-project/Sparkle
+    exactVersion: 2.10.0
 targets:
   Slopometer:
     type: application
@@ -32,14 +36,22 @@ targets:
       - Shared
     dependencies:
       - package: SlopometerCore
+      - package: Sparkle
       - target: SlopometerWidget
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: dev.slopometer.app
+        PRODUCT_BUNDLE_IDENTIFIER: vn.infinitex.slopometer
         PRODUCT_NAME: Slopometer
         INFOPLIST_FILE: App/Info.plist
         CODE_SIGN_ENTITLEMENTS: App/Slopometer.entitlements
         ENABLE_APP_SANDBOX: YES
+      configs:
+        # Development builds check for updates only when asked, so a newer release
+        # never offers to replace the build under test.
+        Debug:
+          SLOPOMETER_AUTOMATIC_UPDATE_CHECKS: NO
+        Release:
+          SLOPOMETER_AUTOMATIC_UPDATE_CHECKS: YES
   SlopometerWidget:
     type: app-extension
     platform: macOS
@@ -53,7 +65,7 @@ targets:
       - package: SlopometerCore
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: dev.slopometer.app.widget
+        PRODUCT_BUNDLE_IDENTIFIER: vn.infinitex.slopometer.widget
         PRODUCT_NAME: SlopometerWidget
         INFOPLIST_FILE: Widget/Info.plist
         CODE_SIGN_ENTITLEMENTS: Widget/SlopometerWidget.entitlements

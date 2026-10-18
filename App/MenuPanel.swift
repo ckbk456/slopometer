@@ -6,6 +6,7 @@ import SwiftUI
 /// sync status, readable at a glance. Settings and inspection stay in the app window.
 struct MenuPanel: View {
     @Environment(AppModel.self) private var model
+    @Environment(Updater.self) private var updater
     @Environment(\.dismiss) private var dismiss
     @Environment(\.slopColors) private var colors
 
@@ -30,6 +31,7 @@ struct MenuPanel: View {
                         icon: "exclamationmark.triangle.fill", iconStyle: colors.warning,
                         title: notice)
                 }
+                if let version = updater.pendingVersion { updateRow(version) }
             }
             .padding(6)
             Divider()
@@ -222,6 +224,25 @@ struct MenuPanel: View {
         .padding(.horizontal, 10)
         .padding(.vertical, 5)
         .accessibilityElement(children: .combine)
+    }
+
+    /// Shown after a scheduled check finds a release, until its alert is looked at.
+    private func updateRow(_ version: String) -> some View {
+        Button {
+            dismiss()
+            updater.checkForUpdates()
+        } label: {
+            PanelRow(
+                icon: "arrow.down.circle.fill", iconStyle: colors.markText,
+                title: "Slopometer \(version) is available"
+            ) {
+                Text("View")
+            }
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .help("Show the update")
+        .accessibilityLabel("Slopometer \(version) is available. Show the update.")
     }
 
     /// Snapshot notices the headline does not already explain, plus widget sharing problems.

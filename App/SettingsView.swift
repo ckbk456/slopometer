@@ -4,6 +4,7 @@ import SwiftUI
 
 struct SettingsView: View {
     @Environment(AppModel.self) private var model
+    @Environment(Updater.self) private var updater
     @Binding var focus: SettingsAnchor?
     @FocusState private var focusedField: SettingsAnchor?
     @State private var login = ""
@@ -23,7 +24,8 @@ struct SettingsView: View {
     }
 
     private func form(bindable: Bindable<AppModel>) -> some View {
-        Form {
+        @Bindable var updater = updater
+        return Form {
             // Who is measured first: the account and how it is connected, then its tokens.
             Section {
                 accountSummary
@@ -178,6 +180,11 @@ struct SettingsView: View {
             AppearanceSettings(
                 theme: bindable.settings.theme, saved: bindable.settings.savedThemes,
                 appearance: bindable.settings.appearance)
+
+            Section("Updates") {
+                Toggle("Check for updates automatically", isOn: $updater.checksAutomatically)
+                Button("Check for Updates…") { updater.checkForUpdates() }
+            }
 
             Section("About") {
                 LabeledContent("Version", value: BuildInfo.version)
