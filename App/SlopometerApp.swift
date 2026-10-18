@@ -7,8 +7,15 @@ struct SlopometerApp: App {
     static let mainWindowID = "slopometer"
 
     @NSApplicationDelegateAdaptor private var delegate: AppDelegate
-    @State private var model = AppModel()
-    @State private var updater = Updater()
+    @State private var model: AppModel
+    @State private var updater: Updater
+
+    init() {
+        // Before the model or Sparkle can open a URL session.
+        HTTPCacheCleanup.run()
+        _model = State(initialValue: AppModel())
+        _updater = State(initialValue: Updater())
+    }
 
     var body: some Scene {
         Window("Slopometer", id: Self.mainWindowID) {

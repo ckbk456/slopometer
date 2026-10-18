@@ -44,6 +44,11 @@ Provider integration and PR quotas are not yet implemented. All gates are pendin
 - [ ] With notifications denied in System Settings, the caption and "Open Notifications"
       appear, and the button opens Slopometer's notification settings.
 - [ ] Verify credentials stay in Keychain and never enter logs, settings, exports, or Git.
+- [ ] After a sync with a token, the app container's `Library/Caches/vn.infinitex.slopometer/`
+      has no `Cache.db*` or `fsCachedData`, and a launch after a 1.0.0 development build
+      removes any that were there (1.0.1).
+- [ ] With Keychain refusing a delete (for example a locked keychain), removing a token
+      keeps it listed and shows the Keychain notice; a later removal clears it (1.0.1).
 - [ ] Verify persisted settings/cache after restart and upgrades without losing source records.
 
 Deterministic numeric/cache tests are separate from this provider checklist.

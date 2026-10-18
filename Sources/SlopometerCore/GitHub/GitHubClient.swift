@@ -37,7 +37,20 @@ public protocol HTTPTransport: Sendable {
 public struct URLSessionTransport: HTTPTransport {
     private let session: URLSession
 
-    public init(session: URLSession = .shared) {
+    /// A session that keeps nothing: no URL cache, cookies, or credential storage, in memory
+    /// or on disk. The shared session's disk cache stores whole requests, Authorization
+    /// header included, and tokens belong in Keychain only.
+    public static func makeSession() -> URLSession {
+        let configuration = URLSessionConfiguration.ephemeral
+        configuration.urlCache = nil
+        configuration.requestCachePolicy = .reloadIgnoringLocalAndRemoteCacheData
+        configuration.httpCookieStorage = nil
+        configuration.httpShouldSetCookies = false
+        configuration.urlCredentialStorage = nil
+        return URLSession(configuration: configuration)
+    }
+
+    public init(session: URLSession = URLSessionTransport.makeSession()) {
         self.session = session
     }
 
@@ -288,6 +301,8 @@ public struct GitHubClient: Sendable {
     }
 
     private static func authorize(_ request: inout URLRequest, token: String) {
+        // Never cached, whatever session carries it.
+        request.cachePolicy = .reloadIgnoringLocalAndRemoteCacheData
         request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         request.setValue("application/vnd.github+json", forHTTPHeaderField: "Accept")
         request.setValue("2022-11-28", forHTTPHeaderField: "X-GitHub-Api-Version")

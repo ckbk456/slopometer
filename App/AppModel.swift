@@ -55,6 +55,8 @@ final class AppModel {
     private(set) var startupError: String?
     /// Set when the snapshot could not be shared, so the widget is showing stale or no data.
     private(set) var widgetProblem: String?
+    /// Set when Keychain refused to delete a token, so the token is still saved.
+    private(set) var keychainProblem: String?
 
     var openWindowAction: OpenWindowAction?
     /// The opt-in notification for reaching the daily PR quota.
@@ -253,7 +255,13 @@ final class AppModel {
     }
 
     func removeToken(_ id: String) {
-        TokenStore.remove(id)
+        guard TokenStore.remove(id) else {
+            keychainProblem =
+                "Keychain refused to delete the token (service vn.infinitex.slopometer.github-token). It is still saved; try removing it again."
+            rebuild()
+            return
+        }
+        keychainProblem = nil
         tokens = TokenStore.entries()
         lastReport = nil
         rebuild()
@@ -317,6 +325,7 @@ final class AppModel {
         guard let cache else { return }
         var problems: [String] = []
         if let startupError { problems.append(startupError) }
+        if let keychainProblem { problems.append(keychainProblem) }
         let report = currentReport
         if let error = report?.calendarError { problems.append(error.message) }
         for token in tokens {
