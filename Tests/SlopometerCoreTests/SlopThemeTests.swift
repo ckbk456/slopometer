@@ -100,7 +100,8 @@ struct ColorThemeTests {
     @Test func gradientMeterWalksFromFirstToLastColor() {
         let appearance = ThemePreset.preset(id: "rainbow")!.theme.resolved().light
         #expect(appearance.meterFill(tick: 0, of: 5) == appearance.gradient.first)
-        #expect(appearance.meterFill(tick: 4, of: 5).contrast(with: appearance.gradient.last!) < 1.001)
+        #expect(
+            appearance.meterFill(tick: 4, of: 5).contrast(with: appearance.gradient.last!) < 1.001)
         let accent = ColorTheme.standard.resolved().light
         #expect(accent.meterFill(tick: 2, of: 5) == accent.accent)
     }
