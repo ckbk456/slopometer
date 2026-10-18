@@ -10,7 +10,7 @@ struct WidgetContent: View {
     let size: WidgetSize
     /// The moment the widget shows, so the sync age can advance between snapshots.
     var now = Date()
-    @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.slopColors) private var colors
 
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
@@ -53,7 +53,7 @@ struct WidgetContent: View {
         VStack(alignment: .leading, spacing: 4) {
             Image(systemName: "gauge.with.dots.needle.50percent")
                 .font(.title3)
-                .foregroundStyle(SlopPalette.colors(colorScheme).markText)
+                .foregroundStyle(colors.markText)
                 .widgetAccentable()
             Spacer(minLength: 0)
             Text(title).font(.headline).lineLimit(2)
@@ -291,13 +291,14 @@ private struct WeekdayLabel: View {
     }
 }
 
-/// One day's tile with its count: the level fill, an en dash for unknown, today outlined.
+/// One day's tile with its count: the theme's fill for the day (levels or smooth), an en dash
+/// for unknown, today outlined.
 /// Shared by the medium strip, the large calendar, and the menu bar panel.
 struct DayTile: View {
     let point: DashboardSnapshot.Point
     let busiest: Int
     var textStyle: Font.TextStyle = .callout
-    @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.slopColors) private var colors
     @Environment(\.widgetRenderingMode) private var renderingMode
 
     var body: some View {
@@ -312,9 +313,8 @@ struct DayTile: View {
                     .lineLimit(1)
                     .padding(.horizontal, 2)
                 if renderingMode == .fullColor {
-                    let colors = SlopPalette.colors(colorScheme)
-                    shape.fill(colors.fill(level: level))
-                    label.foregroundStyle(colors.number(level: level))
+                    shape.fill(colors.fill(count: count, busiest: busiest))
+                    label.foregroundStyle(colors.number(count: count, busiest: busiest))
                 } else if level >= 2 {
                     // Unfocused and tinted desktop widgets draw text and bright tiles in the
                     // same near-white, so from half brightness up the number is cut out of

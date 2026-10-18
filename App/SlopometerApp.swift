@@ -10,7 +10,7 @@ struct SlopometerApp: App {
 
     var body: some Scene {
         Window("Slopometer", id: Self.mainWindowID) {
-            MainView()
+            Themed { MainView() }
                 .environment(model)
                 .onAppear { delegate.model = model }
         }
@@ -18,7 +18,7 @@ struct SlopometerApp: App {
         .windowResizability(.contentMinSize)
 
         MenuBarExtra {
-            MenuPanel()
+            Themed { MenuPanel() }
                 .environment(model)
         } label: {
             MenuBarLabel()
@@ -26,6 +26,18 @@ struct SlopometerApp: App {
                 .onAppear { delegate.model = model }
         }
         .menuBarExtraStyle(.window)
+    }
+}
+
+/// Applies the person's color theme to a scene's content. It reads the model's settings,
+/// so editing the theme re-renders the window and the panel at once, and it sits inside
+/// the scene's own color scheme, so each appearance gets its resolved colors.
+private struct Themed<Content: View>: View {
+    @Environment(AppModel.self) private var model
+    @ViewBuilder let content: Content
+
+    var body: some View {
+        content.slopTheme(model.settings.theme.resolved())
     }
 }
 

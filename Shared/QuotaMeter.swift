@@ -1,3 +1,4 @@
+import SlopometerCore
 import SwiftUI
 import WidgetKit
 
@@ -8,15 +9,18 @@ struct QuotaMeter: View {
     let count: Int
     let target: Int
     var height: CGFloat = 10
-    @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.slopColors) private var colors
     @Environment(\.widgetRenderingMode) private var renderingMode
 
     private static let maxTicks = 20
 
+    private var isFullColor: Bool { renderingMode == .fullColor }
+
+    /// The theme's color for a filled tick: the accent, or its step along the gradient.
     /// Full white when the desktop draws the widget in one color, so filled ticks stay
     /// clearly brighter than the track.
-    private var filled: Color {
-        renderingMode == .fullColor ? SlopPalette.colors(colorScheme).mark : .white
+    private func filled(tick index: Int) -> Color {
+        isFullColor ? colors.meterFill(tick: index, of: target) : .white
     }
 
     var body: some View {
@@ -35,7 +39,7 @@ struct QuotaMeter: View {
                     .monospacedDigit()
                     .foregroundStyle(
                         renderingMode == .fullColor
-                            ? SlopPalette.colors(colorScheme).markText : .primary)
+                            ? colors.markText : .primary)
             }
         }
         .accessibilityElement()
@@ -48,7 +52,7 @@ struct QuotaMeter: View {
         return HStack(spacing: gap) {
             ForEach(0..<target, id: \.self) { index in
                 Capsule()
-                    .fill(index < count ? filled : SlopPalette.track)
+                    .fill(index < count ? filled(tick: index) : SlopPalette.track)
                     .widgetAccentable(index < count)
                     .frame(width: side)
             }
@@ -59,7 +63,23 @@ struct QuotaMeter: View {
         let fraction = min(1, Double(count) / Double(max(target, 1)))
         return ZStack(alignment: .leading) {
             Capsule().fill(SlopPalette.track)
-            Capsule().fill(filled).widgetAccentable().frame(width: width * fraction)
+            Capsule().fill(fill(upTo: fraction)).widgetAccentable().frame(width: width * fraction)
         }
+    }
+
+    /// The continuous track's filled part. With a gradient meter it walks the gradient from
+    /// the start to `fraction`, as the ticks would, sampled so it mixes like the ticks do.
+    private func fill(upTo fraction: Double) -> AnyShapeStyle {
+        guard isFullColor else { return AnyShapeStyle(Color.white) }
+        guard colors.appearance.meter == .gradient else { return AnyShapeStyle(colors.mark) }
+        let steps = 8
+        let stops = (0...steps).map { step in
+            let location = Double(step) / Double(steps)
+            return Gradient.Stop(
+                color: Color(colors.appearance.color(at: fraction * location)),
+                location: location)
+        }
+        return AnyShapeStyle(
+            LinearGradient(stops: stops, startPoint: .leading, endPoint: .trailing))
     }
 }

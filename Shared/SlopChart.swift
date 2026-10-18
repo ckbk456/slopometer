@@ -28,43 +28,20 @@ struct SlopChart: View {
     }
 }
 
-/// The app's colors, read from `SlopTheme` (the single source; custom colors replace the
-/// theme later). Green is measured activity, amber the trend and warnings.
-///
-/// Views in this folder also render in widgets, so they resolve colors for the
-/// environment's color scheme with `colors(_:)`. The adaptive constants (`mark`,
-/// `markText`, `average`) follow the appearance through AppKit for app-only views.
+/// Theme-independent colors and the level math. Themed colors come from the environment's
+/// `slopColors`, set at each window, panel, and widget root with `slopTheme(_:)`, so views
+/// here render the person's theme in the app and in widgets alike.
 enum SlopPalette {
-    static let theme = SlopTheme.standard
-
-    /// Fills, bars, meter ticks, and control tint.
-    static let mark = adaptive(\.accent)
-    /// Text and icons drawn in the activity color.
-    static let markText = adaptive(\.accentText)
-    static let average = adaptive(\.trend)
     static let unknown = Color.secondary.opacity(0.25)
     static let track = Color.secondary.opacity(0.18)
 
     /// GitHub-style levels 0–4, scaled to the busiest visible day.
     static func level(_ count: Int, max: Int) -> Int { SlopTheme.level(count, max: max) }
 
-    static func colors(_ scheme: ColorScheme) -> SlopColors {
-        SlopColors(appearance: theme.appearance(isDark: scheme == .dark))
-    }
-
     /// Level fills for widgets the desktop draws in one color (unfocused or tinted): white
     /// at a fixed opacity per level, so levels never depend on the hue's brightness.
     static func monochromeFill(level: Int) -> Color {
         Color.white.opacity([0.12, 0.3, 0.5, 0.75, 1][Swift.min(Swift.max(level, 0), 4)])
-    }
-
-    private static func adaptive(_ role: KeyPath<SlopTheme.Appearance, ThemeColor>) -> Color {
-        let light = theme.light[keyPath: role]
-        let dark = theme.dark[keyPath: role]
-        return Color(
-            nsColor: NSColor(name: nil) { appearance in
-                NSColor(appearance.bestMatch(from: [.aqua, .darkAqua]) == .darkAqua ? dark : light)
-            })
     }
 }
 
@@ -86,7 +63,7 @@ private struct HeatmapGrid: View {
     let selection: Binding<CalendarDay?>?
 
     let maxHeight: CGFloat?
-    @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.slopColors) private var colors
 
     var body: some View {
         let weeks = Self.weeks(points)
@@ -111,11 +88,8 @@ private struct HeatmapGrid: View {
         Group {
             if let count = point.count {
                 // In tinted desktop widgets the levels survive as opacity of the accent.
-                shape.fill(
-                    SlopPalette.colors(colorScheme).fill(
-                        level: SlopPalette.level(count, max: busiest))
-                )
-                .widgetAccentable()
+                shape.fill(colors.fill(count: count, busiest: busiest))
+                    .widgetAccentable()
             } else {
                 shape.strokeBorder(SlopPalette.unknown, style: StrokeStyle(lineWidth: 1, dash: [2]))
             }
@@ -206,23 +180,32 @@ private struct TrendChart: View {
     let showsAverage: Bool
     let compact: Bool
     let selection: Binding<CalendarDay?>?
-    @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.slopColors) private var colors
     @Environment(\.widgetRenderingMode) private var renderingMode
 
     /// Unfocused or tinted desktop widgets draw in one color; full white keeps the marks
-    /// at full strength there instead of the green's luminance.
+    /// at full strength there instead of the accent's luminance.
     private var markColor: Color {
-        renderingMode == .fullColor ? SlopPalette.colors(colorScheme).mark : .white
+        renderingMode == .fullColor ? colors.mark : .white
+    }
+
+    /// A column's color: the day's fill from the theme's gradient in full color, so bars
+    /// and the calendar agree; full white when the desktop draws in one color.
+    private func barColor(_ count: Int, busiest: Int) -> Color {
+        renderingMode == .fullColor ? colors.fill(count: count, busiest: busiest) : .white
     }
 
     var body: some View {
+        let busiest = points.compactMap(\.count).max() ?? 0
         Chart {
             ForEach(points) { point in
                 let date = point.day.start(in: .current)
                 if let count = point.count {
                     if style == .columns {
                         BarMark(x: .value("Day", date, unit: .day), y: .value(unit, count))
-                            .foregroundStyle(markColor.opacity(point.isIncomplete ? 0.4 : 1))
+                            .foregroundStyle(
+                                barColor(count, busiest: busiest)
+                                    .opacity(point.isIncomplete ? 0.4 : 1))
                     } else {
                         LineMark(x: .value("Day", date, unit: .day), y: .value(unit, count))
                             .foregroundStyle(by: .value("Series", "Daily"))
@@ -241,7 +224,7 @@ private struct TrendChart: View {
             }
         }
         .chartForegroundStyleScale([
-            "Daily": markColor, "Average": SlopPalette.colors(colorScheme).average,
+            "Daily": markColor, "Average": colors.average,
         ])
         .chartLegend(compact ? .hidden : .automatic)
         .chartYAxisLabel(compact ? "" : unit)

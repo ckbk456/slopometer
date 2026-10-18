@@ -35,7 +35,9 @@ struct SlopometerWidgetView: View {
     let entry: SnapshotEntry
 
     var body: some View {
+        // The app shares its theme in the snapshot; older snapshots fall back to the standard.
         WidgetContent(snapshot: entry.snapshot, size: size, now: entry.date)
+            .slopTheme((entry.snapshot?.theme ?? .standard).resolved())
             .widgetURL(URL(string: "slopometer://open"))
             .containerBackground(.fill.tertiary, for: .widget)
     }
