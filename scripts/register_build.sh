@@ -6,7 +6,7 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 
 APP="$PWD/.build/xcode/Build/Products/Debug/Slopometer.app"
-BUNDLE_ID=dev.slopometer.app
+BUNDLE_ID=vn.infinitex.slopometer
 LSREGISTER=/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister
 
 [ -d "$APP" ] || { printf 'No build at %s\n' "$APP" >&2; exit 1; }

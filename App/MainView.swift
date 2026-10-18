@@ -16,28 +16,45 @@ struct MainView: View {
     enum Tab { case dashboard, widgets, settings }
 
     var body: some View {
-        TabView(selection: $tab) {
-            DashboardView(openSettings: { anchor in
-                settingsFocus = anchor
-                tab = .settings
-            })
-            .tabItem { Label("Activity", systemImage: "chart.bar") }
-            .tag(Tab.dashboard)
-            WidgetsView()
-                .tabItem { Label("Widgets", systemImage: "square.grid.2x2") }
-                .tag(Tab.widgets)
-            SettingsView(focus: $settingsFocus)
-                .tabItem { Label("Settings", systemImage: "gearshape") }
-                .tag(Tab.settings)
+        // A segmented control in the window toolbar rather than a TabView, whose tab strip
+        // macOS 26 draws as a cramped glass capsule inside the content.
+        Group {
+            switch tab {
+            case .dashboard:
+                DashboardView(openSettings: { anchor in
+                    settingsFocus = anchor
+                    tab = .settings
+                })
+            case .widgets:
+                WidgetsView()
+            case .settings:
+                SettingsView(focus: $settingsFocus)
+            }
         }
         .padding()
         .frame(minWidth: 640, minHeight: 540)
+        .toolbar {
+            ToolbarItem(placement: .principal) {
+                SectionPicker(
+                    selection: $tab,
+                    options: [
+                        .init(value: .dashboard, title: "Activity"),
+                        .init(value: .widgets, title: "Widgets"),
+                        .init(value: .settings, title: "Settings"),
+                    ]
+                )
+                // Toolbar size in both densities.
+                .controlSize(.regular)
+            }
+            .hidesSharedGlassBackground()
+        }
         .onAppear { if model.accountLogin.isEmpty && !model.hasToken { tab = .settings } }
     }
 }
 
 struct DashboardView: View {
     @Environment(AppModel.self) private var model
+    @Environment(\.density) private var density
     @State private var selectedDay: CalendarDay?
     let openSettings: (SettingsAnchor) -> Void
 
@@ -50,7 +67,8 @@ struct DashboardView: View {
         GeometryReader { viewport in
             ScrollView {
                 FillingStack(
-                    spacing: 20, height: viewport.size.height - Self.verticalPadding * 2
+                    spacing: density.pick(20, 12),
+                    height: viewport.size.height - Self.verticalPadding * 2
                 ) {
                     content(snapshot, gated: gated, settings: $model.settings)
                 }
@@ -145,12 +163,16 @@ struct DashboardView: View {
     }
 
     private func controls(_ settings: Binding<DashboardSettings>) -> some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Picker("Metric", selection: settings.metric) {
-                ForEach(Metric.allCases) { Text($0.title).tag($0) }
+        VStack(alignment: .leading, spacing: density.pick(12, 8)) {
+            HStack(spacing: 12) {
+                Picker("Metric", selection: settings.metric) {
+                    ForEach(Metric.allCases) { Text($0.title).tag($0) }
+                }
+                .pickerStyle(.segmented)
+                .labelsHidden()
+                ConfigurationMenu()
+                    .fixedSize()
             }
-            .pickerStyle(.segmented)
-            .labelsHidden()
             HStack(spacing: 16) {
                 Picker("View", selection: settings.chartStyle) {
                     ForEach(ChartStyle.allCases) { Text($0.title).tag($0) }
@@ -345,6 +367,8 @@ struct TokenSummaryRow<Trailing: View>: View {
             Image(systemName: icon(state))
                 .foregroundStyle(state.isProblem ? Color.orange : Color.secondary)
                 .frame(width: 18)
+                // The summary below says the same in words.
+                .accessibilityHidden(true)
             VStack(alignment: .leading, spacing: 2) {
                 HStack(spacing: 6) {
                     Text(entry.label).lineLimit(1)
@@ -457,6 +481,7 @@ private struct TokenGate: View {
 private struct QuotaCard: View {
     let quota: DashboardSnapshot.Quota
     @State private var showsEvidence = false
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.slopColors) private var colors
 
     var body: some View {
@@ -488,7 +513,7 @@ private struct QuotaCard: View {
             QuotaMeter(count: quota.count, target: quota.target)
                 .accessibilityLabel(quota.headline)
             Button {
-                withAnimation(.snappy) { showsEvidence.toggle() }
+                withAnimation(reduceMotion ? nil : .snappy) { showsEvidence.toggle() }
             } label: {
                 Label(
                     showsEvidence ? "Hide PRs" : evidenceTitle,
@@ -567,6 +592,7 @@ private struct EvidenceRow: View {
             Image(systemName: "arrow.triangle.pull")
                 .foregroundStyle(colors.markText)
                 .font(.callout)
+                .accessibilityHidden(true)
             Text(title).lineLimit(1)
             if isDraft {
                 Text("Draft").font(.caption).foregroundStyle(.secondary)

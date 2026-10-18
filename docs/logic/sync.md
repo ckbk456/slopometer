@@ -105,11 +105,10 @@ PR evidence, the last successful sync, and plain-language notices for missing to
 stale data (older than 45 minutes), incomplete coverage, and sync errors.
 
 The app writes the snapshot as JSON to the App Group container
-`5U4584QFCQ.dev.slopometer` and reloads widget timelines only when the bytes change.
+`5U4584QFCQ.vn.infinitex.slopometer` and reloads widget timelines only when the bytes change.
 The widget decodes it and never fetches or reads Keychain. Tokens live only in
-Keychain (service `dev.slopometer.github-token`, one item per token ID); their names
-and kinds are nonsecret preferences (`tokenEntries`). The single token saved by
-earlier versions (account `default`) is adopted as "Personal".
+Keychain (service `vn.infinitex.slopometer.github-token`, one item per token ID); their names
+and kinds are nonsecret preferences (`tokenEntries`).
 
 macOS refuses App Group access to unsigned builds and to a copy signed differently
 from the one that owns the container. A failed write is shown in the app window as
@@ -152,8 +151,9 @@ Appearance: a preset from `ThemePreset.all` (`ThemePreset.swift`) or their own e
 It is saved in `DashboardSettings.theme` and copied into the widget snapshot
 (`DashboardSnapshot.theme`; nil in older snapshots means the standard theme), so the app,
 menu bar panel, and widget draw the same colors. A theme holds, per appearance (dark may
-reuse light; while it does, the editor keeps the previous dark colors in view state until
-another theme is chosen or Settings closes, so turning sharing off restores them):
+reuse light). "Same colors in dark and light mode" shares the palette being edited and saves
+the other one in `DashboardSettings.setAsidePalette`, so turning sharing off restores it,
+even after a restart, until another theme is chosen:
 
 - `gradient`: 2–8 evenly spaced colors, low to high activity, mixed in OKLab.
 - `accent`: control tint, badges, highlighted numbers, the daily line; nil picks the
@@ -186,13 +186,16 @@ ignores the theme and keeps the white levels described above.
 rainbow reads as hue only; hovering a day shows its count), or when level 1 nearly vanishes
 into the background (below 1.2:1). Mono, Viridis, and Cividis are marked colorblind-safe.
 
-The default Slop Green reproduces the earlier palette exactly: its gradient is the green at
-35, 55, 75, and 100 % opacity over each background.
+The default, Slop Electric (`ThemePreset.electric`, id `electric`), runs electric blue to
+indigo: #93C5FD, #3B82F6, #4F46E5, #3730A3 in light and #312E81, #4338CA, #3B82F6, #7DD3FC
+in dark. Neighboring levels differ by at least 1.45:1 and lightness is ordered, so it draws
+no advice.
 
 | Role | Light (vs #F5F5F5) | Dark (vs #1E1E1E) |
 | --- | --- | --- |
-| Slop Green accent / text | #116329, 6.78:1 | #2EA043, 4.94:1 |
-| Default trend; warning | #8A5C00, 5.33:1 | #D29922, 6.60:1 |
+| Slop Electric accent / text | #3730A3, 9.11:1 | #7DD3FC, 10.0:1 |
+| Slop Electric trend | #BE185D, 5.54:1 | #F472B6, 6.29:1 |
+| Other presets' default trend; warning | #8A5C00, 5.33:1 | #D29922, 6.60:1 |
 
 `SlopThemeTests` checks the standard targets and, for every preset, accent text 4.5:1,
 trend 3:1, and warning 4.5:1 in both appearances. The menu bar panel draws the window

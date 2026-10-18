@@ -70,3 +70,19 @@ struct GlassGroup<Content: View>: View {
         #endif
     }
 }
+
+extension ToolbarItem {
+    /// Drops the glass macOS 26 puts behind toolbar items, for an item that draws its own
+    /// glass, so glass is not stacked on glass.
+    func hidesSharedGlassBackground() -> some ToolbarContent {
+        #if compiler(>=6.2)
+            if #available(macOS 26, *) {
+                return self.sharedBackgroundVisibility(.hidden)
+            } else {
+                return self
+            }
+        #else
+            return self
+        #endif
+    }
+}

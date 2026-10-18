@@ -10,8 +10,13 @@
 		046F6A0DF8313CBFFBD3CB16 /* InlineColorPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44DDBF9308A7EA23DC93648A /* InlineColorPicker.swift */; };
 		0BB5EA42A3FFDB32BEFA1BE3 /* WidgetsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6EEC6B6FF3999B07624F921 /* WidgetsView.swift */; };
 		0DA7C51AD547C85076A95E3F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 5A483B753EAA80FAF20E259A /* Assets.xcassets */; };
+		0FC67DE4476C603024B7ACBF /* Sparkle-LICENSE.txt in Resources */ = {isa = PBXBuildFile; fileRef = 48D7AB6FD83CB9994313450C /* Sparkle-LICENSE.txt */; };
+		15F594F243958A2AD762E78D /* ConfigurationMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80C4116B948FAE2B393D5113 /* ConfigurationMenu.swift */; };
 		27355E91D3F0D148402F3A7C /* SlopometerCore in Frameworks */ = {isa = PBXBuildFile; productRef = 14F18CD2E45DA1E0B4AFBD02 /* SlopometerCore */; };
 		27AAFDEFCB590802050E2F50 /* AppearanceSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60187E46C02AD8A49AD0BE80 /* AppearanceSettings.swift */; };
+		2E2658092D63393F844704FB /* GRDB-LICENSE.txt in Resources */ = {isa = PBXBuildFile; fileRef = 1901BE7E81DEB4F4F0F7616B /* GRDB-LICENSE.txt */; };
+		35AD12272E91142BF5875ABD /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = C9AA9D116A9674B59D6EAE8B /* Sparkle */; };
+		3D703F1C2C249E008AEF7F87 /* LoginItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 746E186733F38F8693F19BE6 /* LoginItem.swift */; };
 		446D228ACFA5B9E9D255D051 /* MainView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E01B7F1D13FF129C1B3877CE /* MainView.swift */; };
 		5333B9EFCADBD19CEDA57972 /* MenuPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7FB30203F2B9554B613E1009 /* MenuPanel.swift */; };
 		59F7189D91F09A7B448DDF29 /* QuotaMeter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FA4514AA2C3D0088573E5A6 /* QuotaMeter.swift */; };
@@ -22,8 +27,11 @@
 		70C22BC55BFF67B9D144560C /* AppModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4293BFD7B2150A12590C6C3E /* AppModel.swift */; };
 		757B4B257B71780F8798CD85 /* WidgetContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C28CD2A91D2162A9B26C8AB /* WidgetContent.swift */; };
 		762EBBFDAB94B2BC8F834236 /* WidgetContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C28CD2A91D2162A9B26C8AB /* WidgetContent.swift */; };
+		7C8BA63C1586227964052FE0 /* QuotaNotifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 992DE8FF42148204F4D7FFF9 /* QuotaNotifier.swift */; };
+		7EBE7DB20FD7AE21DB17C39C /* TimeZonePicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59A53669E1738A871E79E311 /* TimeZonePicker.swift */; };
 		8032311671336129941C55F8 /* Octicons-LICENSE.txt in Resources */ = {isa = PBXBuildFile; fileRef = 0AA17FB0273F52A4536DAADD /* Octicons-LICENSE.txt */; };
 		888E53BC5853E784F4857160 /* QuotaMeter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FA4514AA2C3D0088573E5A6 /* QuotaMeter.swift */; };
+		96D91A4B6F09B3ADAC2F90E2 /* Updater.swift in Sources */ = {isa = PBXBuildFile; fileRef = E0B7BA809719E2DC775A199B /* Updater.swift */; };
 		9C3F41BB24455980D51207E8 /* SlopometerWidget.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 9B1059BB2AB5A145DE46984F /* SlopometerWidget.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		A138EFD2A03DB78FBB9EA276 /* BuildInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 325C0AB1F343F8C48BED92F2 /* BuildInfo.swift */; };
 		A5A435FDED70B5F176AD5A20 /* SlopometerWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2A1C16357B72A82B74B9BD5 /* SlopometerWidget.swift */; };
@@ -32,6 +40,7 @@
 		C7E6E3990FFC6707EB824F75 /* ThemeEnvironment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6729F399225844E012F9191D /* ThemeEnvironment.swift */; };
 		C8512F9249C0687A0E8B4B10 /* Glass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93D504B3D0A8761AC6CC1321 /* Glass.swift */; };
 		EFC776F9AC77B1CFAC0B7E79 /* SlopometerCore in Frameworks */ = {isa = PBXBuildFile; productRef = 959F817C77169F96EBED29B8 /* SlopometerCore */; };
+		F5D97087F61A91AD740BA705 /* SectionPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F7604BC40ED49DFEFE050BC /* SectionPicker.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -61,29 +70,37 @@
 /* Begin PBXFileReference section */
 		0AA17FB0273F52A4536DAADD /* Octicons-LICENSE.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = "Octicons-LICENSE.txt"; sourceTree = "<group>"; };
 		181AD593328CA6011FFD3AC5 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
+		1901BE7E81DEB4F4F0F7616B /* GRDB-LICENSE.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = "GRDB-LICENSE.txt"; sourceTree = "<group>"; };
 		1FA4514AA2C3D0088573E5A6 /* QuotaMeter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuotaMeter.swift; sourceTree = "<group>"; };
 		2CE86D6528E0B4B124751C3E /* TokenStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TokenStore.swift; sourceTree = "<group>"; };
 		325C0AB1F343F8C48BED92F2 /* BuildInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BuildInfo.swift; sourceTree = "<group>"; };
 		4293BFD7B2150A12590C6C3E /* AppModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppModel.swift; sourceTree = "<group>"; };
 		44DDBF9308A7EA23DC93648A /* InlineColorPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InlineColorPicker.swift; sourceTree = "<group>"; };
+		48D7AB6FD83CB9994313450C /* Sparkle-LICENSE.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = "Sparkle-LICENSE.txt"; sourceTree = "<group>"; };
 		4CE6ACBCDE098C02149B86A4 /* SCOPE.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = SCOPE.md; sourceTree = "<group>"; };
+		59A53669E1738A871E79E311 /* TimeZonePicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeZonePicker.swift; sourceTree = "<group>"; };
 		5A483B753EAA80FAF20E259A /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		60187E46C02AD8A49AD0BE80 /* AppearanceSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppearanceSettings.swift; sourceTree = "<group>"; };
 		66E709D3A0DD9070BE504A7A /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		6729F399225844E012F9191D /* ThemeEnvironment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThemeEnvironment.swift; sourceTree = "<group>"; };
 		68193896EEDBB06DB7E3A076 /* SPEC.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = SPEC.md; sourceTree = "<group>"; };
+		746E186733F38F8693F19BE6 /* LoginItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginItem.swift; sourceTree = "<group>"; };
 		78D9D6EB3FDC6DB8A4AA442B /* SlopometerApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SlopometerApp.swift; sourceTree = "<group>"; };
 		7B1F1C47E64F87D003E4486E /* Slopometer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Slopometer.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		7C28CD2A91D2162A9B26C8AB /* WidgetContent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetContent.swift; sourceTree = "<group>"; };
 		7FB30203F2B9554B613E1009 /* MenuPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuPanel.swift; sourceTree = "<group>"; };
+		80C4116B948FAE2B393D5113 /* ConfigurationMenu.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfigurationMenu.swift; sourceTree = "<group>"; };
+		8F7604BC40ED49DFEFE050BC /* SectionPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SectionPicker.swift; sourceTree = "<group>"; };
 		90F88CDE67495BB96DB22442 /* .. */ = {isa = PBXFileReference; lastKnownFileType = folder; name = ..; path = .; sourceTree = SOURCE_ROOT; };
 		93D504B3D0A8761AC6CC1321 /* Glass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Glass.swift; sourceTree = "<group>"; };
+		992DE8FF42148204F4D7FFF9 /* QuotaNotifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuotaNotifier.swift; sourceTree = "<group>"; };
 		9B1059BB2AB5A145DE46984F /* SlopometerWidget.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = SlopometerWidget.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		A6EEC6B6FF3999B07624F921 /* WidgetsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetsView.swift; sourceTree = "<group>"; };
 		AC3337228197F9192A2B19BE /* ROADMAP.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = ROADMAP.md; sourceTree = "<group>"; };
 		B4BD827FF20CC2FB09AC22E9 /* SlopChart.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SlopChart.swift; sourceTree = "<group>"; };
 		C2A1C16357B72A82B74B9BD5 /* SlopometerWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SlopometerWidget.swift; sourceTree = "<group>"; };
 		E01B7F1D13FF129C1B3877CE /* MainView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainView.swift; sourceTree = "<group>"; };
+		E0B7BA809719E2DC775A199B /* Updater.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Updater.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -92,6 +109,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				27355E91D3F0D148402F3A7C /* SlopometerCore in Frameworks */,
+				35AD12272E91142BF5875ABD /* Sparkle in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -113,13 +131,19 @@
 				4293BFD7B2150A12590C6C3E /* AppModel.swift */,
 				5A483B753EAA80FAF20E259A /* Assets.xcassets */,
 				325C0AB1F343F8C48BED92F2 /* BuildInfo.swift */,
+				80C4116B948FAE2B393D5113 /* ConfigurationMenu.swift */,
 				93D504B3D0A8761AC6CC1321 /* Glass.swift */,
 				44DDBF9308A7EA23DC93648A /* InlineColorPicker.swift */,
+				746E186733F38F8693F19BE6 /* LoginItem.swift */,
 				E01B7F1D13FF129C1B3877CE /* MainView.swift */,
 				7FB30203F2B9554B613E1009 /* MenuPanel.swift */,
+				992DE8FF42148204F4D7FFF9 /* QuotaNotifier.swift */,
+				8F7604BC40ED49DFEFE050BC /* SectionPicker.swift */,
 				66E709D3A0DD9070BE504A7A /* SettingsView.swift */,
 				78D9D6EB3FDC6DB8A4AA442B /* SlopometerApp.swift */,
+				59A53669E1738A871E79E311 /* TimeZonePicker.swift */,
 				2CE86D6528E0B4B124751C3E /* TokenStore.swift */,
+				E0B7BA809719E2DC775A199B /* Updater.swift */,
 				A6EEC6B6FF3999B07624F921 /* WidgetsView.swift */,
 				E6050A50124B029FC09B3A1B /* Resources */,
 			);
@@ -165,7 +189,9 @@
 		E6050A50124B029FC09B3A1B /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				1901BE7E81DEB4F4F0F7616B /* GRDB-LICENSE.txt */,
 				0AA17FB0273F52A4536DAADD /* Octicons-LICENSE.txt */,
+				48D7AB6FD83CB9994313450C /* Sparkle-LICENSE.txt */,
 			);
 			path = Resources;
 			sourceTree = "<group>";
@@ -224,6 +250,7 @@
 			name = Slopometer;
 			packageProductDependencies = (
 				14F18CD2E45DA1E0B4AFBD02 /* SlopometerCore */,
+				C9AA9D116A9674B59D6EAE8B /* Sparkle */,
 			);
 			productName = Slopometer;
 			productReference = 7B1F1C47E64F87D003E4486E /* Slopometer.app */;
@@ -258,6 +285,7 @@
 			mainGroup = E73564E4B5E63DB04145A811;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
+				B5731C3A8AAA0B8362831763 /* XCRemoteSwiftPackageReference "Sparkle" */,
 				17A2B36F17A2B2D35029B354 /* XCLocalSwiftPackageReference "Sources/.." */,
 			);
 			preferredProjectObjectVersion = 77;
@@ -277,7 +305,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				0DA7C51AD547C85076A95E3F /* Assets.xcassets in Resources */,
+				2E2658092D63393F844704FB /* GRDB-LICENSE.txt in Resources */,
 				8032311671336129941C55F8 /* Octicons-LICENSE.txt in Resources */,
+				0FC67DE4476C603024B7ACBF /* Sparkle-LICENSE.txt in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -291,16 +321,22 @@
 				70C22BC55BFF67B9D144560C /* AppModel.swift in Sources */,
 				27AAFDEFCB590802050E2F50 /* AppearanceSettings.swift in Sources */,
 				A138EFD2A03DB78FBB9EA276 /* BuildInfo.swift in Sources */,
+				15F594F243958A2AD762E78D /* ConfigurationMenu.swift in Sources */,
 				C8512F9249C0687A0E8B4B10 /* Glass.swift in Sources */,
 				046F6A0DF8313CBFFBD3CB16 /* InlineColorPicker.swift in Sources */,
+				3D703F1C2C249E008AEF7F87 /* LoginItem.swift in Sources */,
 				446D228ACFA5B9E9D255D051 /* MainView.swift in Sources */,
 				5333B9EFCADBD19CEDA57972 /* MenuPanel.swift in Sources */,
 				888E53BC5853E784F4857160 /* QuotaMeter.swift in Sources */,
+				7C8BA63C1586227964052FE0 /* QuotaNotifier.swift in Sources */,
+				F5D97087F61A91AD740BA705 /* SectionPicker.swift in Sources */,
 				6F309BE3F7C3BB11C16DDAD8 /* SettingsView.swift in Sources */,
 				AE6910F4607758AF7D66F8BE /* SlopChart.swift in Sources */,
 				6CDEFD6165BBE05510CF9AE1 /* SlopometerApp.swift in Sources */,
 				B19D8EB97D273F9A05AE16AD /* ThemeEnvironment.swift in Sources */,
+				7EBE7DB20FD7AE21DB17C39C /* TimeZonePicker.swift in Sources */,
 				5E1A783D176203CD4C6A9450 /* TokenStore.swift in Sources */,
+				96D91A4B6F09B3ADAC2F90E2 /* Updater.swift in Sources */,
 				762EBBFDAB94B2BC8F834236 /* WidgetContent.swift in Sources */,
 				0BB5EA42A3FFDB32BEFA1BE3 /* WidgetsView.swift in Sources */,
 			);
@@ -367,6 +403,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEVELOPMENT_TEAM = 5U4584QFCQ;
+				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
@@ -385,7 +422,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 0.12.0;
+				MARKETING_VERSION = 1.0.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -436,6 +473,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = 5U4584QFCQ;
+				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
@@ -448,7 +486,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 0.12.0;
+				MARKETING_VERSION = 1.0.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -472,9 +510,10 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = dev.slopometer.app;
+				PRODUCT_BUNDLE_IDENTIFIER = vn.infinitex.slopometer;
 				PRODUCT_NAME = Slopometer;
 				SDKROOT = macosx;
+				SLOPOMETER_AUTOMATIC_UPDATE_CHECKS = YES;
 			};
 			name = Release;
 		};
@@ -490,7 +529,7 @@
 					"@executable_path/../Frameworks",
 					"@executable_path/../../../../Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = dev.slopometer.app.widget;
+				PRODUCT_BUNDLE_IDENTIFIER = vn.infinitex.slopometer.widget;
 				PRODUCT_NAME = SlopometerWidget;
 				SDKROOT = macosx;
 				SKIP_INSTALL = YES;
@@ -509,7 +548,7 @@
 					"@executable_path/../Frameworks",
 					"@executable_path/../../../../Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = dev.slopometer.app.widget;
+				PRODUCT_BUNDLE_IDENTIFIER = vn.infinitex.slopometer.widget;
 				PRODUCT_NAME = SlopometerWidget;
 				SDKROOT = macosx;
 				SKIP_INSTALL = YES;
@@ -528,9 +567,10 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = dev.slopometer.app;
+				PRODUCT_BUNDLE_IDENTIFIER = vn.infinitex.slopometer;
 				PRODUCT_NAME = Slopometer;
 				SDKROOT = macosx;
+				SLOPOMETER_AUTOMATIC_UPDATE_CHECKS = NO;
 			};
 			name = Debug;
 		};
@@ -573,6 +613,17 @@
 		};
 /* End XCLocalSwiftPackageReference section */
 
+/* Begin XCRemoteSwiftPackageReference section */
+		B5731C3A8AAA0B8362831763 /* XCRemoteSwiftPackageReference "Sparkle" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/sparkle-project/Sparkle";
+			requirement = {
+				kind = exactVersion;
+				version = 2.10.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
 /* Begin XCSwiftPackageProductDependency section */
 		14F18CD2E45DA1E0B4AFBD02 /* SlopometerCore */ = {
 			isa = XCSwiftPackageProductDependency;
@@ -581,6 +632,11 @@
 		959F817C77169F96EBED29B8 /* SlopometerCore */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = SlopometerCore;
+		};
+		C9AA9D116A9674B59D6EAE8B /* Sparkle */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = B5731C3A8AAA0B8362831763 /* XCRemoteSwiftPackageReference "Sparkle" */;
+			productName = Sparkle;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

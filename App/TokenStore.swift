@@ -15,23 +15,14 @@ struct TokenEntry: Codable, Equatable, Identifiable {
 /// GitHub tokens kept in Keychain, one item per token. The list of entries is
 /// nonsecret and kept in preferences.
 enum TokenStore {
-    private static let service = "dev.slopometer.github-token"
-    /// The Keychain account used when only one token could be saved.
-    private static let legacyID = "default"
+    private static let service = "vn.infinitex.slopometer.github-token"
     private static let entriesKey = "tokenEntries"
 
     static func entries() -> [TokenEntry] {
-        if let data = UserDefaults.standard.data(forKey: entriesKey),
+        guard let data = UserDefaults.standard.data(forKey: entriesKey),
             let saved = try? JSONDecoder().decode([TokenEntry].self, from: data)
-        {
-            return saved
-        }
-        guard let legacy = read(legacyID) else { return [] }
-        let migrated = [
-            TokenEntry(id: legacyID, label: "Personal", kind: AccessToken.Kind(of: legacy))
-        ]
-        persist(migrated)
-        return migrated
+        else { return [] }
+        return saved
     }
 
     /// Saved tokens with their values, in the order they were added.

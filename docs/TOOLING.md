@@ -11,6 +11,7 @@ not a claim that another OS or CI run passed.
 | XcodeGen | 2.46.0; CI verifies the release archive SHA-256 | 2.46.0 |
 | Formatter | swift-format 601.0.0 pinned in `Tools/Package.swift` | Built from source with the selected toolchain |
 | GRDB | Exact 7.11.1 and committed resolution pins | Its tagged manifest requires Swift tools 6.1 |
+| Sparkle | Exact 2.10.0 (binary framework) in `project.yml`, pinned in `Package.resolved` | App target only; resolved 2026-10-18 |
 | Python | 3.9+ standard library for structural checks | 3.14 installation available |
 | Make | GNU Make-compatible commands | Apple-provided GNU Make 3.81 |
 
@@ -39,5 +40,11 @@ review and install deliberately rather than running an unpinned installer.
   Runner images change; the workflow fails rather than silently choosing another Xcode.
 
 Signing uses Apple Development team `5U4584QFCQ` with automatic provisioning for
-local signed builds. The repo does not yet include an updater, notarization credentials,
-production configuration, release automation, or selected license.
+local signed builds. A Developer ID Application certificate for the same team is in
+the release machine's Keychain, and the Sparkle EdDSA signing key was generated there
+(see [Updates](logic/updates.md)). The repo does not yet include notarization
+credentials or release automation. The license is MIT (`LICENSE`).
+
+- [Sparkle 2.10.0](https://github.com/sparkle-project/Sparkle/releases/tag/2.10.0),
+  [sandboxing guide](https://sparkle-project.org/documentation/sandboxing/), and
+  [gentle reminders](https://sparkle-project.org/documentation/gentle-reminders/).

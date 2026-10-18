@@ -18,19 +18,12 @@ struct SlopThemeTests {
             #expect(appearance.accent.contrast(with: background) >= 3)
             #expect(appearance.trend.contrast(with: background) >= 4.5)
         }
-        // Light appearance is darker than the earlier rgb(0.18, 0.63, 0.26).
-        let earlier = ThemeColor(red: 0.18, green: 0.63, blue: 0.26)
-        #expect(theme.light.accent.luminance < earlier.luminance)
     }
 
-    @Test func standardTilesMatchTheEarlierOpacityLevels() {
-        let green = ThemeColor(hex: 0x116329)
-        for level in 1...4 {
-            let earlier = green.blended(
-                over: SlopTheme.lightBackground, opacity: SlopTheme.levelOpacities[level - 1])
-            #expect(theme.light.fill(level: level).contrast(with: earlier) < 1.001)
-        }
-        #expect(theme.light.accentText == green)
+    @Test func standardIsSlopElectricWithNoAdvice() {
+        #expect(ColorTheme.standard.presetID == "electric")
+        #expect(ThemePreset.all.first?.name == "Slop Electric")
+        #expect(ThemeAdvice.check(.standard).isEmpty)
     }
 
     @Test func everyTileLevelHasAReadableNumberAndDistinctNeighbors() {
@@ -122,7 +115,7 @@ struct ColorThemeTests {
     }
 
     @Test func orderedPresetsGetNoLightnessWarning() {
-        for id in ["slop-green", "github", "mono", "viridis", "cividis", "ocean"] {
+        for id in ["electric", "github", "mono", "viridis", "cividis", "ocean"] {
             let advice = ThemeAdvice.check(ThemePreset.preset(id: id)!.theme)
             #expect(
                 !advice.contains { if case .unorderedLightness = $0 { true } else { false } },
@@ -152,6 +145,10 @@ struct ColorThemeTests {
         let roundTrip = try JSONDecoder().decode(
             DashboardSettings.self, from: JSONEncoder().encode(edited))
         #expect(roundTrip.theme == edited.theme)
+    }
+
+    @Test func slopGreenIsNoLongerAPreset() {
+        #expect(ThemePreset.preset(id: "slop-green") == nil)
     }
 
     @Test func degenerateGradientsStillResolve() {

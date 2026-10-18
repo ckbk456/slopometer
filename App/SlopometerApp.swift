@@ -8,11 +8,13 @@ struct SlopometerApp: App {
 
     @NSApplicationDelegateAdaptor private var delegate: AppDelegate
     @State private var model = AppModel()
+    @State private var updater = Updater()
 
     var body: some Scene {
         Window("Slopometer", id: Self.mainWindowID) {
             Themed { MainView() }
                 .environment(model)
+                .environment(updater)
                 .onAppear { delegate.model = model }
         }
         .defaultSize(width: 760, height: 620)
@@ -21,6 +23,7 @@ struct SlopometerApp: App {
         MenuBarExtra {
             Themed { MenuPanel() }
                 .environment(model)
+                .environment(updater)
         } label: {
             MenuBarLabel()
                 .environment(model)
@@ -40,6 +43,8 @@ private struct Themed<Content: View>: View {
     var body: some View {
         content
             .slopTheme(model.settings.theme.resolved())
+            .environment(\.density, model.settings.density)
+            .controlSize(model.settings.density == .compact ? .small : .regular)
             // App-wide, so the window and the menu bar panel switch together, from first
             // appearance on. Both scenes set the same value.
             .onChange(of: model.settings.appearance, initial: true) { _, mode in

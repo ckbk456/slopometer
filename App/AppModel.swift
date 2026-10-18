@@ -57,6 +57,8 @@ final class AppModel {
     private(set) var widgetProblem: String?
 
     var openWindowAction: OpenWindowAction?
+    /// The opt-in notification for reaching the daily PR quota.
+    let quotaNotifier = QuotaNotifier()
 
     private let cache: MeasurementCache?
     private let coordinator: SyncCoordinator?
@@ -86,6 +88,7 @@ final class AppModel {
             startupError = "The local cache could not be opened: \(error.localizedDescription)"
         }
         rebuild()
+        quotaNotifier.openWindow = { [weak self] in self?.openMainWindow() }
         startPolling()
         NSWorkspace.shared.notificationCenter.addObserver(
             forName: NSWorkspace.didWakeNotification, object: nil, queue: .main
@@ -199,6 +202,11 @@ final class AppModel {
             ? 0 : consecutiveFailures + 1
         syncStage = nil
         rebuild()
+        // Only a sync that verified a token and fetched PRs confirms today's count.
+        let confirmed = currentReport.map { $0.tokenVerified && $0.pullRequestError == nil }
+        quotaNotifier.check(
+            quota: snapshot.quota, goal: settings.goal, repositories: settings.repositories,
+            timeZone: settings.timeZone, confirmed: confirmed ?? false)
     }
 
     /// Shows each stage and publishes data the sync has already written, so the calendar
@@ -250,6 +258,52 @@ final class AppModel {
         lastReport = nil
         rebuild()
         Task { await refresh() }
+    }
+
+    // MARK: Saved configurations
+
+    /// Applies a configuration in one settings change, so it syncs and rebuilds once.
+    func applyConfiguration(_ id: String) {
+        guard let saved = settings.savedConfigurations.first(where: { $0.id == id }) else {
+            return
+        }
+        // Turning the quota off this way keeps its target for when it is turned on again.
+        if saved.goal == nil, let goal = settings.goal { parkedGoal = goal }
+        settings = saved.applied(to: settings)
+    }
+
+    func saveConfiguration(named name: String) {
+        let saved = SavedConfiguration(name: name, settings: settings)
+        var updated = settings
+        updated.savedConfigurations.append(saved)
+        updated.configurationID = saved.id
+        settings = updated
+    }
+
+    /// Replaces the configuration in use with what the dashboard shows now.
+    func updateConfiguration() {
+        guard
+            let index = settings.savedConfigurations.firstIndex(where: {
+                $0.id == settings.configurationID
+            })
+        else { return }
+        let current = settings.savedConfigurations[index]
+        settings.savedConfigurations[index] = SavedConfiguration(
+            id: current.id, name: current.name, settings: settings)
+    }
+
+    func renameConfiguration(_ id: String, to name: String) {
+        guard let index = settings.savedConfigurations.firstIndex(where: { $0.id == id })
+        else { return }
+        settings.savedConfigurations[index].name = name
+    }
+
+    /// The dashboard keeps its current view; it just no longer names a configuration.
+    func deleteConfiguration(_ id: String) {
+        var updated = settings
+        updated.savedConfigurations.removeAll { $0.id == id }
+        if updated.configurationID == id { updated.configurationID = nil }
+        settings = updated
     }
 
     func openMainWindow() {

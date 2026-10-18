@@ -56,3 +56,40 @@ public struct QuotaProgress: Equatable, Sendable {
         "Daily slop quota: \(count) / \(target) \(metric.unit)"
     }
 }
+
+/// The notification for reaching the daily PR quota: at most one per goal and day.
+public struct QuotaCompletion: Equatable, Sendable {
+    /// The goal (metric, target, repository filter) and the day in the goal timezone.
+    public let key: String
+    public let title: String
+    public let body: String
+
+    /// Nil unless the last sync confirmed the PR data, the quota is reached with complete
+    /// coverage, and this goal was not already announced on `day`. Announced keys from
+    /// earlier days are ignored, so they can be kept until the day changes.
+    public static func due(
+        quota: DashboardSnapshot.Quota?, goal: Goal?, repositories: [String], day: CalendarDay,
+        confirmed: Bool, announced: Set<String>
+    ) -> QuotaCompletion? {
+        guard confirmed, let quota, let goal, quota.isReached, quota.coverageComplete else {
+            return nil
+        }
+        let key = Self.key(goal: goal, repositories: repositories, day: day)
+        guard !announced.contains(key) else { return nil }
+        return QuotaCompletion(
+            key: key, title: "Daily slop quota reached",
+            body: "\(quota.count) / \(quota.target) \(quota.unit) today, \(quota.scopeLabel).")
+    }
+
+    static func key(goal: Goal, repositories: [String], day: CalendarDay) -> String {
+        [
+            day.description, goal.metric.rawValue, String(goal.target),
+            repositories.sorted().joined(separator: ","),
+        ].joined(separator: "|")
+    }
+
+    /// Whether an announced key belongs to `day`, so older ones can be dropped.
+    public static func isFrom(_ day: CalendarDay, key: String) -> Bool {
+        key.hasPrefix("\(day.description)|")
+    }
+}

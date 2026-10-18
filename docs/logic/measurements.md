@@ -26,6 +26,15 @@ to "all" so new repositories are included; the last ticked repository stays tick
 only when coverage is complete. Contributions are never re-bucketed: the provider's
 day labels are used as-is.
 
+`QuotaCompletion` decides the opt-in "Daily slop quota reached" notification (Settings ›
+Pull requests › "Notify when reached", off by default). After each sync, one is due when
+the sync verified a token and fetched PRs without error, the quota is reached with complete
+coverage, and its key — the day in the goal timezone, metric, target, and repository
+filter — was not announced already. Announced keys are kept in preferences for the
+current day only, so restarts do not repeat it, while a changed goal or the next day can
+be announced again. Clicking the notification opens the app window. Editing the target
+alone posts nothing until the next sync confirms the count.
+
 The snapshot builder feeds `MovingAverage` completed days only, so today has no
 average. Sync and snapshot rules are in the [sync guide](sync.md).
 

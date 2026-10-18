@@ -4,10 +4,13 @@ import SwiftUI
 
 struct SettingsView: View {
     @Environment(AppModel.self) private var model
+    @Environment(Updater.self) private var updater
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Binding var focus: SettingsAnchor?
     @FocusState private var focusedField: SettingsAnchor?
     @State private var login = ""
     @State private var addsToken = false
+    @State private var loginItem = LoginItem()
 
     var body: some View {
         @Bindable var model = model
@@ -23,7 +26,8 @@ struct SettingsView: View {
     }
 
     private func form(bindable: Bindable<AppModel>) -> some View {
-        Form {
+        @Bindable var updater = updater
+        return Form {
             // Who is measured first: the account and how it is connected, then its tokens.
             Section {
                 accountSummary
@@ -143,6 +147,7 @@ struct SettingsView: View {
                             Text(goal.metric.unit).foregroundStyle(.secondary)
                         }
                     }
+                    quotaNotification
                 }
                 .disabled(model.settings.goal == nil)
             } header: {
@@ -157,8 +162,8 @@ struct SettingsView: View {
             .disabled(!model.hasToken)
 
             Section("Timezone") {
-                Picker("Timezone", selection: bindable.settings.timeZoneID) {
-                    ForEach(TimeZone.knownTimeZoneIdentifiers, id: \.self) { Text($0).tag($0) }
+                LabeledContent("Timezone") {
+                    TimeZonePicker(selection: bindable.settings.timeZoneID)
                 }
                 HStack(alignment: .firstTextBaseline) {
                     Text("PR days and the quota reset at midnight here.")
@@ -177,7 +182,40 @@ struct SettingsView: View {
 
             AppearanceSettings(
                 theme: bindable.settings.theme, saved: bindable.settings.savedThemes,
-                appearance: bindable.settings.appearance)
+                appearance: bindable.settings.appearance, density: bindable.settings.density,
+                setAside: bindable.settings.setAsidePalette)
+
+            Section("General") {
+                Toggle(
+                    "Open at login",
+                    isOn: Binding(get: { loginItem.isOn }, set: { loginItem.set($0) }))
+                if loginItem.status == .requiresApproval {
+                    HStack {
+                        Text("Waiting for approval in System Settings › General › Login Items.")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                        Spacer()
+                        Button("Open Login Items") { loginItem.openSystemSettings() }
+                    }
+                }
+                if let error = loginItem.error {
+                    Text(error)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+            }
+            // The person can change login items in System Settings while the window is open.
+            .onReceive(
+                NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)
+            ) { _ in
+                loginItem.refresh()
+                Task { await model.quotaNotifier.refreshPermission() }
+            }
+
+            Section("Updates") {
+                Toggle("Check for updates automatically", isOn: $updater.checksAutomatically)
+                Button("Check for Updates…") { updater.checkForUpdates() }
+            }
 
             Section("About") {
                 LabeledContent("Version", value: BuildInfo.version)
@@ -189,12 +227,30 @@ struct SettingsView: View {
         .formStyle(.grouped)
     }
 
+    /// Opt-in; once per goal and day, never while some PRs may be missing.
+    @ViewBuilder
+    private var quotaNotification: some View {
+        let notifier = model.quotaNotifier
+        Toggle(
+            "Notify when reached",
+            isOn: Binding(get: { notifier.isOn }, set: { on in Task { await notifier.set(on) } }))
+        if notifier.isOn, notifier.isBlocked {
+            HStack {
+                Text("Notifications for Slopometer are off in System Settings.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                Spacer()
+                Button("Open Notifications") { notifier.openSystemSettings() }
+            }
+        }
+    }
+
     /// Scrolls to a section the dashboard asked for, then clears the request. Asking for
     /// the token section with no token saved opens Add Token directly.
     private func reveal(_ anchor: SettingsAnchor?, with proxy: ScrollViewProxy) {
         guard let anchor else { return }
         DispatchQueue.main.async {
-            withAnimation { proxy.scrollTo(anchor, anchor: .top) }
+            withAnimation(reduceMotion ? nil : .default) { proxy.scrollTo(anchor, anchor: .top) }
             if anchor == .account, !model.hasToken { focusedField = .account }
             if anchor == .token, !model.hasToken { presentAddToken() }
             focus = nil

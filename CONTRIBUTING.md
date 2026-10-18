@@ -2,8 +2,8 @@
 
 Start with [AGENTS](AGENTS.md), [SPEC](SPEC.md), [SCOPE](SCOPE.md), and the
 [development guide](docs/DEVELOPMENT.md). Propose product-contract changes before
-implementing them. A public source repository currently has no selected license;
-external contribution terms must be settled before accepting contributions.
+implementing them. Slopometer is released under the [MIT License](LICENSE);
+contributions are accepted under the same license.
 
 Use one task branch/worktree per concern, preserve others' work, and keep fixtures
 obviously separate from provider data. Run `make validate` once the changes are

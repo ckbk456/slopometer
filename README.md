@@ -21,7 +21,7 @@ GitHub account, and shows a dashboard window and a desktop widget.
   token per organization to include its private repositories.
 
 Grid, column, and line views; 30/90/365-day ranges; 7/30-day averages. Color themes:
-gradient presets (Slop Green, GitHub, Electric, Vibe Coded, Rainbow, and more) or a custom
+gradient presets (Slop Electric, GitHub, Vibe Coded, Rainbow, and more) or a custom
 gradient of up to 8 colors, saved under your own names, with a System/Light/Dark switch. Saved configurations, launch at login, and notifications are
 planned. See
 the [short roadmap](ROADMAP.md).
@@ -59,6 +59,6 @@ There is no application server or AI provider dependency.
 
 ## License
 
-No open-source license has been selected yet. Public source availability does
-not itself grant an open-source license. Licensing is a decision before a
-public release or accepting external contributions.
+Slopometer is free and released under the [MIT License](LICENSE). Bundled
+third-party components and their licenses are listed in
+[third-party notices](THIRD_PARTY_NOTICES.md).

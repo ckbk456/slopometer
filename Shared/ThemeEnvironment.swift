@@ -7,6 +7,15 @@ extension EnvironmentValues {
     @Entry var slopTheme = SlopTheme.standard
     /// `slopTheme` resolved for the current color scheme.
     @Entry var slopColors = SlopColors(appearance: SlopTheme.standard.light)
+    /// Comfortable unless the app window or menu bar panel sets compact.
+    @Entry var density = Density.comfortable
+}
+
+extension Density {
+    /// Picks the comfortable or compact value of a spacing or padding.
+    func pick(_ comfortable: CGFloat, _ compact: CGFloat) -> CGFloat {
+        self == .compact ? compact : comfortable
+    }
 }
 
 extension View {

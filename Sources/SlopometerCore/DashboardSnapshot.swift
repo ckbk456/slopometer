@@ -19,9 +19,19 @@ public enum AppearanceMode: String, Codable, CaseIterable, Identifiable, Sendabl
     public var title: String { rawValue.capitalized }
 }
 
+/// Spacing and control size in the app window and menu bar panel. Widgets keep the
+/// system's fixed sizes.
+public enum Density: String, Codable, CaseIterable, Identifiable, Sendable {
+    case comfortable
+    case compact
+
+    public var id: String { rawValue }
+    public var title: String { rawValue.capitalized }
+}
+
 /// Nonsecret preferences. The token is stored separately in Keychain.
 public struct DashboardSettings: Codable, Equatable, Sendable {
-    public static let ranges = [30, 90, 365]
+    public static let ranges = [30, 90, 180, 365]
     public static let averageWindows = [0, 7, 30]
 
     public var login = ""
@@ -38,8 +48,15 @@ public struct DashboardSettings: Codable, Equatable, Sendable {
     /// Colors for the app, menu bar, and widget.
     public var theme = ColorTheme.standard
     public var appearance = AppearanceMode.system
+    public var density = Density.comfortable
     /// Themes the person named, in the order they saved them.
     public var savedThemes: [SavedTheme] = []
+    /// The current theme's other palette while light and dark share one.
+    public var setAsidePalette: SetAsidePalette?
+    /// Named dashboard configurations, in the order they were saved.
+    public var savedConfigurations: [SavedConfiguration] = []
+    /// The configuration last chosen or saved; it may have been edited since.
+    public var configurationID: String?
 
     public init() {}
 
@@ -66,14 +83,22 @@ public struct DashboardSettings: Codable, Equatable, Sendable {
         goal = try container.decodeIfPresent(Goal.self, forKey: .goal)
         widgets =
             try container.decodeIfPresent(WidgetSettings.self, forKey: .widgets)
-            ?? WidgetSettings(following: metric, chartStyle: chartStyle)
+            ?? defaults.widgets
         theme = try container.decodeIfPresent(ColorTheme.self, forKey: .theme) ?? defaults.theme
         appearance =
             try container.decodeIfPresent(AppearanceMode.self, forKey: .appearance)
             ?? defaults.appearance
+        density = try container.decodeIfPresent(Density.self, forKey: .density) ?? defaults.density
         savedThemes =
             try container.decodeIfPresent([SavedTheme].self, forKey: .savedThemes)
             ?? defaults.savedThemes
+        setAsidePalette = try container.decodeIfPresent(
+            SetAsidePalette.self, forKey: .setAsidePalette)
+        savedConfigurations =
+            try container.decodeIfPresent(
+                [SavedConfiguration].self, forKey: .savedConfigurations)
+            ?? defaults.savedConfigurations
+        configurationID = try container.decodeIfPresent(String.self, forKey: .configurationID)
     }
 
     public var timeZone: TimeZone { TimeZone(identifier: timeZoneID) ?? .current }
@@ -331,7 +356,7 @@ public enum SnapshotBuilder {
 
 /// The snapshot file shared with the widget through the App Group container.
 public enum SharedSnapshot {
-    public static let appGroup = "5U4584QFCQ.dev.slopometer"
+    public static let appGroup = "5U4584QFCQ.vn.infinitex.slopometer"
     private static let fileName = "snapshot.json"
 
     public static func url() -> URL? {

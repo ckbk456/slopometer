@@ -101,13 +101,6 @@ public struct WidgetSettings: Codable, Equatable, Sendable {
     public init() {}
 
     /// Settings saved before widgets were configurable followed the dashboard; keep that.
-    public init(following metric: Metric, chartStyle: ChartStyle) {
-        small.metric = metric
-        medium.metric = metric
-        large.metric = metric
-        large.chartStyle = chartStyle
-    }
-
     public subscript(size: WidgetSize) -> WidgetPanelSettings {
         get {
             switch size {

@@ -13,15 +13,16 @@ struct AppearanceSettings: View {
     @Binding var theme: ColorTheme
     @Binding var saved: [SavedTheme]
     @Binding var appearance: AppearanceMode
+    @Binding var density: Density
     @State private var draft: ColorTheme
     /// The preset or saved theme the draft started from; kept after edits so a saved
     /// theme can be updated in place.
     @State private var origin: String?
     /// Which appearance's palette the editor changes; light while dark mode shares it.
     @State private var editsDark = false
-    /// Dark colors set aside while dark mode shares the light ones, so turning sharing
-    /// off again restores them instead of starting over.
-    @State private var setAsideDark: ColorTheme.Palette?
+    /// The palette set aside while both appearances share one, so turning sharing off
+    /// restores it instead of starting over. Sharing keeps whichever side was being edited.
+    @Binding var setAside: SetAsidePalette?
     @State private var selectedStop = 0
     /// The stop whose color popover is open.
     @State private var editingStop: Int?
@@ -37,11 +38,14 @@ struct AppearanceSettings: View {
 
     init(
         theme: Binding<ColorTheme>, saved: Binding<[SavedTheme]>,
-        appearance: Binding<AppearanceMode>
+        appearance: Binding<AppearanceMode>, density: Binding<Density>,
+        setAside: Binding<SetAsidePalette?>
     ) {
         _theme = theme
         _saved = saved
         _appearance = appearance
+        _density = density
+        _setAside = setAside
         _draft = State(initialValue: theme.wrappedValue)
         _origin = State(initialValue: theme.wrappedValue.presetID)
     }
@@ -56,8 +60,15 @@ struct AppearanceSettings: View {
                 commit()
             }
             .onChange(of: theme) { _, saved in
-                if saved != draft { draft = saved }
+                // Another theme arrived (a saved configuration, say): its colors are not
+                // the ones set aside.
+                if saved != draft {
+                    draft = saved
+                    setAside = nil
+                }
             }
+            // Leaving Settings mid-edit keeps the edit.
+            .onDisappear { commit() }
             .onAppear { editsDark = colorScheme == .dark && draft.dark != nil }
             .onDisappear(perform: commit)
             .alert(namingTitle, isPresented: isNaming) {
@@ -91,6 +102,12 @@ struct AppearanceSettings: View {
             }
             .pickerStyle(.segmented)
             .fixedSize()
+            Picker("Density", selection: $density) {
+                ForEach(Density.allCases) { Text($0.title).tag($0) }
+            }
+            .pickerStyle(.segmented)
+            .fixedSize()
+            .help("Spacing and control size in the window and menu bar panel")
             LazyVGrid(columns: swatchColumns, alignment: .leading, spacing: 10) {
                 ForEach(ThemePreset.all) { preset in
                     PresetSwatch(
@@ -106,7 +123,7 @@ struct AppearanceSettings: View {
                 Label("Colorblind-safe", systemImage: "eye")
                     .font(.caption).foregroundStyle(.secondary)
                 Spacer()
-                Button("Reset to Slop Green") { choose(ColorTheme.standard) }
+                Button("Reset to Slop Electric") { choose(ColorTheme.standard) }
                     .disabled(draft == ColorTheme.standard)
             }
             if !saved.isEmpty {
@@ -168,7 +185,7 @@ struct AppearanceSettings: View {
         origin = preset.presetID
         selectedStop = 0
         editingStop = nil
-        setAsideDark = nil
+        setAside = nil
         if preset.dark == nil { editsDark = false }
     }
 
@@ -237,20 +254,19 @@ struct AppearanceSettings: View {
 
     private var colorsSection: some View {
         Section {
-            HStack {
+            Toggle("Same colors in dark and light mode", isOn: sharesPalette)
+            if draft.dark != nil {
                 Picker("Editing", selection: $editsDark) {
                     Text("Light").tag(false)
                     Text("Dark").tag(true)
                 }
                 .pickerStyle(.segmented)
                 .fixedSize()
-                .disabled(draft.dark == nil)
-                Spacer()
-                Toggle("Same colors in dark mode", isOn: sharesDark)
-            }
-            if draft.dark == nil, setAsideDark != nil {
-                Text("Your dark colors are kept. Turn this off to get them back.")
-                    .font(.caption).foregroundStyle(.secondary)
+            } else if let setAside {
+                Text(
+                    "Your \(setAside.isDark ? "dark" : "light") colors are kept. Turn this off to get them back."
+                )
+                .font(.caption).foregroundStyle(.secondary)
             }
             GradientEditor(
                 colors: palette.gradient, selection: stopIndex, editing: $editingStop,
@@ -492,23 +508,36 @@ struct AppearanceSettings: View {
             set: { color in editPalette { set(&$0, color) } })
     }
 
-    /// On sets the dark colors aside rather than discarding them; off brings them back,
-    /// or copies the light colors so editing starts from what is shown. Returning to the
-    /// chosen theme's own colors keeps it selected.
-    private var sharesDark: Binding<Bool> {
+    /// On shares the palette being edited, so what is on screen is what both appearances
+    /// get, and sets the other one aside rather than discarding it. Off brings that one
+    /// back, or copies the shared colors so editing starts from what is shown. Returning
+    /// to the chosen theme's own colors keeps it selected.
+    private var sharesPalette: Binding<Bool> {
         Binding(
             get: { draft.dark == nil },
             set: { shares in
                 var updated = draft
                 if shares {
                     guard let dark = updated.dark else { return }
-                    setAsideDark = dark
+                    if editsDark {
+                        setAside = SetAsidePalette(palette: updated.light, isDark: false)
+                        updated.light = dark
+                    } else {
+                        setAside = SetAsidePalette(palette: dark, isDark: true)
+                    }
                     updated.dark = nil
                     editsDark = false
                 } else {
                     guard updated.dark == nil else { return }
-                    updated.dark = setAsideDark ?? updated.light
-                    setAsideDark = nil
+                    let shared = updated.light
+                    if let setAside, !setAside.isDark {
+                        // The shared colors came from dark; they go back to dark.
+                        updated.light = setAside.palette
+                        updated.dark = shared
+                    } else {
+                        updated.dark = setAside?.palette ?? shared
+                    }
+                    setAside = nil
                     editsDark = true
                 }
                 updated.presetID = nil

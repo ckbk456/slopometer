@@ -171,6 +171,15 @@ enum HeatmapLabel {
         let value = point.count.map { "\($0) \(unit)" } ?? "unknown"
         return "\(date): \(value)\(point.isIncomplete ? " so far (today, incomplete)" : "")"
     }
+
+    /// The moving average on a day, for VoiceOver on line and column charts.
+    static func describeAverage(
+        _ point: DashboardSnapshot.Point, _ average: Double, unit: String
+    ) -> String {
+        let date = point.day.start(in: .current).formatted(date: .abbreviated, time: .omitted)
+        return
+            "\(date): average \(average.formatted(.number.precision(.fractionLength(1)))) \(unit)"
+    }
 }
 
 private struct TrendChart: View {
@@ -205,17 +214,22 @@ private struct TrendChart: View {
                         BarMark(x: .value("Day", date, unit: .day), y: .value(unit, count))
                             .foregroundStyle(
                                 barColor(count, busiest: busiest)
-                                    .opacity(point.isIncomplete ? 0.4 : 1))
+                                    .opacity(point.isIncomplete ? 0.4 : 1)
+                            )
+                            .accessibilityLabel(HeatmapLabel.describe(point, unit: unit))
                     } else {
                         LineMark(x: .value("Day", date, unit: .day), y: .value(unit, count))
                             .foregroundStyle(by: .value("Series", "Daily"))
                             .interpolationMethod(.linear)
+                            .accessibilityLabel(HeatmapLabel.describe(point, unit: unit))
                     }
                 }
                 if showsAverage, let average = point.average {
                     LineMark(x: .value("Day", date, unit: .day), y: .value(unit, average))
                         .foregroundStyle(by: .value("Series", "Average"))
                         .lineStyle(StrokeStyle(lineWidth: 2, dash: [4, 3]))
+                        .accessibilityLabel(
+                            HeatmapLabel.describeAverage(point, average, unit: unit))
                 }
                 if selection?.wrappedValue == point.day {
                     RuleMark(x: .value("Day", date, unit: .day))

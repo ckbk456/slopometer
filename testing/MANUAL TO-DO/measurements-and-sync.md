@@ -35,7 +35,14 @@ Provider integration and PR quotas are not yet implemented. All gates are pendin
 - [ ] Check local midnight and daylight-saving transitions; document provider-calendar differences.
 - [ ] Confirm 7/30-day averages include zero days, warm-up history, and missing-data gaps.
 - [ ] Set/edit a quota; exceed it; verify exact scope/unit, day reset, and PR evidence.
-- [ ] If enabled, receive one confirmed completion notification per goal/day.
+- [ ] Quota notification (1.0.0): turning on "Notify when reached" asks for macOS
+      permission once; reaching the target shows one "Daily slop quota reached" banner
+      after the next sync, with the unit and scope; later syncs, a relaunch, or exceeding
+      the target the same day post nothing more; the next day it can fire again.
+- [ ] With some PRs possibly missing (a failed token), no notification is posted even
+      when the count meets the target. Clicking the banner opens the app window.
+- [ ] With notifications denied in System Settings, the caption and "Open Notifications"
+      appear, and the button opens Slopometer's notification settings.
 - [ ] Verify credentials stay in Keychain and never enter logs, settings, exports, or Git.
 - [ ] Verify persisted settings/cache after restart and upgrades without losing source records.
 

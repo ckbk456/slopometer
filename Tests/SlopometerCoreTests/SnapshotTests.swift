@@ -168,15 +168,14 @@ struct SnapshotTests {
         #expect(large.todayCount == 1)
     }
 
-    @Test func settingsSavedBeforeWidgetSettingsKeepTheirValues() throws {
+    @Test func missingWidgetSettingsUseTheDefaults() throws {
         let saved = Data(
             #"{"login":"me","metric":"prsOpened","chartStyle":"columns","rangeDays":30,"averageWindow":0,"timeZoneID":"Asia/Bangkok","repositories":[]}"#
                 .utf8)
         let decoded = try JSONDecoder().decode(DashboardSettings.self, from: saved)
         #expect(decoded.login == "me")
         #expect(decoded.rangeDays == 30)
-        for size in WidgetSize.allCases { #expect(decoded.widgets[size].metric == .prsOpened) }
-        #expect(decoded.widgets.large.chartStyle == .columns)
+        #expect(decoded.widgets == WidgetSettings())
         let roundTrip = try JSONDecoder().decode(
             DashboardSettings.self, from: JSONEncoder().encode(decoded))
         #expect(roundTrip == decoded)

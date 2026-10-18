@@ -7,7 +7,7 @@
 - [ ] Close and reopen the window from the menu bar; verify Quit exits the app.
 - [ ] Inspect keyboard operation, VoiceOver, and light/dark contrast.
 - [ ] At the minimum window width, controls stay on their rows and the grid has no empty
-      gap below it for 30, 90, and 365 days.
+      gap below it for 30, 90, 180, and 365 days.
 - [ ] Without a token, PRs opened / Authored PRs merged show the token explanation; Add
       Token opens Settings scrolled to the token field. Rejected or mismatched tokens show
       their own wording.
@@ -30,7 +30,7 @@
       disabled while classic tokens are saved, and shows its note.
 - [ ] Resize the window from 640×540 to full-screen height: columns and line charts fill
       the height smoothly without jitter; the grid grows with square cells and never
-      overflows the width for 30, 90, and 365 days. With the quota card, day detail, or
+      overflows the width for 30, 90, 180, and 365 days. With the quota card, day detail, or
       notices showing, the chart keeps at least its minimum height and the tab scrolls.
 - [ ] On macOS 26+: quota card, token explanation, day detail, tier badge, refresh and `?`
       buttons render as Liquid Glass, legible in light/dark and with Reduce Transparency
@@ -138,7 +138,10 @@ checks below were not separately reported and remain pending.
 
 - [ ] Settings › Appearance: each preset changes the Activity grid, columns, line, quota
       meter, tint, menu bar panel, Widgets tab previews, and desktop widgets together, in
-      light and dark appearance. Slop Green looks exactly like 0.11.
+      light and dark appearance.
+- [ ] Slop Electric is the first preset and selected on a fresh install; Reset to Slop
+      Electric restores it; no Slop Green preset is offered. A new widget placed before the
+      app has run shows Slop Electric.
 - [ ] Custom gradient: add up to 8 and remove down to 2 colors, edit by picker and hex,
       Reverse, Surprise Me; the caption switches to "Edited from …, not saved"; the choice
       survives relaunch.
@@ -155,7 +158,7 @@ checks below were not separately reported and remain pending.
 - [ ] Appearance System/Light/Dark switches the window, menu bar panel, and desktop widget
       (background included) at once; System follows the macOS switch again.
 - [ ] The palette button on the dashboard opens Settings scrolled to Appearance.
-- [ ] "Same colors in dark mode" off: light and dark edit separately and both previews and
+- [ ] "Same colors in dark and light mode" off: light and dark edit separately and both previews and
       the real app follow the system appearance switch.
 - [ ] Smooth mapping with Rainbow: neighboring counts get visibly different colors; 4 levels
       shows 4. Tile numbers stay readable on every color, including yellow.
@@ -163,15 +166,86 @@ checks below were not separately reported and remain pending.
 - [ ] Advice captions appear for Rainbow (lightness) and a flat custom gradient (similar
       levels) and disappear for GitHub/Viridis.
 - [ ] Accent text (Target reached, Token badge, "+N") stays readable with Halloween's
-      yellow and Electric's light blue; warnings stay amber in every theme.
+      yellow and Slop Electric's sky blue; warnings stay amber in every theme.
 - [ ] Unfocused/tinted desktop widget ignores the theme and stays readable.
 - [ ] A saved theme with its own dark colors shows light above dark in its tile, in both
       window appearances; a saved theme without them shows one strip.
-- [ ] With separate dark colors, turning "Same colors in dark mode" on shows a note, and
-      turning it off brings the dark colors back; on a saved theme or preset the
-      selection stays when the colors return to what was saved.
+- [ ] With separate dark colors, turning "Same colors in dark and light mode" on while
+      editing Dark keeps the dark colors on screen for both appearances and notes that the
+      light colors are kept (and the reverse while editing Light). Edit the shared colors,
+      then turn it off: the set-aside side comes back and the edited colors stay on the
+      side they came from. On a saved theme or preset the selection stays when the colors
+      return to what was saved. The toggle sits on its own row without wrapping.
 - [ ] VoiceOver names each preset and control; the selected preset is marked by more
       than color; Increase Contrast and Reduce Transparency remain legible.
+
+## Release identity and updates (1.0.0): pending
+
+- [ ] After `make run`, only the 1.0.0 build is registered: the widget gallery offers one
+      Slopometer, and `slopometer://` links open it. Earlier `dev.slopometer.app` widgets
+      are gone or show no data and must be re-added.
+- [ ] The app starts empty (new identity): enter the username and tokens again; sync,
+      the menu bar, and the widget work as before.
+- [ ] Settings › Updates shows "Check for updates automatically" (off in Debug) and
+      "Check for Updates…". Before a feed is published, checking reports that the update
+      server cannot be reached, with no crash or hang.
+- [ ] Settings › About and the menu bar panel read version 1.0.0.
+- [ ] After a feed is published: an older release finds the newer one, the alert shows
+      release notes, Install relaunches into the new version, and data and widgets are kept.
+- [ ] A scheduled check (release build) shows a Dock icon and the menu bar panel row
+      "Slopometer x is available"; clicking the row brings the alert forward; both clear
+      after the alert is dismissed.
+
+## Open at login (1.0.0): pending
+
+- [ ] Settings › General › "Open at login" is off on a fresh install. Turning it on adds
+      Slopometer to System Settings › General › Login Items; logging out and in starts it
+      in the menu bar without opening the window.
+- [ ] Turning it off in System Settings is reflected by the toggle when the app comes
+      back to the front; turning it off in the app removes the login item.
+- [ ] If macOS asks for approval, the caption and "Open Login Items" appear and lead to
+      the right System Settings page.
+- [ ] A Debug build registers its own `.build` path; turn the toggle off before deleting
+      a worktree, or the login item points at a missing app.
+
+## Saved configurations (1.0.0): pending
+
+- [ ] Activity › Configurations › "Save as New Configuration…" names and saves the current
+      metric, repositories, chart, range, average, colors, and quota; the menu then shows
+      its name with a checkmark.
+- [ ] Changing any of those marks it "(edited)"; "Update" saves the change; choosing it
+      again discards the edit. Changing light/dark, timezone, or a widget does not mark it.
+- [ ] Switching between two configurations changes the chart, colors, and quota (or turns
+      the quota off and back on with the earlier target), the menu bar headline, and
+      nothing in the Widgets tab.
+- [ ] The menu bar panel shows a configuration row only when some are saved; it switches
+      but does not offer save, rename, or delete.
+- [ ] Rename and Delete work from the Activity menu; deleting the one in use keeps the
+      dashboard as it is. Configurations survive relaunch.
+- [ ] VoiceOver reads "Configuration: <name>" for both menus.
+
+## Density and accessibility pass (1.0.0): pending
+
+- [ ] Settings › Appearance › Density switches Comfortable/Compact at once: smaller
+      controls and tighter spacing in the Activity tab, Settings, and the menu bar panel
+      (narrower, shorter rows); widgets are unchanged; the choice survives relaunch and is
+      not marked as a configuration edit.
+- [ ] VoiceOver on a columns or line chart reads each day as "<date>: <n> <unit>" (today
+      "so far") and average points as "<date>: average <x> <unit>".
+- [ ] With Reduce Motion on, showing/hiding the quota's PRs and jumping to a Settings
+      section happen without animation.
+- [ ] VoiceOver does not read symbol names for token status icons, PR rows, or the widget's
+      empty-state gauge.
+
+## Timezone picker (1.0.0): pending
+
+- [ ] Settings › Timezone shows "City · GMT±h" (for example "Ho Chi Minh · GMT+7") and opens a
+      popover with the search field focused and the current zone scrolled into view.
+- [ ] Typing "ho chi" (partial names), "asia", "Indochina", "+7", or "UTC+7"
+      narrows the list; Return picks the first match; clicking a row picks it and closes.
+- [ ] "Use This Mac's Timezone" appears only when the setting differs from the Mac's zone.
+- [ ] Offsets show half hours (Kolkata GMT+5:30) and current daylight saving (New York).
+- [ ] VoiceOver reads each row as city, region, offset and marks the selected one.
 
 ## Widget and background app: pending
 
@@ -182,12 +256,15 @@ checks below were not separately reported and remain pending.
 - [ ] Small shows the headline and "Synced <time>"; medium shows 7 labeled day tiles;
       large shows a 5-week calendar for grid and the chosen 30 or 90 days for columns/line, with
       no average line. Footer age is left, window label right, and does not shift.
-- [ ] The window's tabs read Activity, Widgets, Settings. The Widgets tab shows a Small,
+- [ ] The window toolbar's section switcher reads Activity, Widgets, Settings at the same
+      size in Comfortable and Compact density. On macOS 26 it is a glass capsule whose
+      selected pill follows the track's curve and slides between sections (no slide with
+      Reduce Motion), with no second glass layer behind it; on macOS 14–15 it is the
+      standard segmented control. VoiceOver reads it as "Section" and marks the selected one. The Widgets tab shows a Small,
       Medium, and Large section, each with a preview matching the desktop widget. Changing
       a size's headline, metric, view, or window updates only that size and its preview;
       changing the Activity tab's metric or view changes no widget. Quota headline without an active quota shows
       today's count; a PR metric without a token shows the token message in that size.
-- [ ] After upgrading from 0.5.0, each widget keeps the metric and view it showed before.
 - [ ] With the desktop widget unfocused (tinted), grid levels, today's outline, tiles,
       and the quota meter stay distinguishable.
 - [ ] Widget matches the app's counts and shows snapshot age when the app is quit.
@@ -197,7 +274,6 @@ checks below were not separately reported and remain pending.
       out of the tile and readable; today's weekday label is bold in both renderings.
 - [ ] Check Spaces, multiple displays, sleep/wake, and restart.
 - [ ] Inspect density, contrast, and Reduce Motion.
-- [ ] Verify login launch only after opting in; no orphan helper remains after quit.
 - [ ] Test macOS 14 and other claimed supported versions on named targets.
 
 Evidence: 2026-10-17, macOS 27.0.1, signed Debug build launched and quit cleanly by an

@@ -9,7 +9,7 @@ milestones, not date estimates or authorization to publish/merge/release.
 | 1 · Harden the bench | Single CI run per change, project drift check, consistent formatter and signing, widget extension with App Group and shared snapshot format | CI gate; widget appears from a locally signed build (manual) | Toolchain merged (#2); widget built and signed locally; manual widget check pending |
 | 2 · Measure real slop | Source records, timezone bucketing, cache v2, public-profile calendar, optional token with GraphQL calendar and PR search, recorded fixtures | Reconciliation, deduplication, removed-PR, timezone, search-window, rate-limit, and token-mismatch tests | MVP: tests pass locally; live sync exercised on one account; manual provider checks pending |
 | 3 · Set the daily quota | PR goals, evidence inspector, three charts, 7/30-day averages, widget views | Same-series chart/widget agreement; boundary, missing-data and quota tests | MVP: implemented without login launch or notifications; token gate, typed quota target, and fitted grid added; size-specific widget windows and per-size widget settings added; repository filter is a checklist of synced repositories; several tokens (one per organization) and opt-in classic tokens (InsecuSlopometer™); manual checks pending |
-| 4 · Calibrate and package | Theme editor, saved configurations, accessibility, login launch, optional notification | Consolidated manual gates and explicit license/signing/distribution decisions | Theme editor implemented (0.12.0); the rest planned; manual checks pending |
+| 4 · Calibrate and package | Theme editor, saved configurations, accessibility, login launch, optional notification | Consolidated manual gates and explicit license/signing/distribution decisions | Theme editor implemented (0.12.0); release identity, MIT license, in-app updater, open at login, quota notification, saved configurations, density, and a source-level accessibility pass implemented (1.0.0); release job planned; manual checks pending |
 
 First technical priority: settle data contracts and widget plumbing before
 visual polish. First data priority: agree on what counts before celebrating a
@@ -86,8 +86,8 @@ version or build differs from the app's. Core tests cover the stamp's tolerant d
 and the comparison; the manual check in the
 [desktop guide](testing/MANUAL%20TO-DO/desktop-and-appearance.md) is pending.
 
-Color themes (0.12.0): Settings › Appearance offers gradient presets (Slop Green default,
-GitHub, Electric, Vibe Coded, Rainbow, Sunset, Ocean, Halloween, Mono, Viridis, Cividis) and
+Color themes (0.12.0): Settings › Appearance offers gradient presets (Slop Electric default,
+GitHub, Vibe Coded, Rainbow, Sunset, Ocean, Halloween, Mono, Viridis, Cividis) and
 a custom gradient of 2–8 colors per appearance, with 4-level or Smooth mapping, automatic or
 chosen accent, average-line color, and an accent or gradient quota meter. The app, menu bar
 panel, and widget draw from the same saved theme; text and window backgrounds stay with the
@@ -105,3 +105,64 @@ Saved theme tiles with their own dark colors show light above dark; "Same colors
 mode" sets the dark colors aside instead of discarding them, so turning it off restores
 them. The widget sync age now reads "2m ago" or "1h 05m ago" instead of "00:02".
 Core tests cover the new settings and snapshot fields; rendering checks are pending.
+
+Release identity and updater (1.0.0): implemented on `codex/sparkle-updater` on the user's
+direction (SCOPE updated). The app, widget, App Group, and Keychain service moved to
+`vn.infinitex.slopometer`, so earlier development data is not carried over. Sparkle 2.10.0
+checks `https://updates.infinitex.vn/slopometer/appcast.xml` daily in release builds (off
+by default in Debug), with Settings › Updates and a menu bar panel reminder; the EdDSA key
+was generated in the release machine's Keychain. The version is 1.0.0 on the user's
+direction; login launch, the notification, and saved configurations followed below. Next: a tagged-release job (Developer ID archive, notarization, appcast,
+upload to R2). Updater and identity checks in the
+[desktop guide](testing/MANUAL%20TO-DO/desktop-and-appearance.md) are pending.
+
+Open at login (1.0.0): implemented on `codex/launch-at-login` with `SMAppService.mainApp`
+behind Settings › General, off by default, reading the system status back (including
+approval pending). Checks in the [desktop guide](testing/MANUAL%20TO-DO/desktop-and-appearance.md)
+are pending.
+
+Quota notification (1.0.0): implemented on `codex/quota-notification`. Opt-in "Notify
+when reached" under Settings › Pull requests posts one notification per goal and day,
+only after a sync confirms PR data with complete coverage. Core tests cover the rules;
+the checks in the [measurements guide](testing/MANUAL%20TO-DO/measurements-and-sync.md)
+are pending.
+
+Saved configurations (1.0.0): implemented on `codex/saved-configurations` as Activity
+presets on the user's direction (SPEC updated): metric, repository filter, chart, range,
+average, theme, and quota, saved and managed from the Activity tab and switched there or
+from the menu bar panel. Widgets keep their per-size settings. Density does not exist yet,
+so it is not part of a configuration. Core tests cover capture, apply, edit detection, and
+decoding; the checks in the [desktop guide](testing/MANUAL%20TO-DO/desktop-and-appearance.md)
+are pending.
+
+Density and accessibility (1.0.0): implemented on `codex/density`. Settings › Appearance ›
+Density (Comfortable/Compact) sets control size and spacing in the app window and menu bar
+panel; widgets keep system sizes. A source review added VoiceOver labels to column/line
+chart marks, made the two animations respect Reduce Motion, and hid decorative icons.
+Earlier work already labels heatmap and widget tiles, the color picker, and swatches. No
+person has run the accessibility checks; they are in the
+[desktop guide](testing/MANUAL%20TO-DO/desktop-and-appearance.md).
+
+Default theme (1.0.0): Slop Green is removed because it read as GitHub's
+own green. Slop Electric, retuned to an ordered electric blue to indigo ramp, is the first
+preset and the default, including for the widget before the app writes a snapshot. Core
+tests cover the default's contrast targets and advice; rendering checks are pending.
+
+Pre-release cutover (1.0.0): nothing was released before 1.0.0, and the new identity starts
+with empty preferences, cache, and Keychain, so code that adopted earlier development data
+was removed: the single-token Keychain adoption, the 0.5.0 widget-settings fallback, the
+Slop Green theme mapping, and `make run`'s handling of the old bundle ID. Missing settings
+still decode to their defaults, which protects 1.0.x itself.
+
+Polish after the first 1.0.0 test (1.0.0): a 180-day range joins 30/90/365 (SPEC and SCOPE
+updated on the user's direction); the window's sections are a segmented control in the
+toolbar instead of a TabView, whose tab strip macOS 26 drew as a cramped capsule; "Same
+colors in dark and light mode" shares whichever palette is being edited and saves the
+other in settings, so customization is never hidden or lost, and pending color edits are
+kept when leaving Settings. Manual checks in the
+[desktop guide](testing/MANUAL%20TO-DO/desktop-and-appearance.md) are pending.
+
+Timezone picker (1.0.0): Settings › Timezone is a searchable popover (city, region, IANA
+identifier, zone name, or offset such as "+7"), listed west to east with each zone's
+current GMT offset and a "Use This Mac's Timezone" shortcut, instead of a menu of 400
+identifiers. `TimeZoneChoice` in the core holds the naming and search, with tests.

@@ -55,6 +55,7 @@ struct WidgetContent: View {
                 .font(.title3)
                 .foregroundStyle(colors.markText)
                 .widgetAccentable()
+                .accessibilityHidden(true)
             Spacer(minLength: 0)
             Text(title).font(.headline).lineLimit(2)
             Text(detail).font(.caption).foregroundStyle(.secondary).lineLimit(3)

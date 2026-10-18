@@ -106,7 +106,7 @@ Display last successful sync and incomplete coverage alongside cached data.
   headline only; medium shows the last 7 days as daily tiles; large chooses grid
   (a calendar of the last 5 weeks, one tile per day) or columns/line (last 30 or 90 days). Each window is labeled.
   Widgets omit the moving average, which stays in the app window.
-- Date ranges: 30, 90, and 365 days. Contributions may retain provider-calendar
+- Date ranges: 30, 90, 180, and 365 days. Contributions may retain provider-calendar
   layout; PR series use the selected goal timezone.
 - Trailing simple moving average: off, 7 days, or 30 days. Include confirmed
   zero-activity days in the denominator. Unknown days invalidate the affected
@@ -137,12 +137,16 @@ or guilt notification is required.
 Provide light/dark/system appearance, palette presets and custom colors for
 heatmap levels (a gradient), chart marks, moving average, goal meter, and accent.
 Text and window backgrounds follow the system or the chosen light/dark appearance, so a
-color choice cannot make labels unreadable. Expose compact/comfortable density. Preserve legibility and system
+color choice cannot make labels unreadable. Expose compact/comfortable density (shared like the light/dark choice; it sets spacing and
+control size in the app window and menu bar panel, while widgets keep the system sizes). Preserve legibility and system
 accessibility preferences; color alone must not convey a count or status.
 
-A saved configuration includes metric, scope, chart, range, average, theme,
-density, and goal reference. The widget displays a chosen saved configuration.
-Start with one account; multiple named configurations can share it.
+A saved configuration includes metric, repository filter, chart, range, average,
+theme, and the daily quota (or none). It is saved, updated, renamed, and deleted from
+the app window's Activity tab and switched there or from the menu bar panel. The
+account, tokens, timezone, light/dark choice, and widgets are shared: each widget size
+keeps its own settings rather than following a configuration. Start with one account;
+multiple named configurations can share it.
 
 ## Sync and local data
 
@@ -165,6 +169,14 @@ the widget shows the last snapshot with its age.
 Tokens belong in Keychain. Never place tokens in source, preferences, logs,
 the shared snapshot, or chart exports. The sample-data scaffold needs no
 credentials.
+
+## Updates
+
+Releases are signed with Developer ID, notarized, and offered through an in-app
+updater that reads a signed static feed. Release builds check on a schedule the
+person can turn off and can check on demand; an update installs only after the person
+accepts it, and only when its signature matches the key built into the app. The check
+sends no account, token, or usage data. See the [updates guide](docs/logic/updates.md).
 
 ## Acceptance gates
 
