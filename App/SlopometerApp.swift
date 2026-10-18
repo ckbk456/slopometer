@@ -1,4 +1,5 @@
 import AppKit
+import SlopometerCore
 import SwiftUI
 
 @main
@@ -37,7 +38,24 @@ private struct Themed<Content: View>: View {
     @ViewBuilder let content: Content
 
     var body: some View {
-        content.slopTheme(model.settings.theme.resolved())
+        content
+            .slopTheme(model.settings.theme.resolved())
+            // App-wide, so the window and the menu bar panel switch together, from first
+            // appearance on. Both scenes set the same value.
+            .onChange(of: model.settings.appearance, initial: true) { _, mode in
+                NSApp.appearance = mode.nsAppearance
+            }
+    }
+}
+
+extension AppearanceMode {
+    /// Nil follows the system.
+    fileprivate var nsAppearance: NSAppearance? {
+        switch self {
+        case .system: nil
+        case .light: NSAppearance(named: .aqua)
+        case .dark: NSAppearance(named: .darkAqua)
+        }
     }
 }
 

@@ -5,6 +5,7 @@ import SwiftUI
 enum SettingsAnchor: Hashable {
     case account
     case token
+    case appearance
 }
 
 struct MainView: View {
@@ -174,6 +175,9 @@ struct DashboardView: View {
                 .help(
                     settings.wrappedValue.chartStyle == .grid
                         ? "Averages show in columns and line." : "")
+                Button("Colors", systemImage: "paintpalette") { openSettings(.appearance) }
+                    .labelStyle(.iconOnly)
+                    .help("Change colors and appearance in Settings")
             }
             .disabled(model.snapshot.metric.requiresToken && !model.tokenUsable)
         }

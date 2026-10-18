@@ -9,6 +9,16 @@ public enum ChartStyle: String, Codable, CaseIterable, Identifiable, Sendable {
     public var title: String { rawValue.capitalized }
 }
 
+/// Light, dark, or following the system, for the app window, menu bar panel, and widget.
+public enum AppearanceMode: String, Codable, CaseIterable, Identifiable, Sendable {
+    case system
+    case light
+    case dark
+
+    public var id: String { rawValue }
+    public var title: String { rawValue.capitalized }
+}
+
 /// Nonsecret preferences. The token is stored separately in Keychain.
 public struct DashboardSettings: Codable, Equatable, Sendable {
     public static let ranges = [30, 90, 365]
@@ -27,6 +37,9 @@ public struct DashboardSettings: Codable, Equatable, Sendable {
     public var widgets = WidgetSettings()
     /// Colors for the app, menu bar, and widget.
     public var theme = ColorTheme.standard
+    public var appearance = AppearanceMode.system
+    /// Themes the person named, in the order they saved them.
+    public var savedThemes: [SavedTheme] = []
 
     public init() {}
 
@@ -55,6 +68,12 @@ public struct DashboardSettings: Codable, Equatable, Sendable {
             try container.decodeIfPresent(WidgetSettings.self, forKey: .widgets)
             ?? WidgetSettings(following: metric, chartStyle: chartStyle)
         theme = try container.decodeIfPresent(ColorTheme.self, forKey: .theme) ?? defaults.theme
+        appearance =
+            try container.decodeIfPresent(AppearanceMode.self, forKey: .appearance)
+            ?? defaults.appearance
+        savedThemes =
+            try container.decodeIfPresent([SavedTheme].self, forKey: .savedThemes)
+            ?? defaults.savedThemes
     }
 
     public var timeZone: TimeZone { TimeZone(identifier: timeZoneID) ?? .current }
@@ -149,6 +168,8 @@ public struct DashboardSnapshot: Codable, Equatable, Sendable {
     /// The app's colors, so the widget draws what the app shows. Nil in snapshots written
     /// before themes; readers fall back to the standard theme.
     public var theme: ColorTheme? = nil
+    /// Nil in snapshots written before appearance modes; readers follow the system.
+    public var appearance: AppearanceMode? = nil
 
     public var unit: String { metric.unit }
 
@@ -303,7 +324,8 @@ public enum SnapshotBuilder {
             averageWindow: settings.averageWindow, sourceLabel: sourceLabel,
             scopeLabel: scopeLabel, points: points, widgets: widgets,
             todayCount: points.last?.count, quota: quota,
-            lastSuccessfulSync: lastSync, notices: notices, theme: settings.theme)
+            lastSuccessfulSync: lastSync, notices: notices, theme: settings.theme,
+            appearance: settings.appearance)
     }
 }
 
@@ -357,6 +379,6 @@ extension DashboardSnapshot {
             averageWindow: averageWindow, sourceLabel: sourceLabel, scopeLabel: scopeLabel,
             points: points, widgets: widgets, todayCount: todayCount, quota: quota,
             lastSuccessfulSync: lastSuccessfulSync, notices: notices, writerBuild: writerBuild,
-            theme: theme)
+            theme: theme, appearance: appearance)
     }
 }

@@ -175,7 +175,9 @@ struct SettingsView: View {
                 }
             }
 
-            AppearanceSettings(theme: bindable.settings.theme)
+            AppearanceSettings(
+                theme: bindable.settings.theme, saved: bindable.settings.savedThemes,
+                appearance: bindable.settings.appearance)
 
             Section("About") {
                 LabeledContent("Version", value: BuildInfo.version)

@@ -171,7 +171,13 @@ builds) is a fixed amber that is not themable. Text and window backgrounds are n
 either. Each tile's number is white or black, whichever contrasts more with its fill. Views
 read the resolved colors from `@Environment(\.slopColors)`, set by `.slopTheme(_:)`
 (`Shared/ThemeEnvironment.swift`) at the window, panel, and widget roots for the current
-color scheme. Column bars take their day's fill; the tinted/unfocused widget rendering
+color scheme. `DashboardSettings.appearance` (System, Light, Dark) sets `NSApp.appearance`
+for the window and menu bar panel and travels in `DashboardSnapshot.appearance` (nil means
+System); a forced widget sets its color scheme before resolving the theme and draws the
+matching reference background instead of the system fill. `DashboardSettings.savedThemes`
+holds named `SavedTheme`s; a saved theme's id is also its theme's `presetID`, so it stays
+selected until edited, and the editor remembers it as the origin so it can be updated in
+place. Editing clears `presetID`, as for presets. Column bars take their day's fill; the tinted/unfocused widget rendering
 ignores the theme and keeps the white levels described above.
 
 `ThemeAdvice.check` warns, without blocking, when neighboring levels are hard to tell apart

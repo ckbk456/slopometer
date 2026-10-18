@@ -136,8 +136,8 @@ or guilt notification is required.
 
 Provide light/dark/system appearance, palette presets and custom colors for
 heatmap levels (a gradient), chart marks, moving average, goal meter, and accent.
-Text and window backgrounds follow the system, so a color choice cannot make labels
-unreadable. Expose compact/comfortable density. Preserve legibility and system
+Text and window backgrounds follow the system or the chosen light/dark appearance, so a
+color choice cannot make labels unreadable. Expose compact/comfortable density. Preserve legibility and system
 accessibility preferences; color alone must not convey a count or status.
 
 A saved configuration includes metric, scope, chart, range, average, theme,

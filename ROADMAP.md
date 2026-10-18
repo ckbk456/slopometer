@@ -95,3 +95,10 @@ system (SPEC updated on the user's direction). Readability advice is shown, neve
 Core tests cover OKLab mixing, readable text, sampling, Smooth mapping, presets, advice, and
 settings migration; every rendering check in the
 [desktop guide](testing/MANUAL%20TO-DO/desktop-and-appearance.md) is pending.
+
+Theme editor polish (still 0.12.0, unreleased): a System/Light/Dark appearance switch for the
+app, menu bar panel, and widget; saved themes (save, update, rename, delete); an in-place
+color picker in a popover beside each gradient handle, accent, and average line instead of
+the shared color panel; titled gradient actions; Less/More activity labels; drag to reorder
+gradient colors; and a palette button on the dashboard that opens Settings › Appearance.
+Core tests cover the new settings and snapshot fields; rendering checks are pending.

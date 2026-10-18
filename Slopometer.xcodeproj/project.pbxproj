@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		046F6A0DF8313CBFFBD3CB16 /* InlineColorPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44DDBF9308A7EA23DC93648A /* InlineColorPicker.swift */; };
 		0BB5EA42A3FFDB32BEFA1BE3 /* WidgetsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6EEC6B6FF3999B07624F921 /* WidgetsView.swift */; };
 		0DA7C51AD547C85076A95E3F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 5A483B753EAA80FAF20E259A /* Assets.xcassets */; };
 		27355E91D3F0D148402F3A7C /* SlopometerCore in Frameworks */ = {isa = PBXBuildFile; productRef = 14F18CD2E45DA1E0B4AFBD02 /* SlopometerCore */; };
@@ -64,6 +65,7 @@
 		2CE86D6528E0B4B124751C3E /* TokenStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TokenStore.swift; sourceTree = "<group>"; };
 		325C0AB1F343F8C48BED92F2 /* BuildInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BuildInfo.swift; sourceTree = "<group>"; };
 		4293BFD7B2150A12590C6C3E /* AppModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppModel.swift; sourceTree = "<group>"; };
+		44DDBF9308A7EA23DC93648A /* InlineColorPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InlineColorPicker.swift; sourceTree = "<group>"; };
 		4CE6ACBCDE098C02149B86A4 /* SCOPE.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = SCOPE.md; sourceTree = "<group>"; };
 		5A483B753EAA80FAF20E259A /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		60187E46C02AD8A49AD0BE80 /* AppearanceSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppearanceSettings.swift; sourceTree = "<group>"; };
@@ -112,6 +114,7 @@
 				5A483B753EAA80FAF20E259A /* Assets.xcassets */,
 				325C0AB1F343F8C48BED92F2 /* BuildInfo.swift */,
 				93D504B3D0A8761AC6CC1321 /* Glass.swift */,
+				44DDBF9308A7EA23DC93648A /* InlineColorPicker.swift */,
 				E01B7F1D13FF129C1B3877CE /* MainView.swift */,
 				7FB30203F2B9554B613E1009 /* MenuPanel.swift */,
 				66E709D3A0DD9070BE504A7A /* SettingsView.swift */,
@@ -289,6 +292,7 @@
 				27AAFDEFCB590802050E2F50 /* AppearanceSettings.swift in Sources */,
 				A138EFD2A03DB78FBB9EA276 /* BuildInfo.swift in Sources */,
 				C8512F9249C0687A0E8B4B10 /* Glass.swift in Sources */,
+				046F6A0DF8313CBFFBD3CB16 /* InlineColorPicker.swift in Sources */,
 				446D228ACFA5B9E9D255D051 /* MainView.swift in Sources */,
 				5333B9EFCADBD19CEDA57972 /* MenuPanel.swift in Sources */,
 				888E53BC5853E784F4857160 /* QuotaMeter.swift in Sources */,
