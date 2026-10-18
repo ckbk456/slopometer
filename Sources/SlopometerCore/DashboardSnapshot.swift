@@ -40,6 +40,10 @@ public struct DashboardSettings: Codable, Equatable, Sendable {
     public var appearance = AppearanceMode.system
     /// Themes the person named, in the order they saved them.
     public var savedThemes: [SavedTheme] = []
+    /// Named dashboard configurations, in the order they were saved.
+    public var savedConfigurations: [SavedConfiguration] = []
+    /// The configuration last chosen or saved; it may have been edited since.
+    public var configurationID: String?
 
     public init() {}
 
@@ -74,6 +78,11 @@ public struct DashboardSettings: Codable, Equatable, Sendable {
         savedThemes =
             try container.decodeIfPresent([SavedTheme].self, forKey: .savedThemes)
             ?? defaults.savedThemes
+        savedConfigurations =
+            try container.decodeIfPresent(
+                [SavedConfiguration].self, forKey: .savedConfigurations)
+            ?? defaults.savedConfigurations
+        configurationID = try container.decodeIfPresent(String.self, forKey: .configurationID)
     }
 
     public var timeZone: TimeZone { TimeZone(identifier: timeZoneID) ?? .current }

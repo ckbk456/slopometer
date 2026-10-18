@@ -146,11 +146,15 @@ struct DashboardView: View {
 
     private func controls(_ settings: Binding<DashboardSettings>) -> some View {
         VStack(alignment: .leading, spacing: 12) {
-            Picker("Metric", selection: settings.metric) {
-                ForEach(Metric.allCases) { Text($0.title).tag($0) }
+            HStack(spacing: 12) {
+                Picker("Metric", selection: settings.metric) {
+                    ForEach(Metric.allCases) { Text($0.title).tag($0) }
+                }
+                .pickerStyle(.segmented)
+                .labelsHidden()
+                ConfigurationMenu()
+                    .fixedSize()
             }
-            .pickerStyle(.segmented)
-            .labelsHidden()
             HStack(spacing: 16) {
                 Picker("View", selection: settings.chartStyle) {
                     ForEach(ChartStyle.allCases) { Text($0.title).tag($0) }

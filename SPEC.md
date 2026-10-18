@@ -140,9 +140,12 @@ Text and window backgrounds follow the system or the chosen light/dark appearanc
 color choice cannot make labels unreadable. Expose compact/comfortable density. Preserve legibility and system
 accessibility preferences; color alone must not convey a count or status.
 
-A saved configuration includes metric, scope, chart, range, average, theme,
-density, and goal reference. The widget displays a chosen saved configuration.
-Start with one account; multiple named configurations can share it.
+A saved configuration includes metric, repository filter, chart, range, average,
+theme, and the daily quota (or none). It is saved, updated, renamed, and deleted from
+the app window's Activity tab and switched there or from the menu bar panel. The
+account, tokens, timezone, light/dark choice, and widgets are shared: each widget size
+keeps its own settings rather than following a configuration. Start with one account;
+multiple named configurations can share it.
 
 ## Sync and local data
 

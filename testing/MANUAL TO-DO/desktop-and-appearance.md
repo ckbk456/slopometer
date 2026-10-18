@@ -202,6 +202,22 @@ checks below were not separately reported and remain pending.
 - [ ] A Debug build registers its own `.build` path; turn the toggle off before deleting
       a worktree, or the login item points at a missing app.
 
+## Saved configurations (1.0.0): pending
+
+- [ ] Activity › Configurations › "Save as New Configuration…" names and saves the current
+      metric, repositories, chart, range, average, colors, and quota; the menu then shows
+      its name with a checkmark.
+- [ ] Changing any of those marks it "(edited)"; "Update" saves the change; choosing it
+      again discards the edit. Changing light/dark, timezone, or a widget does not mark it.
+- [ ] Switching between two configurations changes the chart, colors, and quota (or turns
+      the quota off and back on with the earlier target), the menu bar headline, and
+      nothing in the Widgets tab.
+- [ ] The menu bar panel shows a configuration row only when some are saved; it switches
+      but does not offer save, rename, or delete.
+- [ ] Rename and Delete work from the Activity menu; deleting the one in use keeps the
+      dashboard as it is. Configurations survive relaunch.
+- [ ] VoiceOver reads "Configuration: <name>" for both menus.
+
 ## Widget and background app: pending
 
 - [ ] App runs from the menu bar without a Dock icon; the window opens on demand.

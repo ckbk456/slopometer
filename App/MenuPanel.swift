@@ -26,6 +26,7 @@ struct MenuPanel: View {
             VStack(alignment: .leading, spacing: 2) {
                 syncRow
                 if !snapshot.login.isEmpty { accountRow }
+                if !needsLogin, !model.settings.savedConfigurations.isEmpty { configurationRow }
                 ForEach(notices, id: \.self) { notice in
                     PanelRow(
                         icon: "exclamationmark.triangle.fill", iconStyle: colors.warning,
@@ -243,6 +244,23 @@ struct MenuPanel: View {
         .buttonStyle(.plain)
         .help("Show the update")
         .accessibilityLabel("Slopometer \(version) is available. Show the update.")
+    }
+
+    /// Switches saved configurations; saving and editing them happens in the app window.
+    private var configurationRow: some View {
+        HStack(spacing: 8) {
+            Image(systemName: "square.stack")
+                .foregroundStyle(.secondary)
+                .frame(width: 18)
+            ConfigurationMenu(manages: false)
+                .menuStyle(.borderlessButton)
+                .labelStyle(.titleOnly)
+                .fixedSize()
+            Spacer(minLength: 0)
+        }
+        .font(.callout)
+        .padding(.horizontal, 10)
+        .padding(.vertical, 5)
     }
 
     /// Snapshot notices the headline does not already explain, plus widget sharing problems.

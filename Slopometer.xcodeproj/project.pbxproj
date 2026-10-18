@@ -10,6 +10,7 @@
 		046F6A0DF8313CBFFBD3CB16 /* InlineColorPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44DDBF9308A7EA23DC93648A /* InlineColorPicker.swift */; };
 		0BB5EA42A3FFDB32BEFA1BE3 /* WidgetsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6EEC6B6FF3999B07624F921 /* WidgetsView.swift */; };
 		0DA7C51AD547C85076A95E3F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 5A483B753EAA80FAF20E259A /* Assets.xcassets */; };
+		15F594F243958A2AD762E78D /* ConfigurationMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80C4116B948FAE2B393D5113 /* ConfigurationMenu.swift */; };
 		27355E91D3F0D148402F3A7C /* SlopometerCore in Frameworks */ = {isa = PBXBuildFile; productRef = 14F18CD2E45DA1E0B4AFBD02 /* SlopometerCore */; };
 		27AAFDEFCB590802050E2F50 /* AppearanceSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60187E46C02AD8A49AD0BE80 /* AppearanceSettings.swift */; };
 		35AD12272E91142BF5875ABD /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = C9AA9D116A9674B59D6EAE8B /* Sparkle */; };
@@ -81,6 +82,7 @@
 		7B1F1C47E64F87D003E4486E /* Slopometer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Slopometer.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		7C28CD2A91D2162A9B26C8AB /* WidgetContent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetContent.swift; sourceTree = "<group>"; };
 		7FB30203F2B9554B613E1009 /* MenuPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuPanel.swift; sourceTree = "<group>"; };
+		80C4116B948FAE2B393D5113 /* ConfigurationMenu.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfigurationMenu.swift; sourceTree = "<group>"; };
 		90F88CDE67495BB96DB22442 /* .. */ = {isa = PBXFileReference; lastKnownFileType = folder; name = ..; path = .; sourceTree = SOURCE_ROOT; };
 		93D504B3D0A8761AC6CC1321 /* Glass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Glass.swift; sourceTree = "<group>"; };
 		992DE8FF42148204F4D7FFF9 /* QuotaNotifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuotaNotifier.swift; sourceTree = "<group>"; };
@@ -121,6 +123,7 @@
 				4293BFD7B2150A12590C6C3E /* AppModel.swift */,
 				5A483B753EAA80FAF20E259A /* Assets.xcassets */,
 				325C0AB1F343F8C48BED92F2 /* BuildInfo.swift */,
+				80C4116B948FAE2B393D5113 /* ConfigurationMenu.swift */,
 				93D504B3D0A8761AC6CC1321 /* Glass.swift */,
 				44DDBF9308A7EA23DC93648A /* InlineColorPicker.swift */,
 				746E186733F38F8693F19BE6 /* LoginItem.swift */,
@@ -304,6 +307,7 @@
 				70C22BC55BFF67B9D144560C /* AppModel.swift in Sources */,
 				27AAFDEFCB590802050E2F50 /* AppearanceSettings.swift in Sources */,
 				A138EFD2A03DB78FBB9EA276 /* BuildInfo.swift in Sources */,
+				15F594F243958A2AD762E78D /* ConfigurationMenu.swift in Sources */,
 				C8512F9249C0687A0E8B4B10 /* Glass.swift in Sources */,
 				046F6A0DF8313CBFFBD3CB16 /* InlineColorPicker.swift in Sources */,
 				3D703F1C2C249E008AEF7F87 /* LoginItem.swift in Sources */,
