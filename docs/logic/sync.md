@@ -186,13 +186,17 @@ ignores the theme and keeps the white levels described above.
 rainbow reads as hue only; hovering a day shows its count), or when level 1 nearly vanishes
 into the background (below 1.2:1). Mono, Viridis, and Cividis are marked colorblind-safe.
 
-The default Slop Green reproduces the earlier palette exactly: its gradient is the green at
-35, 55, 75, and 100 % opacity over each background.
+The default, Slop Electric (`ThemePreset.electric`, id `electric`), runs electric blue to
+indigo: #93C5FD, #3B82F6, #4F46E5, #3730A3 in light and #312E81, #4338CA, #3B82F6, #7DD3FC
+in dark. Neighboring levels differ by at least 1.45:1 and lightness is ordered, so it draws
+no advice. The earlier Slop Green preset was removed; a stored theme whose `presetID` is
+`slop-green` decodes as the default.
 
 | Role | Light (vs #F5F5F5) | Dark (vs #1E1E1E) |
 | --- | --- | --- |
-| Slop Green accent / text | #116329, 6.78:1 | #2EA043, 4.94:1 |
-| Default trend; warning | #8A5C00, 5.33:1 | #D29922, 6.60:1 |
+| Slop Electric accent / text | #3730A3, 9.11:1 | #7DD3FC, 10.0:1 |
+| Slop Electric trend | #BE185D, 5.54:1 | #F472B6, 6.29:1 |
+| Other presets' default trend; warning | #8A5C00, 5.33:1 | #D29922, 6.60:1 |
 
 `SlopThemeTests` checks the standard targets and, for every preset, accent text 4.5:1,
 trend 3:1, and warning 4.5:1 in both appearances. The menu bar panel draws the window

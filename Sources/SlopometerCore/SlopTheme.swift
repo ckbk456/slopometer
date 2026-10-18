@@ -47,14 +47,6 @@ public struct ThemeColor: Codable, Equatable, Hashable, Sendable {
         return (max(a, b) + 0.05) / (min(a, b) + 0.05)
     }
 
-    /// This color drawn at `opacity` over `background`, as an opacity fill renders.
-    public func blended(over background: ThemeColor, opacity: Double) -> ThemeColor {
-        ThemeColor(
-            red: red * opacity + background.red * (1 - opacity),
-            green: green * opacity + background.green * (1 - opacity),
-            blue: blue * opacity + background.blue * (1 - opacity))
-    }
-
     /// Whether white reads better than black on this color.
     public var prefersLightText: Bool { contrast(with: .white) >= contrast(with: .black) }
 
@@ -199,8 +191,11 @@ public struct ColorTheme: Codable, Equatable, Sendable {
 
     public func palette(isDark: Bool) -> Palette { isDark ? (dark ?? light) : light }
 
-    /// The default theme: today's Slop Green.
-    public static var standard: ColorTheme { ThemePreset.slopGreen.theme }
+    /// The default theme: Slop Electric.
+    public static var standard: ColorTheme { ThemePreset.electric.theme }
+
+    /// Removed presets; a theme still saved with one of these ids decodes as the default.
+    static let retiredPresetIDs: Set<String> = ["slop-green"]
 
     /// Colors by role for both appearances, with text made readable on each background.
     public func resolved() -> SlopTheme {
@@ -217,6 +212,10 @@ public struct ColorTheme: Codable, Equatable, Sendable {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         let defaults = Self.standard
         presetID = try container.decodeIfPresent(String.self, forKey: .presetID)
+        if let presetID, Self.retiredPresetIDs.contains(presetID) {
+            self = defaults
+            return
+        }
         light = try container.decodeIfPresent(Palette.self, forKey: .light) ?? defaults.light
         dark = try container.decodeIfPresent(Palette.self, forKey: .dark)
         mapping =
@@ -322,10 +321,6 @@ public struct SlopTheme: Equatable, Sendable {
 
     public static let lightBackground = ThemeColor(hex: 0xF5F5F5)
     public static let darkBackground = ThemeColor(hex: 0x1E1E1E)
-
-    /// Opacity of the activity color for levels 1–4 in the single-hue presets. The steps
-    /// keep neighboring levels apart and leave every tile a number color with 4.5:1 contrast.
-    public static let levelOpacities = [0.35, 0.55, 0.75, 1.0]
 
     /// GitHub-style levels 0–4, scaled to the busiest visible day.
     public static func level(_ count: Int, max: Int) -> Int {

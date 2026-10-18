@@ -138,7 +138,11 @@ checks below were not separately reported and remain pending.
 
 - [ ] Settings › Appearance: each preset changes the Activity grid, columns, line, quota
       meter, tint, menu bar panel, Widgets tab previews, and desktop widgets together, in
-      light and dark appearance. Slop Green looks exactly like 0.11.
+      light and dark appearance.
+- [ ] Slop Electric is the first preset and selected on a fresh install; Reset to Slop
+      Electric restores it; no Slop Green preset is offered. A 0.12.0 development build
+      that had Slop Green selected opens with Slop Electric. A new widget placed before the
+      app has run shows Slop Electric.
 - [ ] Custom gradient: add up to 8 and remove down to 2 colors, edit by picker and hex,
       Reverse, Surprise Me; the caption switches to "Edited from …, not saved"; the choice
       survives relaunch.
@@ -163,7 +167,7 @@ checks below were not separately reported and remain pending.
 - [ ] Advice captions appear for Rainbow (lightness) and a flat custom gradient (similar
       levels) and disappear for GitHub/Viridis.
 - [ ] Accent text (Target reached, Token badge, "+N") stays readable with Halloween's
-      yellow and Electric's light blue; warnings stay amber in every theme.
+      yellow and Slop Electric's sky blue; warnings stay amber in every theme.
 - [ ] Unfocused/tinted desktop widget ignores the theme and stays readable.
 - [ ] A saved theme with its own dark colors shows light above dark in its tile, in both
       window appearances; a saved theme without them shows one strip.

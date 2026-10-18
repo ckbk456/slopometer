@@ -28,41 +28,16 @@ public struct ThemePreset: Identifiable, Equatable, Sendable {
 
     public static func preset(id: String?) -> ThemePreset? { all.first { $0.id == id } }
 
-    /// The single-green look the app shipped with: the green at the level opacities over
-    /// each appearance's background, so tiles match the earlier rendering exactly.
-    public static let slopGreen: ThemePreset = {
-        func ramp(_ hex: UInt32, over background: ThemeColor) -> [ThemeColor] {
-            SlopTheme.levelOpacities.map {
-                ThemeColor(hex: hex).blended(over: background, opacity: $0)
-            }
-        }
-        return ThemePreset(
-            id: "slop-green", name: "Slop Green", isColorblindSafe: false,
-            theme: ColorTheme(
-                presetID: "slop-green",
-                light: .init(
-                    gradient: ramp(0x116329, over: SlopTheme.lightBackground),
-                    accent: ThemeColor(hex: 0x116329), trend: ThemeColor(hex: 0x8A5C00)),
-                dark: .init(
-                    gradient: ramp(0x2EA043, over: SlopTheme.darkBackground),
-                    accent: ThemeColor(hex: 0x2EA043), trend: ThemeColor(hex: 0xD29922))))
-    }()
-
-    private init(id: String, name: String, isColorblindSafe: Bool, theme: ColorTheme) {
-        self.id = id
-        self.name = name
-        self.isColorblindSafe = isColorblindSafe
-        self.theme = theme
-    }
+    /// The default: electric blue to indigo.
+    public static let electric = ThemePreset(
+        id: "electric", name: "Slop Electric", light: [0x93C5FD, 0x3B82F6, 0x4F46E5, 0x3730A3],
+        dark: [0x312E81, 0x4338CA, 0x3B82F6, 0x7DD3FC], trend: (0xBE185D, 0xF472B6))
 
     public static let all: [ThemePreset] = [
-        slopGreen,
+        electric,
         ThemePreset(
             id: "github", name: "GitHub", light: [0x9BE9A8, 0x40C463, 0x30A14E, 0x216E39],
             dark: [0x0E4429, 0x006D32, 0x26A641, 0x39D353]),
-        ThemePreset(
-            id: "electric", name: "Electric", light: [0x7DD3FC, 0x38BDF8, 0x6366F1, 0x7C3AED],
-            dark: [0x1E3A8A, 0x2563EB, 0x38BDF8, 0xA78BFA], trend: (0xBE185D, 0xF472B6)),
         ThemePreset(
             id: "vibe-coded", name: "Vibe Coded", light: [0xC4B5FD, 0xA855F7, 0xD946EF, 0xDB2777],
             dark: [0x4C1D95, 0x7C3AED, 0xC026D3, 0xF472B6], trend: (0x0369A1, 0x38BDF8)),

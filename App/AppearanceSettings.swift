@@ -114,7 +114,7 @@ struct AppearanceSettings: View {
                 Label("Colorblind-safe", systemImage: "eye")
                     .font(.caption).foregroundStyle(.secondary)
                 Spacer()
-                Button("Reset to Slop Green") { choose(ColorTheme.standard) }
+                Button("Reset to Slop Electric") { choose(ColorTheme.standard) }
                     .disabled(draft == ColorTheme.standard)
             }
             if !saved.isEmpty {

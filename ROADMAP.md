@@ -86,8 +86,8 @@ version or build differs from the app's. Core tests cover the stamp's tolerant d
 and the comparison; the manual check in the
 [desktop guide](testing/MANUAL%20TO-DO/desktop-and-appearance.md) is pending.
 
-Color themes (0.12.0): Settings › Appearance offers gradient presets (Slop Green default,
-GitHub, Electric, Vibe Coded, Rainbow, Sunset, Ocean, Halloween, Mono, Viridis, Cividis) and
+Color themes (0.12.0): Settings › Appearance offers gradient presets (Slop Electric default,
+GitHub, Vibe Coded, Rainbow, Sunset, Ocean, Halloween, Mono, Viridis, Cividis) and
 a custom gradient of 2–8 colors per appearance, with 4-level or Smooth mapping, automatic or
 chosen accent, average-line color, and an accent or gradient quota meter. The app, menu bar
 panel, and widget draw from the same saved theme; text and window backgrounds stay with the
@@ -112,8 +112,7 @@ direction (SCOPE updated). The app, widget, App Group, and Keychain service move
 checks `https://updates.infinitex.vn/slopometer/appcast.xml` daily in release builds (off
 by default in Debug), with Settings › Updates and a menu bar panel reminder; the EdDSA key
 was generated in the release machine's Keychain. The version is 1.0.0 on the user's
-direction, although SCOPE's login launch, notification, and saved configurations are not
-yet implemented. Next: a tagged-release job (Developer ID archive, notarization, appcast,
+direction; login launch, the notification, and saved configurations followed below. Next: a tagged-release job (Developer ID archive, notarization, appcast,
 upload to R2). Updater and identity checks in the
 [desktop guide](testing/MANUAL%20TO-DO/desktop-and-appearance.md) are pending.
 
@@ -143,3 +142,9 @@ chart marks, made the two animations respect Reduce Motion, and hid decorative i
 Earlier work already labels heatmap and widget tiles, the color picker, and swatches. No
 person has run the accessibility checks; they are in the
 [desktop guide](testing/MANUAL%20TO-DO/desktop-and-appearance.md).
+
+Default theme (1.0.0): Slop Green is removed because it read as GitHub's
+own green. Slop Electric, retuned to an ordered electric blue to indigo ramp, is the first
+preset and the default, including for the widget before the app writes a snapshot. A theme
+saved with the retired Slop Green id loads as Slop Electric. Core tests cover the default's
+contrast targets, advice, and the migration; rendering checks are pending.
