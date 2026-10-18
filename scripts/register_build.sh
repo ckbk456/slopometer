@@ -41,6 +41,6 @@ for pid in $(pgrep -f "$WIDGET_EXEC" || true); do
         "" | "$APP/"*) continue ;;
     esac
     if kill -TERM "$pid" 2>/dev/null; then
-        printf 'Stopped widget %s from another build: %s\n' "$pid" "$cmd"
+        printf 'Stopped widget %s from another build: %s\n' "$pid" "${cmd%%$WIDGET_EXEC*}"
     fi
 done
