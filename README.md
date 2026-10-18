@@ -20,8 +20,10 @@ GitHub account, and shows a dashboard window and a desktop widget.
   the exact PRs behind each count, a repository filter, and a daily PR quota. Add one
   token per organization to include its private repositories.
 
-Grid, column, and line views; 30/90/365-day ranges; 7/30-day averages. Theme
-editing, saved configurations, launch at login, and notifications are planned. See
+Grid, column, and line views; 30/90/365-day ranges; 7/30-day averages. Color themes:
+gradient presets (Slop Green, GitHub, Electric, Vibe Coded, Rainbow, and more) or a custom
+gradient of up to 8 colors. Saved configurations, launch at login, and notifications are
+planned. See
 the [short roadmap](ROADMAP.md).
 
 ## Develop
