@@ -162,8 +162,8 @@ struct SettingsView: View {
             .disabled(!model.hasToken)
 
             Section("Timezone") {
-                Picker("Timezone", selection: bindable.settings.timeZoneID) {
-                    ForEach(TimeZone.knownTimeZoneIdentifiers, id: \.self) { Text($0).tag($0) }
+                LabeledContent("Timezone") {
+                    TimeZonePicker(selection: bindable.settings.timeZoneID)
                 }
                 HStack(alignment: .firstTextBaseline) {
                     Text("PR days and the quota reset at midnight here.")

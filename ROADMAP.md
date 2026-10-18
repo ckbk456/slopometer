@@ -161,3 +161,8 @@ colors in dark and light mode" shares whichever palette is being edited and save
 other in settings, so customization is never hidden or lost, and pending color edits are
 kept when leaving Settings. Manual checks in the
 [desktop guide](testing/MANUAL%20TO-DO/desktop-and-appearance.md) are pending.
+
+Timezone picker (1.0.0): Settings › Timezone is a searchable popover (city, region, IANA
+identifier, zone name, or offset such as "+7"), listed west to east with each zone's
+current GMT offset and a "Use This Mac's Timezone" shortcut, instead of a menu of 400
+identifiers. `TimeZoneChoice` in the core holds the naming and search, with tests.
