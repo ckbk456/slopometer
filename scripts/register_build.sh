@@ -28,3 +28,19 @@ LSREGISTER=/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchSe
 
 "$LSREGISTER" -f -R "$APP"
 pluginkit -a "$APP/Contents/PlugIns/SlopometerWidget.appex"
+
+# chronod keeps a widget extension running from whichever build it loaded last, so it can
+# render an old widget after the registration changes. Stop only extension processes
+# launched from another build (exact PIDs); chronod relaunches the registered one.
+# There is no command to reload WidgetKit timelines; the relaunched widget rereads the
+# snapshot, and the app reloads timelines whenever it publishes new data.
+WIDGET_EXEC=SlopometerWidget.appex/Contents/MacOS/SlopometerWidget
+for pid in $(pgrep -f "$WIDGET_EXEC" || true); do
+    cmd=$(ps -o command= -p "$pid" 2>/dev/null || true)
+    case "$cmd" in
+        "" | "$APP/"*) continue ;;
+    esac
+    if kill -TERM "$pid" 2>/dev/null; then
+        printf 'Stopped widget %s from another build: %s\n' "$pid" "$cmd"
+    fi
+done

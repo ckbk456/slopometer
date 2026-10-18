@@ -133,6 +133,9 @@ public struct DashboardSnapshot: Codable, Equatable, Sendable {
     public let lastSuccessfulSync: Date?
     /// Plain-language coverage, staleness, and token notes. Never empty when data is missing.
     public let notices: [String]
+    /// The build that wrote the shared copy; nil in memory and in snapshots from before 0.11.1,
+    /// which still decode because the key is optional.
+    public var writerBuild: BuildStamp? = nil
 
     public var unit: String { metric.unit }
 
@@ -340,6 +343,6 @@ extension DashboardSnapshot {
             tier: tier, metric: metric, chartStyle: chartStyle, rangeDays: rangeDays,
             averageWindow: averageWindow, sourceLabel: sourceLabel, scopeLabel: scopeLabel,
             points: points, widgets: widgets, todayCount: todayCount, quota: quota,
-            lastSuccessfulSync: lastSuccessfulSync, notices: notices)
+            lastSuccessfulSync: lastSuccessfulSync, notices: notices, writerBuild: writerBuild)
     }
 }

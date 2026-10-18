@@ -78,3 +78,10 @@ before older history; every other sync fetches only PRs updated since each token
 checkpoint, with a full reconcile at least daily. Core tests cover the limiter, the
 two-phase first sync, changes-only syncs, the daily reconcile, a new token, and
 failed fetches. Human checks for live timing and the progressive display are pending.
+
+One registered development build (0.11.1): `make run` also stops widget extension
+processes launched from other checkouts' builds, and the app stamps the shared snapshot
+with its version, build, and commit. The widget shows a one-line caption when its own
+version or build differs from the app's. Core tests cover the stamp's tolerant decoding
+and the comparison; the manual check in the
+[desktop guide](testing/MANUAL%20TO-DO/desktop-and-appearance.md) is pending.

@@ -37,7 +37,7 @@ controlled. Agents must still inspect for separately running commands.
 | Signed app: `make build-signed` | `project.yml` team, `Makefile` | 10s–5m cold | Yes | Automatic signing with the project team; needs a signed-in Xcode account; required for the sandbox and widget |
 | Complete local gate: `make validate` | `Makefile` | 15s–8m cold | Yes | Sequential lint, docs, tests, build; internet if caches empty |
 | Open Xcode: `make open` | `Makefile` | <10s | No | Human-owned GUI action |
-| Preview app: `make run` | `Makefile`, `scripts/register_build.sh` | Build + launch | Yes | Signed build, so it matches Xcode runs; unregisters (does not delete) Slopometer builds from other checkouts that are not running, so the widget and `slopometer://` use this one; human-owned app process; quit via menu bar |
+| Preview app: `make run` | `Makefile`, `scripts/register_build.sh` | Build + launch | Yes | Signed build, so it matches Xcode runs; unregisters (does not delete) Slopometer builds from other checkouts that are not running, so the widget and `slopometer://` use this one, then sends TERM to widget extension processes launched from any other build so chronod relaunches this one; a still-running app from another checkout is reported and skipped; human-owned app process; quit via menu bar |
 
 There is no separate JS lint, typecheck, codegen service, migration CLI, dev
 server, deployment command, release job, or UI test suite. Swift compilation
@@ -54,7 +54,9 @@ supported Xcode emits one, the structural check verifies its pins agree.
 
 Build output is `.build/xcode/Build/Products/Debug/Slopometer.app`. `make build` and
 `make validate` write an unsigned app to the same path, which macOS will not load as a
-widget; run `make run` again before checking the widget. The core
+widget; run `make run` again before checking the widget. Only one build should be
+registered at a time: the app stamps the shared snapshot with its version and build, and
+the widget shows "Widget build differs from app" when its own build differs. The core
 package uses `.build/`; Xcode dependency clones use `.build/SourcePackages/`.
 These are ignored. No global shell config or background service is needed.
 

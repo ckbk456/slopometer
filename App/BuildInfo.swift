@@ -1,15 +1,13 @@
 import Foundation
+import SlopometerCore
 
 /// Identifies the running build: semantic version, build number, and source commit.
 enum BuildInfo {
-    static let version = value("CFBundleShortVersionString")
-    static let build = value("CFBundleVersion")
-    static let commit = value("SlopometerCommit")
+    static let stamp = BuildStamp(bundle: .main)
+    static var version: String { stamp.version }
+    static var build: String { stamp.build }
+    static var commit: String { stamp.commit }
 
     /// For example "0.2.0 (31, 16667c3)".
-    private static func value(_ key: String) -> String {
-        Bundle.main.object(forInfoDictionaryKey: key) as? String ?? "unknown"
-    }
-
-    static var summary: String { "\(version) (\(build), \(commit))" }
+    static var summary: String { stamp.summary }
 }
