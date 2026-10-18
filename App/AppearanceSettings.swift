@@ -2,29 +2,51 @@ import AppKit
 import SlopometerCore
 import SwiftUI
 
-/// Settings › Appearance: a preset, or the person's own edit of one. Only the activity
-/// gradient, accent, average line, mapping, and meter are themable; text and window
-/// backgrounds stay with the system so no choice can make labels unreadable.
+/// Settings › Appearance: light, dark, or system, then a preset, a saved theme, or the
+/// person's own edit of one. Only the activity gradient, accent, average line, mapping,
+/// and meter are themable; text and window backgrounds follow the chosen appearance so no
+/// choice can make labels unreadable.
 ///
 /// Edits go to a local draft first so color drags redraw the preview at once, then reach
 /// the model after a short pause; every settings change rebuilds the snapshot and widget.
 struct AppearanceSettings: View {
     @Binding var theme: ColorTheme
+    @Binding var saved: [SavedTheme]
+    @Binding var appearance: AppearanceMode
     @State private var draft: ColorTheme
+    /// The preset or saved theme the draft started from; kept after edits so a saved
+    /// theme can be updated in place.
+    @State private var origin: String?
     /// Which appearance's palette the editor changes; light while dark mode shares it.
     @State private var editsDark = false
     @State private var selectedStop = 0
-    @State private var hexText = ""
+    /// The stop whose color popover is open.
+    @State private var editingStop: Int?
+    @State private var naming: Naming?
+    @State private var nameText = ""
+    @State private var deleting: SavedTheme?
     @Environment(\.colorScheme) private var colorScheme
 
-    init(theme: Binding<ColorTheme>) {
+    private enum Naming: Equatable {
+        case save
+        case rename(String)
+    }
+
+    init(
+        theme: Binding<ColorTheme>, saved: Binding<[SavedTheme]>,
+        appearance: Binding<AppearanceMode>
+    ) {
         _theme = theme
+        _saved = saved
+        _appearance = appearance
         _draft = State(initialValue: theme.wrappedValue)
+        _origin = State(initialValue: theme.wrappedValue.presetID)
     }
 
     var body: some View {
         // Modifiers on one section only; on a group they would repeat for each section.
         presetsSection
+            .id(SettingsAnchor.appearance)
             .task(id: draft) {
                 try? await Task.sleep(for: .milliseconds(250))
                 guard !Task.isCancelled else { return }
@@ -33,7 +55,22 @@ struct AppearanceSettings: View {
             .onChange(of: theme) { _, saved in
                 if saved != draft { draft = saved }
             }
+            .onAppear { editsDark = colorScheme == .dark && draft.dark != nil }
             .onDisappear(perform: commit)
+            .alert(namingTitle, isPresented: isNaming) {
+                TextField("Name", text: $nameText)
+                Button(naming == .save ? "Save" : "Rename", action: finishNaming)
+                    .disabled(trimmedName.isEmpty)
+                Button("Cancel", role: .cancel) {}
+            }
+            .confirmationDialog(
+                "Delete “\(deleting?.name ?? "")”?", isPresented: isDeleting,
+                presenting: deleting
+            ) { item in
+                Button("Delete", role: .destructive) { delete(item) }
+            } message: { _ in
+                Text("The colors in use now stay until you choose another theme.")
+            }
         colorsSection
         previewSection
     }
@@ -42,17 +79,21 @@ struct AppearanceSettings: View {
         if theme != draft { theme = draft }
     }
 
-    // MARK: Presets
+    // MARK: Presets and saved themes
 
     private var presetsSection: some View {
         Section {
-            LazyVGrid(
-                columns: [GridItem(.adaptive(minimum: 88, maximum: 120), spacing: 10)],
-                alignment: .leading, spacing: 10
-            ) {
+            Picker("Appearance", selection: $appearance) {
+                ForEach(AppearanceMode.allCases) { Text($0.title).tag($0) }
+            }
+            .pickerStyle(.segmented)
+            .fixedSize()
+            LazyVGrid(columns: swatchColumns, alignment: .leading, spacing: 10) {
                 ForEach(ThemePreset.all) { preset in
                     PresetSwatch(
-                        preset: preset, isDark: colorScheme == .dark,
+                        name: preset.name, theme: preset.theme,
+                        isColorblindSafe: preset.isColorblindSafe,
+                        isDark: colorScheme == .dark,
                         isSelected: draft.presetID == preset.id
                     ) { choose(preset.theme) }
                 }
@@ -65,21 +106,122 @@ struct AppearanceSettings: View {
                 Button("Reset to Slop Green") { choose(ColorTheme.standard) }
                     .disabled(draft == ColorTheme.standard)
             }
+            if !saved.isEmpty {
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("Your themes").font(.caption.weight(.semibold))
+                        .foregroundStyle(.secondary)
+                    LazyVGrid(columns: swatchColumns, alignment: .leading, spacing: 10) {
+                        ForEach(saved) { item in
+                            PresetSwatch(
+                                name: item.name, theme: item.theme, isColorblindSafe: false,
+                                isDark: colorScheme == .dark,
+                                isSelected: draft.presetID == item.id
+                            ) { choose(item.theme) }
+                            .contextMenu { savedMenu(item) }
+                        }
+                    }
+                }
+                .padding(.vertical, 2)
+            }
+            HStack(alignment: .firstTextBaseline) {
+                if let source = savedOrigin, draft.presetID != source.id {
+                    Button("Update “\(source.name)”") { update(source) }
+                        .help("Replace this saved theme's colors with the ones shown")
+                }
+                Button("Save as New Theme…") { startNaming(.save) }
+                    .help("Keep these colors under your own name")
+                Spacer()
+                if !saved.isEmpty {
+                    Text("Right-click a saved theme to rename or delete it.")
+                        .font(.caption).foregroundStyle(.secondary)
+                }
+            }
         } header: {
             header(
                 "Appearance",
                 caption:
-                    "Colors for activity, the accent, and the average line. Text follows the system."
+                    "Light or Dark applies to the window, menu bar panel, and widget. Colors cover activity, the accent, and the average line."
             )
         }
     }
 
-    /// Presets apply at once, without the editing pause.
+    private var swatchColumns: [GridItem] {
+        [GridItem(.adaptive(minimum: 88, maximum: 120), spacing: 10)]
+    }
+
+    @ViewBuilder
+    private func savedMenu(_ item: SavedTheme) -> some View {
+        Button("Rename…") { startNaming(.rename(item.id)) }
+        Button("Update with Current Colors") { update(item) }
+            .disabled(draft.presetID == item.id)
+        Divider()
+        Button("Delete…", role: .destructive) { deleting = item }
+    }
+
+    /// Presets and saved themes apply at once, without the editing pause.
     private func choose(_ preset: ColorTheme) {
         draft = preset
         theme = preset
+        origin = preset.presetID
         selectedStop = 0
+        editingStop = nil
         if preset.dark == nil { editsDark = false }
+    }
+
+    private var savedOrigin: SavedTheme? { saved.first { $0.id == origin } }
+
+    private func update(_ item: SavedTheme) {
+        guard let index = saved.firstIndex(where: { $0.id == item.id }) else { return }
+        var updated = draft
+        updated.presetID = item.id
+        saved[index].theme = updated
+        choose(updated)
+    }
+
+    private func delete(_ item: SavedTheme) {
+        saved.removeAll { $0.id == item.id }
+        if origin == item.id { origin = nil }
+        if draft.presetID == item.id {
+            draft.presetID = nil
+            commit()
+        }
+    }
+
+    private var trimmedName: String { nameText.trimmingCharacters(in: .whitespacesAndNewlines) }
+
+    private var namingTitle: String { naming == .save ? "Save Theme" : "Rename Theme" }
+
+    private var isNaming: Binding<Bool> {
+        Binding(get: { naming != nil }, set: { if !$0 { naming = nil } })
+    }
+
+    private var isDeleting: Binding<Bool> {
+        Binding(get: { deleting != nil }, set: { if !$0 { deleting = nil } })
+    }
+
+    private func startNaming(_ purpose: Naming) {
+        releaseWindowFocus()
+        switch purpose {
+        case .save:
+            nameText = "My Theme \(saved.count + 1)"
+        case .rename(let id):
+            nameText = saved.first { $0.id == id }?.name ?? ""
+        }
+        naming = purpose
+    }
+
+    private func finishNaming() {
+        let name = trimmedName
+        guard !name.isEmpty, let purpose = naming else { return }
+        switch purpose {
+        case .save:
+            let item = SavedTheme(name: name, theme: draft)
+            saved.append(item)
+            choose(item.theme)
+        case .rename(let id):
+            if let index = saved.firstIndex(where: { $0.id == id }) { saved[index].name = name }
+        }
+        naming = nil
     }
 
     // MARK: Colors
@@ -98,9 +240,19 @@ struct AppearanceSettings: View {
                 Toggle("Same colors in dark mode", isOn: sharesDark)
             }
             GradientEditor(
-                colors: palette.gradient, selection: stopIndex,
-                select: { selectedStop = $0 })
-            stopControls
+                colors: palette.gradient, selection: stopIndex, editing: $editingStop,
+                select: { selectedStop = $0 }, move: moveStop,
+                color: { index in
+                    themeColorBinding {
+                        $0.gradient[min(index, $0.gradient.count - 1)]
+                    } set: {
+                        if index < $0.gradient.count { $0.gradient[index] = $1 }
+                    }
+                },
+                remove: removeStop)
+            gradientActions
+            Text("Click a color to change it. Drag a color left or right to reorder.")
+                .font(.caption).foregroundStyle(.secondary)
             HStack(alignment: .firstTextBaseline) {
                 Picker("Mapping", selection: field(\.mapping)) {
                     ForEach(ColorMapping.allCases) { Text($0.title).tag($0) }
@@ -132,14 +284,15 @@ struct AppearanceSettings: View {
                 Toggle("Automatic accent", isOn: automaticAccent)
                 Spacer()
                 if let accent = palette.accent {
-                    ColorPicker(
-                        "Accent",
-                        selection: colorBinding { _ in
+                    ColorSwatchButton(
+                        title: "Accent",
+                        color: themeColorBinding { _ in
                             accent
                         } set: {
                             $0.accent = $1
-                        },
-                        supportsOpacity: false)
+                        }
+                    )
+                    .fixedSize()
                 }
             }
             Text(
@@ -147,71 +300,50 @@ struct AppearanceSettings: View {
             )
             .font(.caption).foregroundStyle(.secondary)
             .fixedSize(horizontal: false, vertical: true)
-            ColorPicker(
-                "Average line",
-                selection: colorBinding {
+            ColorSwatchButton(
+                title: "Average line",
+                color: themeColorBinding {
                     $0.trend
                 } set: {
                     $0.trend = $1
-                },
-                supportsOpacity: false)
+                })
         } header: {
-            header(
-                "Colors",
-                caption: ThemePreset.preset(id: draft.presetID).map { "Preset: \($0.name)" }
-                    ?? "Custom")
+            header("Colors", caption: themeCaption)
         }
     }
 
-    /// The selected stop's color, hex, and the gradient-wide actions.
-    private var stopControls: some View {
+    private var themeCaption: String {
+        if let preset = ThemePreset.preset(id: draft.presetID) { return "Preset: \(preset.name)" }
+        if let item = saved.first(where: { $0.id == draft.presetID }) {
+            return "Your theme: \(item.name)"
+        }
+        if let item = savedOrigin { return "Edited from “\(item.name)”, not saved" }
+        if let preset = ThemePreset.preset(id: origin) {
+            return "Edited from \(preset.name), not saved"
+        }
+        return "Custom, not saved"
+    }
+
+    /// Whole-gradient actions, titled so each says what it does.
+    private var gradientActions: some View {
         let count = palette.gradient.count
         return HStack(spacing: 8) {
-            ColorPicker(
-                "Color \(stopIndex + 1) of \(count)",
-                selection: colorBinding {
-                    $0.gradient[stopIndex]
-                } set: {
-                    $0.gradient[stopIndex] = $1
-                },
-                supportsOpacity: false
-            )
-            .fixedSize()
-            TextField("Hex", text: $hexText, prompt: Text("#RRGGBB"))
-                .labelsHidden()
-                .textFieldStyle(.roundedBorder)
-                .font(.body.monospaced())
-                .frame(width: 92)
-                .accessibilityLabel("Hex for color \(stopIndex + 1)")
-                .onSubmit(applyHex)
-            Spacer()
-            ControlGroup {
-                Button("Add color", systemImage: "plus", action: addStop)
-                    .disabled(count >= ColorTheme.maxColors)
-                    .help("Add a color after this one")
-                Button("Remove color", systemImage: "minus", action: removeStop)
-                    .disabled(count <= ColorTheme.minColors)
-                    .help("Remove this color")
-            }
-            .fixedSize()
+            Button("Add Color", systemImage: "plus", action: addStop)
+                .disabled(count >= ColorTheme.maxColors)
+                .help(
+                    count >= ColorTheme.maxColors
+                        ? "Up to \(ColorTheme.maxColors) colors"
+                        : "Add a color after the selected one, halfway to its neighbor")
             Button("Reverse", systemImage: "arrow.left.arrow.right") {
                 editPalette { $0.gradient.reverse() }
                 selectedStop = count - 1 - stopIndex
             }
-            .help("Reverse the gradient")
-            Button("Surprise me", systemImage: "dice", action: surprise)
+            .help("Flip the gradient so the most active days get the first color")
+            Button("Surprise Me", systemImage: "dice", action: surprise)
                 .help("Random colors that still run from light to dark")
+            Spacer()
         }
-        .labelStyle(.iconOnly)
-        .onAppear { hexText = palette.gradient[stopIndex].hexString }
-        .onChange(of: palette.gradient[stopIndex]) { _, color in hexText = color.hexString }
-    }
-
-    private func applyHex() {
-        if let color = ThemeColor(hexString: hexText) {
-            editPalette { $0.gradient[stopIndex] = color }
-        }
-        hexText = palette.gradient[stopIndex].hexString
+        .labelStyle(.titleAndIcon)
     }
 
     /// Inserts the midpoint of the selected color and its right neighbor (left at the end).
@@ -231,13 +363,24 @@ struct AppearanceSettings: View {
         selectedStop = index + 1 < palette.gradient.count - 1 ? index + 1 : index
     }
 
-    private func removeStop() {
-        let index = stopIndex
+    private func removeStop(_ index: Int) {
+        editingStop = nil
         editPalette { palette in
-            guard palette.gradient.count > ColorTheme.minColors else { return }
+            guard palette.gradient.count > ColorTheme.minColors,
+                palette.gradient.indices.contains(index)
+            else { return }
             palette.gradient.remove(at: index)
         }
         selectedStop = max(0, index - 1)
+    }
+
+    private func moveStop(from source: Int, to destination: Int) {
+        guard source != destination else { return }
+        editPalette { palette in
+            let color = palette.gradient.remove(at: source)
+            palette.gradient.insert(color, at: destination)
+        }
+        selectedStop = destination
     }
 
     /// Evenly spaced hues from a random start, ordered by lightness for the appearance
@@ -250,12 +393,10 @@ struct AppearanceSettings: View {
         let colors = (0..<count).map { index in
             let t = count > 1 ? Double(index) / Double(count - 1) : 1
             let hue = (start + span * t).truncatingRemainder(dividingBy: 1) + 1
-            let brightness = dark ? 0.35 + 0.6 * t : 0.95 - 0.5 * t
-            let saturation = dark ? 0.85 - 0.25 * t : 0.4 + 0.45 * t
-            return themeColor(
-                NSColor(
-                    hue: hue.truncatingRemainder(dividingBy: 1), saturation: saturation,
-                    brightness: brightness, alpha: 1))
+            return ThemeColor(
+                hue: hue.truncatingRemainder(dividingBy: 1),
+                saturation: dark ? 0.85 - 0.25 * t : 0.4 + 0.45 * t,
+                brightness: dark ? 0.35 + 0.6 * t : 0.95 - 0.5 * t)
         }
         editPalette { $0.gradient = colors }
     }
@@ -329,13 +470,13 @@ struct AppearanceSettings: View {
             })
     }
 
-    private func colorBinding(
+    private func themeColorBinding(
         get: @escaping (ColorTheme.Palette) -> ThemeColor,
         set: @escaping (inout ColorTheme.Palette, ThemeColor) -> Void
-    ) -> Binding<Color> {
+    ) -> Binding<ThemeColor> {
         Binding(
-            get: { Color(get(palette)) },
-            set: { color in editPalette { set(&$0, themeColor(NSColor(color))) } })
+            get: { get(palette) },
+            set: { color in editPalette { set(&$0, color) } })
     }
 
     /// Off copies the light colors into dark so editing starts from what is shown.
@@ -364,19 +505,12 @@ struct AppearanceSettings: View {
     }
 }
 
-/// sRGB components of an AppKit color; extended-range values are clamped.
-private func themeColor(_ color: NSColor) -> ThemeColor {
-    let srgb = color.usingColorSpace(.sRGB) ?? color
-    func clamp(_ value: CGFloat) -> Double { min(max(Double(value), 0), 1) }
-    return ThemeColor(
-        red: clamp(srgb.redComponent), green: clamp(srgb.greenComponent),
-        blue: clamp(srgb.blueComponent))
-}
-
-/// A preset's gradient for the current appearance with its name. Selection shows as a
+/// A theme's gradient for the current appearance with its name. Selection shows as a
 /// checkmark and a heavier outline, not only color.
 private struct PresetSwatch: View {
-    let preset: ThemePreset
+    let name: String
+    let theme: ColorTheme
+    let isColorblindSafe: Bool
     let isDark: Bool
     let isSelected: Bool
     let action: () -> Void
@@ -388,7 +522,7 @@ private struct PresetSwatch: View {
                 shape
                     .fill(
                         LinearGradient(
-                            colors: preset.theme.palette(isDark: isDark).gradient.map(Color.init),
+                            colors: theme.palette(isDark: isDark).gradient.map(Color.init),
                             startPoint: .leading, endPoint: .trailing)
                     )
                     .frame(height: 24)
@@ -407,10 +541,10 @@ private struct PresetSwatch: View {
                         }
                     }
                 HStack(spacing: 3) {
-                    Text(preset.name)
+                    Text(name)
                         .font(.caption.weight(isSelected ? .semibold : .regular))
                         .lineLimit(1)
-                    if preset.isColorblindSafe {
+                    if isColorblindSafe {
                         Image(systemName: "eye").font(.caption2).foregroundStyle(.secondary)
                     }
                 }
@@ -418,24 +552,29 @@ private struct PresetSwatch: View {
             .contentShape(.rect)
         }
         .buttonStyle(.plain)
-        .help(preset.isColorblindSafe ? "\(preset.name), colorblind-safe" : preset.name)
-        .accessibilityLabel(
-            preset.isColorblindSafe ? "\(preset.name), colorblind-safe" : preset.name
-        )
+        .help(isColorblindSafe ? "\(name), colorblind-safe" : name)
+        .accessibilityLabel(isColorblindSafe ? "\(name), colorblind-safe" : name)
         .accessibilityAddTraits(isSelected ? .isSelected : [])
     }
 }
 
 /// The gradient with one handle per color, evenly spaced like the colors themselves.
+/// Clicking a handle opens its color in a popover; dragging it reorders the gradient.
 private struct GradientEditor: View {
     let colors: [ThemeColor]
     let selection: Int
+    @Binding var editing: Int?
     let select: (Int) -> Void
+    let move: (Int, Int) -> Void
+    let color: (Int) -> Binding<ThemeColor>
+    let remove: (Int) -> Void
+    @State private var dragged: Int?
+    @State private var dragOffset: CGFloat = 0
 
     private static let handle: CGFloat = 20
 
     var body: some View {
-        VStack(spacing: 6) {
+        VStack(spacing: 4) {
             // Inset by half a handle so each handle sits under its color's position.
             RoundedRectangle(cornerRadius: 6)
                 .fill(
@@ -449,36 +588,119 @@ private struct GradientEditor: View {
                 .frame(height: 28)
                 .padding(.horizontal, Self.handle / 2)
                 .accessibilityHidden(true)
-            HStack(spacing: 0) {
-                ForEach(colors.indices, id: \.self) { index in
-                    if index > 0 { Spacer(minLength: 4) }
-                    stop(index)
+            GeometryReader { proxy in
+                let step =
+                    colors.count > 1
+                    ? (proxy.size.width - Self.handle) / CGFloat(colors.count - 1) : 0
+                ZStack(alignment: .leading) {
+                    ForEach(colors.indices, id: \.self) { index in
+                        stop(index, step: step, width: proxy.size.width)
+                    }
                 }
+                .coordinateSpace(.named(Self.space))
             }
+            .frame(height: Self.handle)
+            HStack {
+                Label("Less activity", systemImage: "arrow.left")
+                Spacer()
+                Label("More activity", systemImage: "arrow.right")
+                    .labelStyle(TrailingIconLabelStyle())
+            }
+            .font(.caption).foregroundStyle(.secondary)
+            .padding(.horizontal, Self.handle / 2)
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel("Left is less activity, right is more")
         }
         .padding(.vertical, 2)
     }
 
-    private func stop(_ index: Int) -> some View {
+    private static let space = "gradient-stops"
+
+    private func stop(_ index: Int, step: CGFloat, width: CGFloat) -> some View {
         let isSelected = index == selection
-        return Button {
-            select(index)
-        } label: {
-            Circle()
-                .fill(Color(colors[index]))
-                .overlay {
-                    Circle().strokeBorder(
-                        isSelected ? Color.primary : Color.primary.opacity(0.25),
-                        lineWidth: isSelected ? 2.5 : 1)
+        let isDragged = index == dragged
+        let base = CGFloat(index) * step
+        let x = isDragged ? min(max(base + dragOffset, 0), width - Self.handle) : base
+        return Circle()
+            .fill(Color(colors[index]))
+            .overlay {
+                Circle().strokeBorder(
+                    isSelected ? Color.primary : Color.primary.opacity(0.25),
+                    lineWidth: isSelected ? 2.5 : 1)
+            }
+            .padding(isSelected || isDragged ? 0 : 3)
+            .frame(width: Self.handle, height: Self.handle)
+            .shadow(color: .black.opacity(isDragged ? 0.3 : 0), radius: 3)
+            .contentShape(Circle())
+            .popover(isPresented: popover(index), arrowEdge: .bottom) {
+                VStack(alignment: .leading, spacing: 10) {
+                    Text("Color \(index + 1) of \(colors.count)").font(.headline)
+                    InlineColorPicker(color: color(index))
+                    Button("Remove Color", systemImage: "trash", role: .destructive) {
+                        remove(index)
+                    }
+                    .disabled(colors.count <= ColorTheme.minColors)
+                    .help(
+                        colors.count <= ColorTheme.minColors
+                            ? "A gradient needs at least \(ColorTheme.minColors) colors"
+                            : "Remove this color from the gradient")
                 }
-                .padding(isSelected ? 0 : 3)
-                .frame(width: Self.handle, height: Self.handle)
-                .contentShape(Circle())
+                .padding(14)
+            }
+            .onTapGesture { open(index) }
+            .gesture(
+                DragGesture(minimumDistance: 3, coordinateSpace: .named(Self.space))
+                    .onChanged { value in
+                        editing = nil
+                        dragged = index
+                        dragOffset = value.translation.width
+                    }
+                    .onEnded { value in
+                        let target =
+                            step > 0
+                            ? Int((CGFloat(index) + value.translation.width / step).rounded())
+                            : index
+                        dragged = nil
+                        dragOffset = 0
+                        select(index)
+                        move(index, min(max(target, 0), colors.count - 1))
+                    }
+            )
+            .padding(.leading, x)
+            .zIndex(isDragged ? 1 : 0)
+            .help("\(colors[index].hexString). Click to change, drag to reorder.")
+            .accessibilityElement()
+            .accessibilityLabel("Color \(index + 1) of \(colors.count), \(colors[index].hexString)")
+            .accessibilityAddTraits(isSelected ? [.isButton, .isSelected] : .isButton)
+            .accessibilityAction { open(index) }
+            .accessibilityAction(named: "Move left") {
+                if index > 0 { move(index, index - 1) }
+            }
+            .accessibilityAction(named: "Move right") {
+                if index + 1 < colors.count { move(index, index + 1) }
+            }
+    }
+
+    private func open(_ index: Int) {
+        releaseWindowFocus()
+        select(index)
+        editing = index
+    }
+
+    private func popover(_ index: Int) -> Binding<Bool> {
+        Binding(
+            get: { editing == index },
+            set: { if !$0, editing == index { editing = nil } })
+    }
+}
+
+/// Title first, then the icon, so a right arrow points away from its text.
+private struct TrailingIconLabelStyle: LabelStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        HStack(spacing: 4) {
+            configuration.title
+            configuration.icon
         }
-        .buttonStyle(.plain)
-        .help(colors[index].hexString)
-        .accessibilityLabel("Color \(index + 1) of \(colors.count), \(colors[index].hexString)")
-        .accessibilityAddTraits(isSelected ? .isSelected : [])
     }
 }
 

@@ -160,4 +160,28 @@ struct ColorThemeTests {
         let empty = ColorTheme(light: .init(gradient: [], trend: .black))
         #expect(empty.resolved().dark.gradient.count == 2)
     }
+
+    @Test func savedThemesTakeTheirIDAsThePresetID() {
+        let saved = SavedTheme(name: "Mine", theme: ThemePreset.preset(id: "electric")!.theme)
+        #expect(saved.theme.presetID == saved.id)
+        #expect(SavedTheme(id: "fixed", name: "Mine", theme: .standard).theme.presetID == "fixed")
+        #expect(SavedTheme(name: "A", theme: .standard).id != saved.id)
+    }
+
+    @Test func settingsWithoutAppearanceOrSavedThemesKeepDefaultsAndRoundTrip() throws {
+        let data = Data(#"{"login":"octocat"}"#.utf8)
+        let settings = try JSONDecoder().decode(DashboardSettings.self, from: data)
+        #expect(settings.appearance == .system)
+        #expect(settings.savedThemes.isEmpty)
+
+        var edited = settings
+        edited.appearance = .dark
+        edited.savedThemes = [
+            SavedTheme(name: "Mine", theme: .standard),
+            SavedTheme(name: "Mine", theme: ThemePreset.preset(id: "electric")!.theme),
+        ]
+        let roundTrip = try JSONDecoder().decode(
+            DashboardSettings.self, from: JSONEncoder().encode(edited))
+        #expect(roundTrip == edited)
+    }
 }

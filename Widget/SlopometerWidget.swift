@@ -36,10 +36,29 @@ struct SlopometerWidgetView: View {
 
     var body: some View {
         // The app shares its theme in the snapshot; older snapshots fall back to the standard.
-        WidgetContent(snapshot: entry.snapshot, size: size, now: entry.date)
+        let content = WidgetContent(snapshot: entry.snapshot, size: size, now: entry.date)
             .slopTheme((entry.snapshot?.theme ?? .standard).resolved())
             .widgetURL(URL(string: "slopometer://open"))
-            .containerBackground(.fill.tertiary, for: .widget)
+        if let scheme = forcedScheme {
+            // The environment sits above slopTheme, so the theme resolves for the forced
+            // scheme, and the background matches it instead of the desktop's.
+            content
+                .environment(\.colorScheme, scheme)
+                .containerBackground(
+                    Color(scheme == .dark ? SlopTheme.darkBackground : SlopTheme.lightBackground),
+                    for: .widget)
+        } else {
+            content.containerBackground(.fill.tertiary, for: .widget)
+        }
+    }
+
+    /// Nil follows the system, including for snapshots from before appearance modes.
+    private var forcedScheme: ColorScheme? {
+        switch entry.snapshot?.appearance {
+        case .light: .light
+        case .dark: .dark
+        case .system, nil: nil
+        }
     }
 
     private var size: WidgetSize {

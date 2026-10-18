@@ -140,7 +140,21 @@ checks below were not separately reported and remain pending.
       meter, tint, menu bar panel, Widgets tab previews, and desktop widgets together, in
       light and dark appearance. Slop Green looks exactly like 0.11.
 - [ ] Custom gradient: add up to 8 and remove down to 2 colors, edit by picker and hex,
-      Reverse, Shuffle; the preset label switches to Custom; the choice survives relaunch.
+      Reverse, Surprise Me; the caption switches to "Edited from …, not saved"; the choice
+      survives relaunch.
+- [ ] Clicking a gradient handle opens the color picker in a popover right under it (on a
+      multi-display setup too); dragging inside it, the hue bar, and hex entry update the
+      gradient and previews live; Remove Color sits in the same popover. Accent and Average
+      line swatches open the same picker. The system color panel never appears.
+- [ ] Dragging a handle left or right reorders the gradient; VoiceOver offers Move left/right.
+- [ ] "Less activity" and "More activity" labels sit under the gradient's ends; buttons are
+      titled (Add Color, Reverse, Surprise Me) and show tooltips.
+- [ ] Save as New Theme names and selects a saved theme under "Your themes"; editing it
+      shows Update "Name"; right-click Rename, Update with Current Colors, and Delete work;
+      saved themes survive relaunch.
+- [ ] Appearance System/Light/Dark switches the window, menu bar panel, and desktop widget
+      (background included) at once; System follows the macOS switch again.
+- [ ] The palette button on the dashboard opens Settings scrolled to Appearance.
 - [ ] "Same colors in dark mode" off: light and dark edit separately and both previews and
       the real app follow the system appearance switch.
 - [ ] Smooth mapping with Rainbow: neighboring counts get visibly different colors; 4 levels

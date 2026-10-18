@@ -220,6 +220,22 @@ struct SnapshotTests {
         #expect(old.login == snapshot.login)
     }
 
+    @Test func snapshotsCarryTheAppearanceAndOldOnesFollowTheSystem() throws {
+        var configured = settings(.contributions)
+        configured.appearance = .light
+        let snapshot = try SnapshotBuilder.build(
+            settings: configured, cache: MeasurementCache(), tokenUsable: false, problems: [],
+            now: now)
+        #expect(snapshot.appearance == .light)
+        let data = try SharedSnapshot.encode(snapshot)
+        #expect(try SharedSnapshot.decode(data).appearance == .light)
+        // A snapshot written before appearance modes has no appearance key.
+        var json = try #require(JSONSerialization.jsonObject(with: data) as? [String: Any])
+        json["appearance"] = nil
+        let old = try SharedSnapshot.decode(JSONSerialization.data(withJSONObject: json))
+        #expect(old.appearance == nil)
+    }
+
     @Test func buildMismatchNeedsBothBuildsKnownAndDifferent() {
         let widget = BuildStamp(version: "0.11.1", build: "42", commit: "abc1234")
         let differs = { BuildStamp.differs(writer: $0, reader: widget) }
