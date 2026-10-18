@@ -165,6 +165,11 @@ checks below were not separately reported and remain pending.
 - [ ] Accent text (Target reached, Token badge, "+N") stays readable with Halloween's
       yellow and Electric's light blue; warnings stay amber in every theme.
 - [ ] Unfocused/tinted desktop widget ignores the theme and stays readable.
+- [ ] A saved theme with its own dark colors shows light above dark in its tile, in both
+      window appearances; a saved theme without them shows one strip.
+- [ ] With separate dark colors, turning "Same colors in dark mode" on shows a note, and
+      turning it off brings the dark colors back; on a saved theme or preset the
+      selection stays when the colors return to what was saved.
 - [ ] VoiceOver names each preset and control; the selected preset is marked by more
       than color; Increase Contrast and Reduce Transparency remain legible.
 
@@ -186,7 +191,7 @@ checks below were not separately reported and remain pending.
 - [ ] With the desktop widget unfocused (tinted), grid levels, today's outline, tiles,
       and the quota meter stay distinguishable.
 - [ ] Widget matches the app's counts and shows snapshot age when the app is quit.
-- [ ] Medium and large footers read "Synced <time> (hh:mm ago)", the age advances each
+- [ ] Medium and large footers read "Synced <time> (2m ago)" or "(1h 05m ago)", the age advances each
       minute with the app quit, and a sync from an earlier day names that day.
 - [ ] Unfocused desktop widget: medium tiles for the busiest days show their number cut
       out of the tile and readable; today's weekday label is bold in both renderings.

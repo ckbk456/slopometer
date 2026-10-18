@@ -136,7 +136,7 @@ large size). Tiles are the medium strip's `DayTile`: the count on the level fill
 for unknown days, today outlined and its weekday bold. A snapshot from an earlier version (26-week window)
 still renders: the grid keeps its last 5 weeks.
 Activity marks are accent-tinted so levels survive the tinted desktop rendering. Medium
-and large footers read `SyncAgeLabel` ("Synced 21:47 (00:02 ago)", naming the day when
+and large footers read `SyncAgeLabel` ("Synced 21:47 (2m ago)", "(1h 05m ago)", naming the day when
 the sync was not today); the timeline holds one entry per minute for an hour so the age
 advances without the app. In the unfocused or tinted (non-full-color) desktop rendering,
 `DayTile` fills levels with white at fixed opacities (12, 30, 50, 75, 100 %) instead of the
@@ -152,7 +152,8 @@ Appearance: a preset from `ThemePreset.all` (`ThemePreset.swift`) or their own e
 It is saved in `DashboardSettings.theme` and copied into the widget snapshot
 (`DashboardSnapshot.theme`; nil in older snapshots means the standard theme), so the app,
 menu bar panel, and widget draw the same colors. A theme holds, per appearance (dark may
-reuse light):
+reuse light; while it does, the editor keeps the previous dark colors in view state until
+another theme is chosen or Settings closes, so turning sharing off restores them):
 
 - `gradient`: 2–8 evenly spaced colors, low to high activity, mixed in OKLab.
 - `accent`: control tint, badges, highlighted numbers, the daily line; nil picks the

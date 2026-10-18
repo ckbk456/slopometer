@@ -181,6 +181,7 @@ struct WidgetContent: View {
             : window
         return HStack(spacing: 8) {
             Text(SyncAgeLabel.text(synced: snapshot.lastSuccessfulSync, now: now))
+                .monospacedDigit()
             Spacer(minLength: 8)
             Text(label).layoutPriority(1)
         }

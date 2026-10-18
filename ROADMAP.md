@@ -101,4 +101,7 @@ app, menu bar panel, and widget; saved themes (save, update, rename, delete); an
 color picker in a popover beside each gradient handle, accent, and average line instead of
 the shared color panel; titled gradient actions; Less/More activity labels; drag to reorder
 gradient colors; and a palette button on the dashboard that opens Settings › Appearance.
+Saved theme tiles with their own dark colors show light above dark; "Same colors in dark
+mode" sets the dark colors aside instead of discarding them, so turning it off restores
+them. The widget sync age now reads "2m ago" or "1h 05m ago" instead of "00:02".
 Core tests cover the new settings and snapshot fields; rendering checks are pending.
