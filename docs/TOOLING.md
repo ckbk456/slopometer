@@ -43,7 +43,7 @@ Signing uses Apple Development team `5U4584QFCQ` with automatic provisioning for
 local signed builds. A Developer ID Application certificate for the same team is in
 the release machine's Keychain, and the Sparkle EdDSA signing key was generated there
 (see [Updates](logic/updates.md)). The repo does not yet include notarization
-credentials, release automation, or a selected license.
+credentials or release automation. The license is MIT (`LICENSE`).
 
 - [Sparkle 2.10.0](https://github.com/sparkle-project/Sparkle/releases/tag/2.10.0),
   [sandboxing guide](https://sparkle-project.org/documentation/sandboxing/), and

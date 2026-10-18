@@ -59,6 +59,6 @@ There is no application server or AI provider dependency.
 
 ## License
 
-No open-source license has been selected yet. Public source availability does
-not itself grant an open-source license. Licensing is a decision before a
-public release or accepting external contributions.
+Slopometer is free and released under the [MIT License](LICENSE). Bundled
+third-party components and their licenses are listed in
+[third-party notices](THIRD_PARTY_NOTICES.md).

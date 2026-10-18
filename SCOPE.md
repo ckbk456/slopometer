@@ -52,7 +52,6 @@ target in this scope.
 
 - Durability of the unofficial public-profile source and its fallback behavior.
 - Widget reload frequency achievable within system budgets.
-- License.
 - Additional metrics or providers require a scope decision.
 
 Release identity, decided 2026-10-18: app `vn.infinitex.slopometer`, widget
@@ -60,6 +59,8 @@ Release identity, decided 2026-10-18: app `vn.infinitex.slopometer`, widget
 Developer ID team `5U4584QFCQ`, and updates from
 `https://updates.infinitex.vn/slopometer/appcast.xml` (Cloudflare R2). These cannot
 change after public release without losing installed data and widgets.
+
+License, decided 2026-10-18: free of charge, under the MIT License (`LICENSE`).
 
 The agreed stack is Swift, SwiftUI/AppKit, WidgetKit, Swift Charts, and
 SQLite/GRDB. Changes to this scope require explicit human authorization.

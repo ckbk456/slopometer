@@ -10,9 +10,11 @@
 		046F6A0DF8313CBFFBD3CB16 /* InlineColorPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44DDBF9308A7EA23DC93648A /* InlineColorPicker.swift */; };
 		0BB5EA42A3FFDB32BEFA1BE3 /* WidgetsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6EEC6B6FF3999B07624F921 /* WidgetsView.swift */; };
 		0DA7C51AD547C85076A95E3F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 5A483B753EAA80FAF20E259A /* Assets.xcassets */; };
+		0FC67DE4476C603024B7ACBF /* Sparkle-LICENSE.txt in Resources */ = {isa = PBXBuildFile; fileRef = 48D7AB6FD83CB9994313450C /* Sparkle-LICENSE.txt */; };
 		15F594F243958A2AD762E78D /* ConfigurationMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80C4116B948FAE2B393D5113 /* ConfigurationMenu.swift */; };
 		27355E91D3F0D148402F3A7C /* SlopometerCore in Frameworks */ = {isa = PBXBuildFile; productRef = 14F18CD2E45DA1E0B4AFBD02 /* SlopometerCore */; };
 		27AAFDEFCB590802050E2F50 /* AppearanceSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60187E46C02AD8A49AD0BE80 /* AppearanceSettings.swift */; };
+		2E2658092D63393F844704FB /* GRDB-LICENSE.txt in Resources */ = {isa = PBXBuildFile; fileRef = 1901BE7E81DEB4F4F0F7616B /* GRDB-LICENSE.txt */; };
 		35AD12272E91142BF5875ABD /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = C9AA9D116A9674B59D6EAE8B /* Sparkle */; };
 		3D703F1C2C249E008AEF7F87 /* LoginItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 746E186733F38F8693F19BE6 /* LoginItem.swift */; };
 		446D228ACFA5B9E9D255D051 /* MainView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E01B7F1D13FF129C1B3877CE /* MainView.swift */; };
@@ -66,11 +68,13 @@
 /* Begin PBXFileReference section */
 		0AA17FB0273F52A4536DAADD /* Octicons-LICENSE.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = "Octicons-LICENSE.txt"; sourceTree = "<group>"; };
 		181AD593328CA6011FFD3AC5 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
+		1901BE7E81DEB4F4F0F7616B /* GRDB-LICENSE.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = "GRDB-LICENSE.txt"; sourceTree = "<group>"; };
 		1FA4514AA2C3D0088573E5A6 /* QuotaMeter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuotaMeter.swift; sourceTree = "<group>"; };
 		2CE86D6528E0B4B124751C3E /* TokenStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TokenStore.swift; sourceTree = "<group>"; };
 		325C0AB1F343F8C48BED92F2 /* BuildInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BuildInfo.swift; sourceTree = "<group>"; };
 		4293BFD7B2150A12590C6C3E /* AppModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppModel.swift; sourceTree = "<group>"; };
 		44DDBF9308A7EA23DC93648A /* InlineColorPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InlineColorPicker.swift; sourceTree = "<group>"; };
+		48D7AB6FD83CB9994313450C /* Sparkle-LICENSE.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = "Sparkle-LICENSE.txt"; sourceTree = "<group>"; };
 		4CE6ACBCDE098C02149B86A4 /* SCOPE.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = SCOPE.md; sourceTree = "<group>"; };
 		5A483B753EAA80FAF20E259A /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		60187E46C02AD8A49AD0BE80 /* AppearanceSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppearanceSettings.swift; sourceTree = "<group>"; };
@@ -179,7 +183,9 @@
 		E6050A50124B029FC09B3A1B /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				1901BE7E81DEB4F4F0F7616B /* GRDB-LICENSE.txt */,
 				0AA17FB0273F52A4536DAADD /* Octicons-LICENSE.txt */,
+				48D7AB6FD83CB9994313450C /* Sparkle-LICENSE.txt */,
 			);
 			path = Resources;
 			sourceTree = "<group>";
@@ -293,7 +299,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				0DA7C51AD547C85076A95E3F /* Assets.xcassets in Resources */,
+				2E2658092D63393F844704FB /* GRDB-LICENSE.txt in Resources */,
 				8032311671336129941C55F8 /* Octicons-LICENSE.txt in Resources */,
+				0FC67DE4476C603024B7ACBF /* Sparkle-LICENSE.txt in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
