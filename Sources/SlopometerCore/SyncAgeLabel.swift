@@ -1,8 +1,8 @@
 import Foundation
 
-/// The widget's sync line: the clock time of the last sync and its age as hours and
-/// minutes, e.g. "Synced 21:47 (00:02 ago)". The day is named when it was not today,
-/// so a widget left over from an earlier day cannot pass for current data.
+/// The widget's sync line: the clock time of the last sync and its age, e.g.
+/// "Synced 21:47 (2m ago)" or "Synced 20:40 (1h 09m ago)". The day is named when it was
+/// not today, so a widget left over from an earlier day cannot pass for current data.
 public enum SyncAgeLabel {
     public static func text(
         synced: Date?, now: Date, calendar: Calendar = .current, locale: Locale = .current
@@ -13,13 +13,16 @@ public enum SyncAgeLabel {
         )
         .hour().minute()
         if !calendar.isDate(synced, inSameDayAs: now) { format = format.month(.abbreviated).day() }
-        return "Synced \(synced.formatted(format)) (\(age(from: synced, to: now)) ago)"
+        return "Synced \(synced.formatted(format)) (\(age(from: synced, to: now)))"
     }
 
-    /// Whole hours and minutes elapsed, zero-padded; never negative.
+    /// Whole minutes elapsed, with hours once there are any: "just now", "2m ago",
+    /// "1h 09m ago". Minutes are zero-padded after hours; never negative.
     public static func age(from synced: Date, to now: Date) -> String {
         let minutes = max(0, Int(now.timeIntervalSince(synced) / 60))
-        return String(format: "%02d:%02d", minutes / 60, minutes % 60)
+        if minutes == 0 { return "just now" }
+        if minutes < 60 { return "\(minutes)m ago" }
+        return String(format: "%dh %02dm ago", minutes / 60, minutes % 60)
     }
 
     /// When the label next changes: the minute boundaries counted from the sync.

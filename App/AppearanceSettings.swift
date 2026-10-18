@@ -19,6 +19,9 @@ struct AppearanceSettings: View {
     @State private var origin: String?
     /// Which appearance's palette the editor changes; light while dark mode shares it.
     @State private var editsDark = false
+    /// Dark colors set aside while dark mode shares the light ones, so turning sharing
+    /// off again restores them instead of starting over.
+    @State private var setAsideDark: ColorTheme.Palette?
     @State private var selectedStop = 0
     /// The stop whose color popover is open.
     @State private var editingStop: Int?
@@ -114,7 +117,7 @@ struct AppearanceSettings: View {
                         ForEach(saved) { item in
                             PresetSwatch(
                                 name: item.name, theme: item.theme, isColorblindSafe: false,
-                                isDark: colorScheme == .dark,
+                                isDark: colorScheme == .dark, showsBothAppearances: true,
                                 isSelected: draft.presetID == item.id
                             ) { choose(item.theme) }
                             .contextMenu { savedMenu(item) }
@@ -165,7 +168,13 @@ struct AppearanceSettings: View {
         origin = preset.presetID
         selectedStop = 0
         editingStop = nil
+        setAsideDark = nil
         if preset.dark == nil { editsDark = false }
+    }
+
+    /// The preset or saved theme the draft came from, as it was chosen.
+    private var originTheme: ColorTheme? {
+        ThemePreset.preset(id: origin)?.theme ?? savedOrigin?.theme
     }
 
     private var savedOrigin: SavedTheme? { saved.first { $0.id == origin } }
@@ -238,6 +247,10 @@ struct AppearanceSettings: View {
                 .disabled(draft.dark == nil)
                 Spacer()
                 Toggle("Same colors in dark mode", isOn: sharesDark)
+            }
+            if draft.dark == nil, setAsideDark != nil {
+                Text("Your dark colors are kept. Turn this off to get them back.")
+                    .font(.caption).foregroundStyle(.secondary)
             }
             GradientEditor(
                 colors: palette.gradient, selection: stopIndex, editing: $editingStop,
@@ -479,18 +492,33 @@ struct AppearanceSettings: View {
             set: { color in editPalette { set(&$0, color) } })
     }
 
-    /// Off copies the light colors into dark so editing starts from what is shown.
+    /// On sets the dark colors aside rather than discarding them; off brings them back,
+    /// or copies the light colors so editing starts from what is shown. Returning to the
+    /// chosen theme's own colors keeps it selected.
     private var sharesDark: Binding<Bool> {
         Binding(
             get: { draft.dark == nil },
             set: { shares in
+                var updated = draft
                 if shares {
-                    draft.dark = nil
-                    draft.presetID = nil
+                    guard let dark = updated.dark else { return }
+                    setAsideDark = dark
+                    updated.dark = nil
                     editsDark = false
-                } else if draft.dark == nil {
-                    draft.dark = draft.light
+                } else {
+                    guard updated.dark == nil else { return }
+                    updated.dark = setAsideDark ?? updated.light
+                    setAsideDark = nil
+                    editsDark = true
                 }
+                updated.presetID = nil
+                if let source = originTheme, source.dark == updated.dark,
+                    source.light == updated.light,
+                    source.mapping == updated.mapping, source.meter == updated.meter
+                {
+                    updated.presetID = source.presetID
+                }
+                draft = updated
             })
     }
 
@@ -505,41 +533,54 @@ struct AppearanceSettings: View {
     }
 }
 
-/// A theme's gradient for the current appearance with its name. Selection shows as a
-/// checkmark and a heavier outline, not only color.
+/// A theme's gradient for the current appearance with its name; a saved theme with its
+/// own dark colors shows light above dark, since those can differ entirely. Selection
+/// shows as a checkmark and a heavier outline, not only color.
 private struct PresetSwatch: View {
     let name: String
     let theme: ColorTheme
     let isColorblindSafe: Bool
     let isDark: Bool
+    var showsBothAppearances = false
     let isSelected: Bool
     let action: () -> Void
+
+    private var isSplit: Bool { showsBothAppearances && theme.dark != nil }
+
+    private func strip(isDark: Bool) -> some View {
+        LinearGradient(
+            colors: theme.palette(isDark: isDark).gradient.map(Color.init),
+            startPoint: .leading, endPoint: .trailing)
+    }
 
     var body: some View {
         let shape = RoundedRectangle(cornerRadius: 6)
         Button(action: action) {
             VStack(alignment: .leading, spacing: 4) {
-                shape
-                    .fill(
-                        LinearGradient(
-                            colors: theme.palette(isDark: isDark).gradient.map(Color.init),
-                            startPoint: .leading, endPoint: .trailing)
-                    )
-                    .frame(height: 24)
-                    .overlay {
-                        shape.strokeBorder(
-                            isSelected ? Color.primary : Color.primary.opacity(0.15),
-                            lineWidth: isSelected ? 2 : 1)
+                VStack(spacing: 0) {
+                    if isSplit {
+                        strip(isDark: false)
+                        strip(isDark: true)
+                    } else {
+                        strip(isDark: isDark)
                     }
-                    .overlay(alignment: .topTrailing) {
-                        if isSelected {
-                            Image(systemName: "checkmark.circle.fill")
-                                .symbolRenderingMode(.palette)
-                                .foregroundStyle(.white, .black)
-                                .font(.caption)
-                                .padding(3)
-                        }
+                }
+                .frame(height: 24)
+                .clipShape(shape)
+                .overlay {
+                    shape.strokeBorder(
+                        isSelected ? Color.primary : Color.primary.opacity(0.15),
+                        lineWidth: isSelected ? 2 : 1)
+                }
+                .overlay(alignment: .topTrailing) {
+                    if isSelected {
+                        Image(systemName: "checkmark.circle.fill")
+                            .symbolRenderingMode(.palette)
+                            .foregroundStyle(.white, .black)
+                            .font(.caption)
+                            .padding(3)
                     }
+                }
                 HStack(spacing: 3) {
                     Text(name)
                         .font(.caption.weight(isSelected ? .semibold : .regular))
@@ -552,7 +593,11 @@ private struct PresetSwatch: View {
             .contentShape(.rect)
         }
         .buttonStyle(.plain)
-        .help(isColorblindSafe ? "\(name), colorblind-safe" : name)
+        .help(
+            isColorblindSafe
+                ? "\(name), colorblind-safe"
+                : isSplit ? "\(name): light colors above, dark below" : name
+        )
         .accessibilityLabel(isColorblindSafe ? "\(name), colorblind-safe" : name)
         .accessibilityAddTraits(isSelected ? .isSelected : [])
     }
