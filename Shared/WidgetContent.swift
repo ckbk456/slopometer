@@ -13,6 +13,19 @@ struct WidgetContent: View {
     @Environment(\.colorScheme) private var colorScheme
 
     var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            content
+            // Only the widget sees a stamped snapshot; the app's preview never shows this.
+            if BuildStamp.differs(writer: snapshot?.writerBuild, reader: BuildStamp(bundle: .main))
+            {
+                Text("Widget build differs from app. Reopen Slopometer.")
+                    .font(.caption2).foregroundStyle(.secondary)
+                    .lineLimit(2).minimumScaleFactor(0.8)
+            }
+        }
+    }
+
+    private var content: some View {
         Group {
             if let snapshot, snapshot.tier != .notConfigured,
                 let panel = snapshot.widget(size)

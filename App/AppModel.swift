@@ -295,7 +295,10 @@ final class AppModel {
     /// second copy of the app signed differently, are refused access by macOS.
     private func shareWithWidget() {
         do {
-            if try SharedSnapshot.write(snapshot) {
+            // Stamped with this build, so a widget from another build can say so.
+            var shared = snapshot
+            shared.writerBuild = BuildInfo.stamp
+            if try SharedSnapshot.write(shared) {
                 WidgetCenter.shared.reloadAllTimelines()
             }
             widgetProblem = nil

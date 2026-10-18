@@ -122,6 +122,18 @@ checks below were not separately reported and remain pending.
       opaque, "Target reached", "Token", meter ticks, and 7-day tiles are readable; Increase
       Contrast and Reduce Transparency still look right.
 
+## One registered build (0.11.1): pending
+
+- [ ] With builds in two worktrees, `make run` in one prints "Stopped widget … from another
+      build" for the other build's running widget extension (if any) and never stops a
+      process under its own `Slopometer.app`; the desktop widget then follows this build.
+- [ ] While another worktree's app is still running, `make run` warns "Still running, quit
+      it first" and leaves that build registered.
+- [ ] When the widget runs from a different version or build than the app that wrote the
+      snapshot, it shows "Widget build differs from app. Reopen Slopometer." in each size;
+      with matching builds, or a snapshot from before 0.11.1, no caption appears. The
+      app's Widgets tab preview never shows it.
+
 ## Widget and background app: pending
 
 - [ ] App runs from the menu bar without a Dock icon; the window opens on demand.

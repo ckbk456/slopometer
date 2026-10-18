@@ -206,4 +206,32 @@ struct SnapshotTests {
         let decoded = try SharedSnapshot.decode(SharedSnapshot.encode(snapshot))
         #expect(decoded == snapshot)
     }
+
+    @Test func writerBuildRoundTripsAndOldSnapshotsStillDecode() throws {
+        var snapshot = DashboardSnapshot.placeholder
+        snapshot.writerBuild = BuildStamp(version: "0.11.1", build: "42", commit: "abc1234")
+        let data = try SharedSnapshot.encode(snapshot)
+        #expect(try SharedSnapshot.decode(data).writerBuild == snapshot.writerBuild)
+        // A snapshot written before 0.11.1 has no writerBuild key.
+        var json = try #require(JSONSerialization.jsonObject(with: data) as? [String: Any])
+        json["writerBuild"] = nil
+        let old = try SharedSnapshot.decode(JSONSerialization.data(withJSONObject: json))
+        #expect(old.writerBuild == nil)
+        #expect(old.login == snapshot.login)
+    }
+
+    @Test func buildMismatchNeedsBothBuildsKnownAndDifferent() {
+        let widget = BuildStamp(version: "0.11.1", build: "42", commit: "abc1234")
+        let differs = { BuildStamp.differs(writer: $0, reader: widget) }
+        #expect(!differs(nil))
+        #expect(!differs(widget))
+        #expect(!differs(BuildStamp(version: "0.11.1", build: "42", commit: "abc1234-modified")))
+        #expect(differs(BuildStamp(version: "0.10.0", build: "42", commit: "abc1234")))
+        #expect(differs(BuildStamp(version: "0.11.1", build: "41", commit: "abc1234")))
+        #expect(!differs(BuildStamp(version: "0.10.0", build: "unknown", commit: "unknown")))
+        #expect(
+            !BuildStamp.differs(
+                writer: BuildStamp(version: "0.10.0", build: "40", commit: "x"),
+                reader: BuildStamp(version: "unknown", build: "unknown", commit: "unknown")))
+    }
 }
