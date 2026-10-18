@@ -21,6 +21,21 @@ username and tokens must be entered again. There is no migration; only developme
 builds ever used the old identity. Changing any value above after a public release
 would strand every installed copy's data and widgets.
 
+## Where releases live
+
+One Cloudflare R2 bucket behind `updates.infinitex.vn` holds everything a release
+publishes, under `/slopometer/`:
+
+| Path | Purpose |
+| --- | --- |
+| `appcast.xml` | Sparkle feed listing every release |
+| `Slopometer-<version>.zip` | Signed, notarized update archive for Sparkle |
+| `Slopometer.dmg` | Latest notarized disk image; the download site's button links here |
+
+The download site (`ckbk456/slopometer-site`, intended for `slopometer.infinitex.vn`)
+hosts neither the feed nor the DMG; its release gate waits for `Slopometer.dmg` to exist
+here. A GitHub release may mirror the DMG, but nothing depends on it.
+
 ## How an update arrives
 
 `App/Updater.swift` starts Sparkle's standard updater at launch. Sparkle downloads the
