@@ -175,6 +175,8 @@ struct SettingsView: View {
                 }
             }
 
+            AppearanceSettings(theme: bindable.settings.theme)
+
             Section("About") {
                 LabeledContent("Version", value: BuildInfo.version)
                 LabeledContent("Build", value: BuildInfo.build)
@@ -529,7 +531,7 @@ func releaseWindowFocus() {
 }
 
 /// A small `?` that shows longer guidance in a popover, so captions stay one line.
-private struct InfoButton<Content: View>: View {
+struct InfoButton<Content: View>: View {
     let title: String
     @ViewBuilder let content: () -> Content
     @State private var isPresented = false

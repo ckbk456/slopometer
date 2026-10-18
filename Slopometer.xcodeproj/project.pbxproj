@@ -10,6 +10,7 @@
 		0BB5EA42A3FFDB32BEFA1BE3 /* WidgetsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6EEC6B6FF3999B07624F921 /* WidgetsView.swift */; };
 		0DA7C51AD547C85076A95E3F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 5A483B753EAA80FAF20E259A /* Assets.xcassets */; };
 		27355E91D3F0D148402F3A7C /* SlopometerCore in Frameworks */ = {isa = PBXBuildFile; productRef = 14F18CD2E45DA1E0B4AFBD02 /* SlopometerCore */; };
+		27AAFDEFCB590802050E2F50 /* AppearanceSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60187E46C02AD8A49AD0BE80 /* AppearanceSettings.swift */; };
 		446D228ACFA5B9E9D255D051 /* MainView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E01B7F1D13FF129C1B3877CE /* MainView.swift */; };
 		5333B9EFCADBD19CEDA57972 /* MenuPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7FB30203F2B9554B613E1009 /* MenuPanel.swift */; };
 		59F7189D91F09A7B448DDF29 /* QuotaMeter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FA4514AA2C3D0088573E5A6 /* QuotaMeter.swift */; };
@@ -65,6 +66,7 @@
 		4293BFD7B2150A12590C6C3E /* AppModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppModel.swift; sourceTree = "<group>"; };
 		4CE6ACBCDE098C02149B86A4 /* SCOPE.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = SCOPE.md; sourceTree = "<group>"; };
 		5A483B753EAA80FAF20E259A /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		60187E46C02AD8A49AD0BE80 /* AppearanceSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppearanceSettings.swift; sourceTree = "<group>"; };
 		66E709D3A0DD9070BE504A7A /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		6729F399225844E012F9191D /* ThemeEnvironment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThemeEnvironment.swift; sourceTree = "<group>"; };
 		68193896EEDBB06DB7E3A076 /* SPEC.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = SPEC.md; sourceTree = "<group>"; };
@@ -105,6 +107,7 @@
 		1B5FE4DA1791A4823ED9696A /* App */ = {
 			isa = PBXGroup;
 			children = (
+				60187E46C02AD8A49AD0BE80 /* AppearanceSettings.swift */,
 				4293BFD7B2150A12590C6C3E /* AppModel.swift */,
 				5A483B753EAA80FAF20E259A /* Assets.xcassets */,
 				325C0AB1F343F8C48BED92F2 /* BuildInfo.swift */,
@@ -283,6 +286,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				70C22BC55BFF67B9D144560C /* AppModel.swift in Sources */,
+				27AAFDEFCB590802050E2F50 /* AppearanceSettings.swift in Sources */,
 				A138EFD2A03DB78FBB9EA276 /* BuildInfo.swift in Sources */,
 				C8512F9249C0687A0E8B4B10 /* Glass.swift in Sources */,
 				446D228ACFA5B9E9D255D051 /* MainView.swift in Sources */,
