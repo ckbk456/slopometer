@@ -68,6 +68,13 @@ public struct DashboardSnapshot: Codable, Equatable, Sendable {
         public let average: Double?
         public let isIncomplete: Bool
         public var id: CalendarDay { day }
+
+        public init(day: CalendarDay, count: Int?, average: Double?, isIncomplete: Bool) {
+            self.day = day
+            self.count = count
+            self.average = average
+            self.isIncomplete = isIncomplete
+        }
     }
 
     public struct Quota: Codable, Equatable, Sendable {

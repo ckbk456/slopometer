@@ -515,25 +515,14 @@ private enum Sample {
     static let month = points(
         [2, 4, 1, 0, 6, 8, 3, 5, 7, 2, 9, 4, 6, 10, 3, 7, 5, 8, 11, 6, 4], averages: true)
 
-    /// `Point` has no public initializer, so samples are decoded from their coded form.
     private static func points(_ counts: [Int], averages: Bool) -> [DashboardSnapshot.Point] {
-        struct Coded: Encodable {
-            let day: String
-            let count: Int
-            let average: Double?
-            let isIncomplete = false
-        }
         let start = CalendarDay(year: 2026, month: 1, day: 4)!
-        let coded = counts.indices.map { index in
+        return counts.indices.map { index in
             let window = counts[max(0, index - 6)...index]
-            return Coded(
-                day: start.adding(days: index).description, count: counts[index],
-                average: averages
-                    ? Double(window.reduce(0, +)) / Double(window.count) : nil)
+            return DashboardSnapshot.Point(
+                day: start.adding(days: index), count: counts[index],
+                average: averages ? Double(window.reduce(0, +)) / Double(window.count) : nil,
+                isIncomplete: false)
         }
-        guard let data = try? JSONEncoder().encode(coded),
-            let decoded = try? JSONDecoder().decode([DashboardSnapshot.Point].self, from: data)
-        else { return [] }
-        return decoded
     }
 }
