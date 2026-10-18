@@ -43,6 +43,8 @@ private struct Themed<Content: View>: View {
     var body: some View {
         content
             .slopTheme(model.settings.theme.resolved())
+            .environment(\.density, model.settings.density)
+            .controlSize(model.settings.density == .compact ? .small : .regular)
             // App-wide, so the window and the menu bar panel switch together, from first
             // appearance on. Both scenes set the same value.
             .onChange(of: model.settings.appearance, initial: true) { _, mode in

@@ -58,6 +58,7 @@ struct SavedConfigurationTests {
         #expect(!current.configurationIsEdited)
         // Shared settings are not part of a configuration.
         current.appearance = .light
+        current.density = .compact
         #expect(!current.configurationIsEdited)
     }
 
@@ -76,6 +77,7 @@ struct SavedConfigurationTests {
         let decoded = try JSONDecoder().decode(DashboardSettings.self, from: data)
         #expect(decoded.savedConfigurations.isEmpty)
         #expect(decoded.configurationID == nil)
+        #expect(decoded.density == .comfortable)
         #expect(decoded.metric == .prsOpened)
     }
 

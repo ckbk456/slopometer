@@ -38,6 +38,7 @@ struct MainView: View {
 
 struct DashboardView: View {
     @Environment(AppModel.self) private var model
+    @Environment(\.density) private var density
     @State private var selectedDay: CalendarDay?
     let openSettings: (SettingsAnchor) -> Void
 
@@ -50,7 +51,8 @@ struct DashboardView: View {
         GeometryReader { viewport in
             ScrollView {
                 FillingStack(
-                    spacing: 20, height: viewport.size.height - Self.verticalPadding * 2
+                    spacing: density.pick(20, 12),
+                    height: viewport.size.height - Self.verticalPadding * 2
                 ) {
                     content(snapshot, gated: gated, settings: $model.settings)
                 }
@@ -145,7 +147,7 @@ struct DashboardView: View {
     }
 
     private func controls(_ settings: Binding<DashboardSettings>) -> some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: density.pick(12, 8)) {
             HStack(spacing: 12) {
                 Picker("Metric", selection: settings.metric) {
                     ForEach(Metric.allCases) { Text($0.title).tag($0) }
@@ -349,6 +351,8 @@ struct TokenSummaryRow<Trailing: View>: View {
             Image(systemName: icon(state))
                 .foregroundStyle(state.isProblem ? Color.orange : Color.secondary)
                 .frame(width: 18)
+                // The summary below says the same in words.
+                .accessibilityHidden(true)
             VStack(alignment: .leading, spacing: 2) {
                 HStack(spacing: 6) {
                     Text(entry.label).lineLimit(1)
@@ -461,6 +465,7 @@ private struct TokenGate: View {
 private struct QuotaCard: View {
     let quota: DashboardSnapshot.Quota
     @State private var showsEvidence = false
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.slopColors) private var colors
 
     var body: some View {
@@ -492,7 +497,7 @@ private struct QuotaCard: View {
             QuotaMeter(count: quota.count, target: quota.target)
                 .accessibilityLabel(quota.headline)
             Button {
-                withAnimation(.snappy) { showsEvidence.toggle() }
+                withAnimation(reduceMotion ? nil : .snappy) { showsEvidence.toggle() }
             } label: {
                 Label(
                     showsEvidence ? "Hide PRs" : evidenceTitle,
@@ -571,6 +576,7 @@ private struct EvidenceRow: View {
             Image(systemName: "arrow.triangle.pull")
                 .foregroundStyle(colors.markText)
                 .font(.callout)
+                .accessibilityHidden(true)
             Text(title).lineLimit(1)
             if isDraft {
                 Text("Draft").font(.caption).foregroundStyle(.secondary)

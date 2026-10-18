@@ -19,6 +19,16 @@ public enum AppearanceMode: String, Codable, CaseIterable, Identifiable, Sendabl
     public var title: String { rawValue.capitalized }
 }
 
+/// Spacing and control size in the app window and menu bar panel. Widgets keep the
+/// system's fixed sizes.
+public enum Density: String, Codable, CaseIterable, Identifiable, Sendable {
+    case comfortable
+    case compact
+
+    public var id: String { rawValue }
+    public var title: String { rawValue.capitalized }
+}
+
 /// Nonsecret preferences. The token is stored separately in Keychain.
 public struct DashboardSettings: Codable, Equatable, Sendable {
     public static let ranges = [30, 90, 365]
@@ -38,6 +48,7 @@ public struct DashboardSettings: Codable, Equatable, Sendable {
     /// Colors for the app, menu bar, and widget.
     public var theme = ColorTheme.standard
     public var appearance = AppearanceMode.system
+    public var density = Density.comfortable
     /// Themes the person named, in the order they saved them.
     public var savedThemes: [SavedTheme] = []
     /// Named dashboard configurations, in the order they were saved.
@@ -75,6 +86,7 @@ public struct DashboardSettings: Codable, Equatable, Sendable {
         appearance =
             try container.decodeIfPresent(AppearanceMode.self, forKey: .appearance)
             ?? defaults.appearance
+        density = try container.decodeIfPresent(Density.self, forKey: .density) ?? defaults.density
         savedThemes =
             try container.decodeIfPresent([SavedTheme].self, forKey: .savedThemes)
             ?? defaults.savedThemes

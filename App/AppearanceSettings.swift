@@ -13,6 +13,7 @@ struct AppearanceSettings: View {
     @Binding var theme: ColorTheme
     @Binding var saved: [SavedTheme]
     @Binding var appearance: AppearanceMode
+    @Binding var density: Density
     @State private var draft: ColorTheme
     /// The preset or saved theme the draft started from; kept after edits so a saved
     /// theme can be updated in place.
@@ -37,11 +38,12 @@ struct AppearanceSettings: View {
 
     init(
         theme: Binding<ColorTheme>, saved: Binding<[SavedTheme]>,
-        appearance: Binding<AppearanceMode>
+        appearance: Binding<AppearanceMode>, density: Binding<Density>
     ) {
         _theme = theme
         _saved = saved
         _appearance = appearance
+        _density = density
         _draft = State(initialValue: theme.wrappedValue)
         _origin = State(initialValue: theme.wrappedValue.presetID)
     }
@@ -91,6 +93,12 @@ struct AppearanceSettings: View {
             }
             .pickerStyle(.segmented)
             .fixedSize()
+            Picker("Density", selection: $density) {
+                ForEach(Density.allCases) { Text($0.title).tag($0) }
+            }
+            .pickerStyle(.segmented)
+            .fixedSize()
+            .help("Spacing and control size in the window and menu bar panel")
             LazyVGrid(columns: swatchColumns, alignment: .leading, spacing: 10) {
                 ForEach(ThemePreset.all) { preset in
                     PresetSwatch(

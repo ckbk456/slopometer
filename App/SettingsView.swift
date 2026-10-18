@@ -5,6 +5,7 @@ import SwiftUI
 struct SettingsView: View {
     @Environment(AppModel.self) private var model
     @Environment(Updater.self) private var updater
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Binding var focus: SettingsAnchor?
     @FocusState private var focusedField: SettingsAnchor?
     @State private var login = ""
@@ -181,7 +182,7 @@ struct SettingsView: View {
 
             AppearanceSettings(
                 theme: bindable.settings.theme, saved: bindable.settings.savedThemes,
-                appearance: bindable.settings.appearance)
+                appearance: bindable.settings.appearance, density: bindable.settings.density)
 
             Section("General") {
                 Toggle(
@@ -248,7 +249,7 @@ struct SettingsView: View {
     private func reveal(_ anchor: SettingsAnchor?, with proxy: ScrollViewProxy) {
         guard let anchor else { return }
         DispatchQueue.main.async {
-            withAnimation { proxy.scrollTo(anchor, anchor: .top) }
+            withAnimation(reduceMotion ? nil : .default) { proxy.scrollTo(anchor, anchor: .top) }
             if anchor == .account, !model.hasToken { focusedField = .account }
             if anchor == .token, !model.hasToken { presentAddToken() }
             focus = nil

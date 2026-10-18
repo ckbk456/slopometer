@@ -9,6 +9,7 @@ struct MenuPanel: View {
     @Environment(Updater.self) private var updater
     @Environment(\.dismiss) private var dismiss
     @Environment(\.slopColors) private var colors
+    @Environment(\.density) private var density
 
     private var snapshot: DashboardSnapshot { model.snapshot }
     private var metric: Metric { model.menuBarMetric }
@@ -21,7 +22,7 @@ struct MenuPanel: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             hero
-                .padding(20)
+                .padding(density.pick(20, 14))
             Divider()
             VStack(alignment: .leading, spacing: 2) {
                 syncRow
@@ -41,7 +42,7 @@ struct MenuPanel: View {
                 .padding(.top, 8)
                 .padding(.bottom, 6)
         }
-        .frame(width: 300)
+        .frame(width: density.pick(300, 280))
         // The window's own material lets the wallpaper through; a mostly opaque window
         // background behind the content keeps green text and tiles legible on any desktop.
         .background {
@@ -77,7 +78,7 @@ struct MenuPanel: View {
     }
 
     private func quotaHero(_ quota: DashboardSnapshot.Quota) -> some View {
-        VStack(alignment: .leading, spacing: 14) {
+        VStack(alignment: .leading, spacing: density.pick(14, 10)) {
             VStack(alignment: .leading, spacing: 6) {
                 metricCaption("Daily slop quota")
                 HStack(alignment: .firstTextBaseline, spacing: 4) {
@@ -105,7 +106,7 @@ struct MenuPanel: View {
     }
 
     private var countHero: some View {
-        VStack(alignment: .leading, spacing: 14) {
+        VStack(alignment: .leading, spacing: density.pick(14, 10)) {
             VStack(alignment: .leading, spacing: 6) {
                 metricCaption(metric.title)
                 Text(snapshot.todayCount.map(String.init) ?? "–")
@@ -223,7 +224,7 @@ struct MenuPanel: View {
         }
         .font(.callout)
         .padding(.horizontal, 10)
-        .padding(.vertical, 5)
+        .padding(.vertical, density.pick(5, 3))
         .accessibilityElement(children: .combine)
     }
 
@@ -260,7 +261,7 @@ struct MenuPanel: View {
         }
         .font(.callout)
         .padding(.horizontal, 10)
-        .padding(.vertical, 5)
+        .padding(.vertical, density.pick(5, 3))
     }
 
     /// Snapshot notices the headline does not already explain, plus widget sharing problems.
@@ -337,6 +338,7 @@ struct MenuPanel: View {
 /// One icon-led status line. The title stays in the primary color so it reads on the
 /// translucent panel; an optional trailing value is secondary unless styled.
 private struct PanelRow<Value: View>: View {
+    @Environment(\.density) private var density
     let icon: String
     let iconStyle: Color?
     let title: String
@@ -370,7 +372,7 @@ private struct PanelRow<Value: View>: View {
         }
         .font(.callout)
         .padding(.horizontal, 10)
-        .padding(.vertical, 5)
+        .padding(.vertical, density.pick(5, 3))
         .accessibilityElement(children: .combine)
     }
 }

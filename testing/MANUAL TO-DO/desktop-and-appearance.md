@@ -218,6 +218,19 @@ checks below were not separately reported and remain pending.
       dashboard as it is. Configurations survive relaunch.
 - [ ] VoiceOver reads "Configuration: <name>" for both menus.
 
+## Density and accessibility pass (1.0.0): pending
+
+- [ ] Settings › Appearance › Density switches Comfortable/Compact at once: smaller
+      controls and tighter spacing in the Activity tab, Settings, and the menu bar panel
+      (narrower, shorter rows); widgets are unchanged; the choice survives relaunch and is
+      not marked as a configuration edit.
+- [ ] VoiceOver on a columns or line chart reads each day as "<date>: <n> <unit>" (today
+      "so far") and average points as "<date>: average <x> <unit>".
+- [ ] With Reduce Motion on, showing/hiding the quota's PRs and jumping to a Settings
+      section happen without animation.
+- [ ] VoiceOver does not read symbol names for token status icons, PR rows, or the widget's
+      empty-state gauge.
+
 ## Widget and background app: pending
 
 - [ ] App runs from the menu bar without a Dock icon; the window opens on demand.
