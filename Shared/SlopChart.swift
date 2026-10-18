@@ -38,18 +38,15 @@ enum SlopPalette {
     static let theme = SlopTheme.standard
 
     /// Fills, bars, meter ticks, and control tint.
-    static let mark = adaptive(\.activity)
+    static let mark = adaptive(\.accent)
     /// Text and icons drawn in the activity color.
-    static let markText = adaptive(\.activityText)
+    static let markText = adaptive(\.accentText)
     static let average = adaptive(\.trend)
     static let unknown = Color.secondary.opacity(0.25)
     static let track = Color.secondary.opacity(0.18)
 
     /// GitHub-style levels 0–4, scaled to the busiest visible day.
-    static func level(_ count: Int, max: Int) -> Int {
-        guard count > 0, max > 0 else { return 0 }
-        return Swift.min(4, Swift.max(1, Int((Double(count) / Double(max) * 4).rounded(.up))))
-    }
+    static func level(_ count: Int, max: Int) -> Int { SlopTheme.level(count, max: max) }
 
     static func colors(_ scheme: ColorScheme) -> SlopColors {
         SlopColors(appearance: theme.appearance(isDark: scheme == .dark))
@@ -68,27 +65,6 @@ enum SlopPalette {
             nsColor: NSColor(name: nil) { appearance in
                 NSColor(appearance.bestMatch(from: [.aqua, .darkAqua]) == .darkAqua ? dark : light)
             })
-    }
-}
-
-/// One appearance's colors, resolved without AppKit so widgets render them as drawn.
-struct SlopColors {
-    let appearance: SlopTheme.Appearance
-
-    var mark: Color { Color(appearance.activity) }
-    var markText: Color { Color(appearance.activityText) }
-    var average: Color { Color(appearance.trend) }
-
-    func fill(level: Int) -> Color {
-        level == 0
-            ? Color.secondary.opacity(0.12)
-            : mark.opacity(SlopTheme.opacity(level: level))
-    }
-
-    /// White or black, whichever reads better on the level's fill; primary on level 0.
-    func number(level: Int) -> Color {
-        guard level > 0 else { return .primary }
-        return appearance.numberIsLight(level: level) ? .white : .black
     }
 }
 
