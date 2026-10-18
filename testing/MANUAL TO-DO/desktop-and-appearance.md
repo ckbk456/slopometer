@@ -7,7 +7,7 @@
 - [ ] Close and reopen the window from the menu bar; verify Quit exits the app.
 - [ ] Inspect keyboard operation, VoiceOver, and light/dark contrast.
 - [ ] At the minimum window width, controls stay on their rows and the grid has no empty
-      gap below it for 30, 90, and 365 days.
+      gap below it for 30, 90, 180, and 365 days.
 - [ ] Without a token, PRs opened / Authored PRs merged show the token explanation; Add
       Token opens Settings scrolled to the token field. Rejected or mismatched tokens show
       their own wording.
@@ -30,7 +30,7 @@
       disabled while classic tokens are saved, and shows its note.
 - [ ] Resize the window from 640×540 to full-screen height: columns and line charts fill
       the height smoothly without jitter; the grid grows with square cells and never
-      overflows the width for 30, 90, and 365 days. With the quota card, day detail, or
+      overflows the width for 30, 90, 180, and 365 days. With the quota card, day detail, or
       notices showing, the chart keeps at least its minimum height and the tab scrolls.
 - [ ] On macOS 26+: quota card, token explanation, day detail, tier badge, refresh and `?`
       buttons render as Liquid Glass, legible in light/dark and with Reduce Transparency
@@ -158,7 +158,7 @@ checks below were not separately reported and remain pending.
 - [ ] Appearance System/Light/Dark switches the window, menu bar panel, and desktop widget
       (background included) at once; System follows the macOS switch again.
 - [ ] The palette button on the dashboard opens Settings scrolled to Appearance.
-- [ ] "Same colors in dark mode" off: light and dark edit separately and both previews and
+- [ ] "Same colors in dark and light mode" off: light and dark edit separately and both previews and
       the real app follow the system appearance switch.
 - [ ] Smooth mapping with Rainbow: neighboring counts get visibly different colors; 4 levels
       shows 4. Tile numbers stay readable on every color, including yellow.
@@ -170,9 +170,12 @@ checks below were not separately reported and remain pending.
 - [ ] Unfocused/tinted desktop widget ignores the theme and stays readable.
 - [ ] A saved theme with its own dark colors shows light above dark in its tile, in both
       window appearances; a saved theme without them shows one strip.
-- [ ] With separate dark colors, turning "Same colors in dark mode" on shows a note, and
-      turning it off brings the dark colors back; on a saved theme or preset the
-      selection stays when the colors return to what was saved.
+- [ ] With separate dark colors, turning "Same colors in dark and light mode" on while
+      editing Dark keeps the dark colors on screen for both appearances and notes that the
+      light colors are kept (and the reverse while editing Light). Edit the shared colors,
+      then turn it off: the set-aside side comes back and the edited colors stay on the
+      side they came from. On a saved theme or preset the selection stays when the colors
+      return to what was saved. The toggle sits on its own row without wrapping.
 - [ ] VoiceOver names each preset and control; the selected preset is marked by more
       than color; Increase Contrast and Reduce Transparency remain legible.
 
@@ -243,7 +246,8 @@ checks below were not separately reported and remain pending.
 - [ ] Small shows the headline and "Synced <time>"; medium shows 7 labeled day tiles;
       large shows a 5-week calendar for grid and the chosen 30 or 90 days for columns/line, with
       no average line. Footer age is left, window label right, and does not shift.
-- [ ] The window's tabs read Activity, Widgets, Settings. The Widgets tab shows a Small,
+- [ ] The window toolbar's segmented control reads Activity, Widgets, Settings at the same
+      size in Comfortable and Compact density, on macOS 14 and 26. The Widgets tab shows a Small,
       Medium, and Large section, each with a preview matching the desktop widget. Changing
       a size's headline, metric, view, or window updates only that size and its preview;
       changing the Activity tab's metric or view changes no widget. Quota headline without an active quota shows

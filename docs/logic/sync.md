@@ -151,8 +151,9 @@ Appearance: a preset from `ThemePreset.all` (`ThemePreset.swift`) or their own e
 It is saved in `DashboardSettings.theme` and copied into the widget snapshot
 (`DashboardSnapshot.theme`; nil in older snapshots means the standard theme), so the app,
 menu bar panel, and widget draw the same colors. A theme holds, per appearance (dark may
-reuse light; while it does, the editor keeps the previous dark colors in view state until
-another theme is chosen or Settings closes, so turning sharing off restores them):
+reuse light). "Same colors in dark and light mode" shares the palette being edited and saves
+the other one in `DashboardSettings.setAsidePalette`, so turning sharing off restores it,
+even after a restart, until another theme is chosen:
 
 - `gradient`: 2–8 evenly spaced colors, low to high activity, mixed in OKLab.
 - `accent`: control tint, badges, highlighted numbers, the daily line; nil picks the

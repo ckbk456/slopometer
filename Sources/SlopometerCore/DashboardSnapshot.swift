@@ -31,7 +31,7 @@ public enum Density: String, Codable, CaseIterable, Identifiable, Sendable {
 
 /// Nonsecret preferences. The token is stored separately in Keychain.
 public struct DashboardSettings: Codable, Equatable, Sendable {
-    public static let ranges = [30, 90, 365]
+    public static let ranges = [30, 90, 180, 365]
     public static let averageWindows = [0, 7, 30]
 
     public var login = ""
@@ -51,6 +51,8 @@ public struct DashboardSettings: Codable, Equatable, Sendable {
     public var density = Density.comfortable
     /// Themes the person named, in the order they saved them.
     public var savedThemes: [SavedTheme] = []
+    /// The current theme's other palette while light and dark share one.
+    public var setAsidePalette: SetAsidePalette?
     /// Named dashboard configurations, in the order they were saved.
     public var savedConfigurations: [SavedConfiguration] = []
     /// The configuration last chosen or saved; it may have been edited since.
@@ -90,6 +92,8 @@ public struct DashboardSettings: Codable, Equatable, Sendable {
         savedThemes =
             try container.decodeIfPresent([SavedTheme].self, forKey: .savedThemes)
             ?? defaults.savedThemes
+        setAsidePalette = try container.decodeIfPresent(
+            SetAsidePalette.self, forKey: .setAsidePalette)
         savedConfigurations =
             try container.decodeIfPresent(
                 [SavedConfiguration].self, forKey: .savedConfigurations)

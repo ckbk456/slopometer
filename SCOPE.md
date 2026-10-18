@@ -20,7 +20,7 @@ connected GitHub dashboard, a working widget, or a signed release.
   official contribution calendar, PRs opened, authored PRs merged, PR evidence,
   and optional repository filters. Classic tokens only by explicit opt-in. The app states which
   features need a token.
-- Grid, column, and line views; 30/90/365-day ranges; 7/30-day simple averages.
+- Grid, column, and line views; 30/90/180/365-day ranges; 7/30-day simple averages.
 - Palette presets, custom colors, density, and saved configurations.
 - One daily PR goal (token tier) with target, metric, scope, timezone, and
   inspectable PR evidence.

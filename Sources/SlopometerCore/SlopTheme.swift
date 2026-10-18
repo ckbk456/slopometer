@@ -150,6 +150,19 @@ public enum MeterColoring: String, Codable, CaseIterable, Identifiable, Sendable
 /// The colors a person chooses: a theme is a preset or their own edit of one. Text and
 /// window backgrounds stay with the system on purpose, so a choice cannot make labels
 /// unreadable; `resolved()` derives readable text colors from these.
+/// The palette set aside while light and dark share one, saved so turning sharing off
+/// restores it even after Settings closes or the app restarts.
+public struct SetAsidePalette: Codable, Equatable, Sendable {
+    public var palette: ColorTheme.Palette
+    /// Which appearance it came from.
+    public var isDark: Bool
+
+    public init(palette: ColorTheme.Palette, isDark: Bool) {
+        self.palette = palette
+        self.isDark = isDark
+    }
+}
+
 public struct ColorTheme: Codable, Equatable, Sendable {
     /// One appearance's choices.
     public struct Palette: Codable, Equatable, Sendable {

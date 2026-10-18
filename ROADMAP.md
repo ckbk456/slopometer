@@ -153,3 +153,11 @@ with empty preferences, cache, and Keychain, so code that adopted earlier develo
 was removed: the single-token Keychain adoption, the 0.5.0 widget-settings fallback, the
 Slop Green theme mapping, and `make run`'s handling of the old bundle ID. Missing settings
 still decode to their defaults, which protects 1.0.x itself.
+
+Polish after the first 1.0.0 test (1.0.0): a 180-day range joins 30/90/365 (SPEC and SCOPE
+updated on the user's direction); the window's sections are a segmented control in the
+toolbar instead of a TabView, whose tab strip macOS 26 drew as a cramped capsule; "Same
+colors in dark and light mode" shares whichever palette is being edited and saves the
+other in settings, so customization is never hidden or lost, and pending color edits are
+kept when leaving Settings. Manual checks in the
+[desktop guide](testing/MANUAL%20TO-DO/desktop-and-appearance.md) are pending.

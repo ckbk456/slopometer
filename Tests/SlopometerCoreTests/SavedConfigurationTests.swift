@@ -89,6 +89,18 @@ struct SavedConfigurationTests {
         #expect(decoded.goal == nil)
     }
 
+    @Test func aSetAsidePaletteSurvivesSavingAndIsNotPartOfAConfiguration() throws {
+        var current = settings
+        current.savedConfigurations = [SavedConfiguration(name: "Work", settings: current)]
+        current.configurationID = current.savedConfigurations[0].id
+        current.setAsidePalette = SetAsidePalette(palette: current.theme.light, isDark: false)
+        #expect(!current.configurationIsEdited)
+        let decoded = try JSONDecoder().decode(
+            DashboardSettings.self, from: JSONEncoder().encode(current))
+        #expect(decoded.setAsidePalette == current.setAsidePalette)
+        #expect(DashboardSettings().setAsidePalette == nil)
+    }
+
     @Test func roundTripsThroughSettings() throws {
         var current = settings
         current.savedConfigurations = [SavedConfiguration(name: "Work", settings: current)]

@@ -106,7 +106,7 @@ Display last successful sync and incomplete coverage alongside cached data.
   headline only; medium shows the last 7 days as daily tiles; large chooses grid
   (a calendar of the last 5 weeks, one tile per day) or columns/line (last 30 or 90 days). Each window is labeled.
   Widgets omit the moving average, which stays in the app window.
-- Date ranges: 30, 90, and 365 days. Contributions may retain provider-calendar
+- Date ranges: 30, 90, 180, and 365 days. Contributions may retain provider-calendar
   layout; PR series use the selected goal timezone.
 - Trailing simple moving average: off, 7 days, or 30 days. Include confirmed
   zero-activity days in the denominator. Unknown days invalidate the affected

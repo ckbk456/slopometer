@@ -182,7 +182,8 @@ struct SettingsView: View {
 
             AppearanceSettings(
                 theme: bindable.settings.theme, saved: bindable.settings.savedThemes,
-                appearance: bindable.settings.appearance, density: bindable.settings.density)
+                appearance: bindable.settings.appearance, density: bindable.settings.density,
+                setAside: bindable.settings.setAsidePalette)
 
             Section("General") {
                 Toggle(
