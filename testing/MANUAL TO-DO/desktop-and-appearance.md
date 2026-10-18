@@ -190,6 +190,18 @@ checks below were not separately reported and remain pending.
       "Slopometer x is available"; clicking the row brings the alert forward; both clear
       after the alert is dismissed.
 
+## Open at login (1.0.0): pending
+
+- [ ] Settings › General › "Open at login" is off on a fresh install. Turning it on adds
+      Slopometer to System Settings › General › Login Items; logging out and in starts it
+      in the menu bar without opening the window.
+- [ ] Turning it off in System Settings is reflected by the toggle when the app comes
+      back to the front; turning it off in the app removes the login item.
+- [ ] If macOS asks for approval, the caption and "Open Login Items" appear and lead to
+      the right System Settings page.
+- [ ] A Debug build registers its own `.build` path; turn the toggle off before deleting
+      a worktree, or the login item points at a missing app.
+
 ## Widget and background app: pending
 
 - [ ] App runs from the menu bar without a Dock icon; the window opens on demand.
@@ -214,7 +226,6 @@ checks below were not separately reported and remain pending.
       out of the tile and readable; today's weekday label is bold in both renderings.
 - [ ] Check Spaces, multiple displays, sleep/wake, and restart.
 - [ ] Inspect density, contrast, and Reduce Motion.
-- [ ] Verify login launch only after opting in; no orphan helper remains after quit.
 - [ ] Test macOS 14 and other claimed supported versions on named targets.
 
 Evidence: 2026-10-17, macOS 27.0.1, signed Debug build launched and quit cleanly by an

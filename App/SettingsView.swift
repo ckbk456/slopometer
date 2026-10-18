@@ -9,6 +9,7 @@ struct SettingsView: View {
     @FocusState private var focusedField: SettingsAnchor?
     @State private var login = ""
     @State private var addsToken = false
+    @State private var loginItem = LoginItem()
 
     var body: some View {
         @Bindable var model = model
@@ -180,6 +181,30 @@ struct SettingsView: View {
             AppearanceSettings(
                 theme: bindable.settings.theme, saved: bindable.settings.savedThemes,
                 appearance: bindable.settings.appearance)
+
+            Section("General") {
+                Toggle(
+                    "Open at login",
+                    isOn: Binding(get: { loginItem.isOn }, set: { loginItem.set($0) }))
+                if loginItem.status == .requiresApproval {
+                    HStack {
+                        Text("Waiting for approval in System Settings › General › Login Items.")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                        Spacer()
+                        Button("Open Login Items") { loginItem.openSystemSettings() }
+                    }
+                }
+                if let error = loginItem.error {
+                    Text(error)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+            }
+            // The person can change login items in System Settings while the window is open.
+            .onReceive(
+                NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)
+            ) { _ in loginItem.refresh() }
 
             Section("Updates") {
                 Toggle("Check for updates automatically", isOn: $updater.checksAutomatically)

@@ -13,6 +13,7 @@
 		27355E91D3F0D148402F3A7C /* SlopometerCore in Frameworks */ = {isa = PBXBuildFile; productRef = 14F18CD2E45DA1E0B4AFBD02 /* SlopometerCore */; };
 		27AAFDEFCB590802050E2F50 /* AppearanceSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60187E46C02AD8A49AD0BE80 /* AppearanceSettings.swift */; };
 		35AD12272E91142BF5875ABD /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = C9AA9D116A9674B59D6EAE8B /* Sparkle */; };
+		3D703F1C2C249E008AEF7F87 /* LoginItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 746E186733F38F8693F19BE6 /* LoginItem.swift */; };
 		446D228ACFA5B9E9D255D051 /* MainView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E01B7F1D13FF129C1B3877CE /* MainView.swift */; };
 		5333B9EFCADBD19CEDA57972 /* MenuPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7FB30203F2B9554B613E1009 /* MenuPanel.swift */; };
 		59F7189D91F09A7B448DDF29 /* QuotaMeter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FA4514AA2C3D0088573E5A6 /* QuotaMeter.swift */; };
@@ -74,6 +75,7 @@
 		66E709D3A0DD9070BE504A7A /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		6729F399225844E012F9191D /* ThemeEnvironment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThemeEnvironment.swift; sourceTree = "<group>"; };
 		68193896EEDBB06DB7E3A076 /* SPEC.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = SPEC.md; sourceTree = "<group>"; };
+		746E186733F38F8693F19BE6 /* LoginItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginItem.swift; sourceTree = "<group>"; };
 		78D9D6EB3FDC6DB8A4AA442B /* SlopometerApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SlopometerApp.swift; sourceTree = "<group>"; };
 		7B1F1C47E64F87D003E4486E /* Slopometer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Slopometer.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		7C28CD2A91D2162A9B26C8AB /* WidgetContent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetContent.swift; sourceTree = "<group>"; };
@@ -119,6 +121,7 @@
 				325C0AB1F343F8C48BED92F2 /* BuildInfo.swift */,
 				93D504B3D0A8761AC6CC1321 /* Glass.swift */,
 				44DDBF9308A7EA23DC93648A /* InlineColorPicker.swift */,
+				746E186733F38F8693F19BE6 /* LoginItem.swift */,
 				E01B7F1D13FF129C1B3877CE /* MainView.swift */,
 				7FB30203F2B9554B613E1009 /* MenuPanel.swift */,
 				66E709D3A0DD9070BE504A7A /* SettingsView.swift */,
@@ -300,6 +303,7 @@
 				A138EFD2A03DB78FBB9EA276 /* BuildInfo.swift in Sources */,
 				C8512F9249C0687A0E8B4B10 /* Glass.swift in Sources */,
 				046F6A0DF8313CBFFBD3CB16 /* InlineColorPicker.swift in Sources */,
+				3D703F1C2C249E008AEF7F87 /* LoginItem.swift in Sources */,
 				446D228ACFA5B9E9D255D051 /* MainView.swift in Sources */,
 				5333B9EFCADBD19CEDA57972 /* MenuPanel.swift in Sources */,
 				888E53BC5853E784F4857160 /* QuotaMeter.swift in Sources */,

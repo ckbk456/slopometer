@@ -13,7 +13,10 @@
 - `Tests/SlopometerCoreTests/`: deterministic tests with a fake HTTP transport.
 - `project.yml`: app and widget targets depending on the local core package.
 
-It does not register login launch or send notifications.
+Settings › General › "Open at login" registers the app itself as a login item with
+`SMAppService.mainApp` (no helper app); macOS owns the setting, so the toggle reads the
+system status back, including "waiting for approval" in System Settings. It is off until
+turned on. It does not send notifications.
 
 ## Intended flow
 
