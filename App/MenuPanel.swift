@@ -7,6 +7,7 @@ import SwiftUI
 struct MenuPanel: View {
     @Environment(AppModel.self) private var model
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.slopColors) private var colors
 
     private var snapshot: DashboardSnapshot { model.snapshot }
     private var metric: Metric { model.menuBarMetric }
@@ -26,7 +27,7 @@ struct MenuPanel: View {
                 if !snapshot.login.isEmpty { accountRow }
                 ForEach(notices, id: \.self) { notice in
                     PanelRow(
-                        icon: "exclamationmark.triangle.fill", iconStyle: SlopPalette.average,
+                        icon: "exclamationmark.triangle.fill", iconStyle: colors.warning,
                         title: notice)
                 }
             }
@@ -128,10 +129,10 @@ struct MenuPanel: View {
     private func quotaStatus(_ quota: DashboardSnapshot.Quota) -> some View {
         if !quota.coverageComplete {
             Label(statusText(quota), systemImage: "exclamationmark.triangle.fill")
-                .foregroundStyle(SlopPalette.average)
+                .foregroundStyle(colors.warning)
         } else if quota.isReached {
             Label(statusText(quota), systemImage: "checkmark.seal.fill")
-                .foregroundStyle(SlopPalette.markText)
+                .foregroundStyle(colors.markText)
         } else {
             Label(statusText(quota), systemImage: "hourglass")
         }
@@ -213,7 +214,7 @@ struct MenuPanel: View {
                 Label(model.connectionLabel, systemImage: isToken ? "key.fill" : "person")
                     .font(.caption)
                     .foregroundStyle(
-                        isToken ? AnyShapeStyle(SlopPalette.markText) : AnyShapeStyle(.secondary))
+                        isToken ? AnyShapeStyle(colors.markText) : AnyShapeStyle(.secondary))
             }
             Spacer(minLength: 0)
         }
@@ -280,7 +281,7 @@ struct MenuPanel: View {
                 .monospacedDigit()
                 .foregroundStyle(
                     BuildInfo.commit.hasSuffix("-modified")
-                        ? AnyShapeStyle(SlopPalette.average) : AnyShapeStyle(.tertiary)
+                        ? AnyShapeStyle(colors.warning) : AnyShapeStyle(.tertiary)
                 )
                 .textSelection(.enabled)
                 .help("Slopometer version, build number, and source commit")

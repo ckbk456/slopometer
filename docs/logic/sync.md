@@ -145,28 +145,52 @@ out of the tile (`.destinationOut` in a compositing group) instead of drawing ne
 text on a bright tile, and today's weekday is bold. Bars, line, and filled quota ticks are
 white there too.
 
-## Palette roles
+## Palette roles and themes
 
-`SlopTheme` (`Sources/SlopometerCore/SlopTheme.swift`) is the single source of colors, with
-one set per appearance: `activity` (fills, bars, lines, meter ticks, control tint),
-`activityText` (text and icons in the activity color), `trend` (moving average and warning
-accents), and the reference `background` that contrast is measured against. `SlopPalette`
-in `Shared/SlopChart.swift` exposes them as `mark`, `markText`, and `average` (adaptive
-through AppKit, for app views) and as `colors(_:)` resolved from the environment's color
-scheme (shared and widget views). Levels 1–4 draw `activity` at 35, 55, 75, and 100 %
-opacity; each tile's number is white or black, whichever contrasts more with its fill.
+A person picks a `ColorTheme` (`Sources/SlopometerCore/SlopTheme.swift`) in Settings ›
+Appearance: a preset from `ThemePreset.all` (`ThemePreset.swift`) or their own edit of one.
+It is saved in `DashboardSettings.theme` and copied into the widget snapshot
+(`DashboardSnapshot.theme`; nil in older snapshots means the standard theme), so the app,
+menu bar panel, and widget draw the same colors. A theme holds, per appearance (dark may
+reuse light):
+
+- `gradient`: 2–8 evenly spaced colors, low to high activity, mixed in OKLab.
+- `accent`: control tint, badges, highlighted numbers, the daily line; nil picks the
+  gradient color with the most contrast on the background.
+- `trend`: the moving average line.
+
+plus `mapping` (`levels`: GitHub-style levels 1–4 sample the gradient at 0, ⅓, ⅔, 1;
+`continuous` ("Smooth"): count 1 maps to the first color and the busiest visible day to the
+last, so every count gets its own color) and `meter` (quota ticks in the accent, or walking
+the gradient from the first tick to the target).
+
+`resolved()` turns a theme into `SlopTheme`, the roles views read: accent text is the
+accent moved in lightness until it reaches 4.5:1 on the reference background (#F5F5F5
+light, #1E1E1E dark), the trend reaches 3:1, and `warning` (incomplete coverage, modified
+builds) is a fixed amber that is not themable. Text and window backgrounds are not themable
+either. Each tile's number is white or black, whichever contrasts more with its fill. Views
+read the resolved colors from `@Environment(\.slopColors)`, set by `.slopTheme(_:)`
+(`Shared/ThemeEnvironment.swift`) at the window, panel, and widget roots for the current
+color scheme. Column bars take their day's fill; the tinted/unfocused widget rendering
+ignores the theme and keeps the white levels described above.
+
+`ThemeAdvice.check` warns, without blocking, when neighboring levels are hard to tell apart
+(below 1.15:1), when lightness does not rise steadily (the grid view has no numbers, so a
+rainbow reads as hue only; hovering a day shows its count), or when level 1 nearly vanishes
+into the background (below 1.2:1). Mono, Viridis, and Cividis are marked colorblind-safe.
+
+The default Slop Green reproduces the earlier palette exactly: its gradient is the green at
+35, 55, 75, and 100 % opacity over each background.
 
 | Role | Light (vs #F5F5F5) | Dark (vs #1E1E1E) |
 | --- | --- | --- |
-| activity / activityText | #116329, 6.78:1 | #2EA043, 4.94:1 |
-| trend | #8A5C00, 5.33:1 | #D29922, 6.60:1 |
+| Slop Green accent / text | #116329, 6.78:1 | #2EA043, 4.94:1 |
+| Default trend; warning | #8A5C00, 5.33:1 | #D29922, 6.60:1 |
 
-Light appearance is darker than the earlier rgb(0.18, 0.63, 0.26), which measured 3.07:1 on
-#F5F5F5; dark appearance keeps nearly that green, which already read at 4.98:1 there. Tile
-numbers reach at least 4.9:1 on every level in both appearances; `SlopThemeTests` checks
-the targets (text 4.5:1, fills 3:1). The menu bar panel draws the window background at 82 %
-opacity behind its content, so the wallpaper no longer shows through enough to wash out
-the green.
+`SlopThemeTests` checks the standard targets and, for every preset, accent text 4.5:1,
+trend 3:1, and warning 4.5:1 in both appearances. The menu bar panel draws the window
+background at 82 % opacity behind its content, so the wallpaper does not wash out the
+colors.
 
 The dashboard replaces the chart with a token explanation when a PR metric is
 selected without a usable token (missing, still being checked, rejected, or owned by another account)

@@ -29,7 +29,6 @@ struct MainView: View {
                 .tabItem { Label("Settings", systemImage: "gearshape") }
                 .tag(Tab.settings)
         }
-        .tint(SlopPalette.mark)
         .padding()
         .frame(minWidth: 640, minHeight: 540)
         .onAppear { if model.accountLogin.isEmpty && !model.hasToken { tab = .settings } }
@@ -262,6 +261,7 @@ struct DashboardView: View {
 /// a glance. Clicking it lists every saved token and how it feeds the data; never secrets.
 private struct ConnectionBadge: View {
     @Environment(AppModel.self) private var model
+    @Environment(\.slopColors) private var colors
     let manage: () -> Void
     @State private var isPresented = false
 
@@ -274,8 +274,8 @@ private struct ConnectionBadge: View {
                 .font(.caption.weight(.medium))
                 .padding(.horizontal, 8)
                 .padding(.vertical, 3)
-                .foregroundStyle(usesTokens ? SlopPalette.markText : .secondary)
-                .glassCapsule(tint: usesTokens ? SlopPalette.mark : Color.secondary)
+                .foregroundStyle(usesTokens ? colors.markText : .secondary)
+                .glassCapsule(tint: usesTokens ? colors.mark : Color.secondary)
                 .contentShape(Capsule())
         }
         .buttonStyle(.plain)
@@ -391,6 +391,7 @@ struct TokenKindChip: View {
 /// Shown in place of the chart when a PR metric is selected without a usable token.
 private struct TokenGate: View {
     @Environment(AppModel.self) private var model
+    @Environment(\.slopColors) private var colors
     let metric: Metric
     let openTokenSettings: () -> Void
 
@@ -398,7 +399,7 @@ private struct TokenGate: View {
         VStack(spacing: 14) {
             Image(systemName: "key.horizontal")
                 .font(.system(size: 30, weight: .regular))
-                .foregroundStyle(SlopPalette.markText)
+                .foregroundStyle(colors.markText)
             VStack(spacing: 6) {
                 Text(title).font(.title3.weight(.semibold))
                 Text(message)
@@ -452,6 +453,7 @@ private struct TokenGate: View {
 private struct QuotaCard: View {
     let quota: DashboardSnapshot.Quota
     @State private var showsEvidence = false
+    @Environment(\.slopColors) private var colors
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -519,7 +521,7 @@ private struct QuotaCard: View {
                 .foregroundStyle(.secondary)
         } else if quota.isReached {
             Label("Target reached", systemImage: "checkmark.seal.fill")
-                .foregroundStyle(SlopPalette.markText)
+                .foregroundStyle(colors.markText)
         } else {
             Label("\(quota.target - quota.count) to go", systemImage: "hourglass")
                 .foregroundStyle(.secondary)
@@ -544,6 +546,7 @@ private struct EvidenceRow: View {
     let title: String
     let url: String
     let isDraft: Bool
+    @Environment(\.slopColors) private var colors
 
     var body: some View {
         if let destination = URL(string: url) {
@@ -558,7 +561,7 @@ private struct EvidenceRow: View {
     private var content: some View {
         HStack(alignment: .firstTextBaseline, spacing: 8) {
             Image(systemName: "arrow.triangle.pull")
-                .foregroundStyle(SlopPalette.markText)
+                .foregroundStyle(colors.markText)
                 .font(.callout)
             Text(title).lineLimit(1)
             if isDraft {

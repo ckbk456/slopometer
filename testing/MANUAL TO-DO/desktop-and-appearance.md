@@ -134,6 +134,26 @@ checks below were not separately reported and remain pending.
       with matching builds, or a snapshot from before 0.11.1, no caption appears. The
       app's Widgets tab preview never shows it.
 
+## Color themes (0.12.0): pending
+
+- [ ] Settings › Appearance: each preset changes the Activity grid, columns, line, quota
+      meter, tint, menu bar panel, Widgets tab previews, and desktop widgets together, in
+      light and dark appearance. Slop Green looks exactly like 0.11.
+- [ ] Custom gradient: add up to 8 and remove down to 2 colors, edit by picker and hex,
+      Reverse, Shuffle; the preset label switches to Custom; the choice survives relaunch.
+- [ ] "Same colors in dark mode" off: light and dark edit separately and both previews and
+      the real app follow the system appearance switch.
+- [ ] Smooth mapping with Rainbow: neighboring counts get visibly different colors; 4 levels
+      shows 4. Tile numbers stay readable on every color, including yellow.
+- [ ] Gradient meter: ticks walk the gradient; targets over 20 show a gradient track.
+- [ ] Advice captions appear for Rainbow (lightness) and a flat custom gradient (similar
+      levels) and disappear for GitHub/Viridis.
+- [ ] Accent text (Target reached, Token badge, "+N") stays readable with Halloween's
+      yellow and Electric's light blue; warnings stay amber in every theme.
+- [ ] Unfocused/tinted desktop widget ignores the theme and stays readable.
+- [ ] VoiceOver names each preset and control; the selected preset is marked by more
+      than color; Increase Contrast and Reduce Transparency remain legible.
+
 ## Widget and background app: pending
 
 - [ ] App runs from the menu bar without a Dock icon; the window opens on demand.
@@ -157,7 +177,7 @@ checks below were not separately reported and remain pending.
 - [ ] Unfocused desktop widget: medium tiles for the busiest days show their number cut
       out of the tile and readable; today's weekday label is bold in both renderings.
 - [ ] Check Spaces, multiple displays, sleep/wake, and restart.
-- [ ] Inspect custom palettes, density, contrast, and Reduce Motion.
+- [ ] Inspect density, contrast, and Reduce Motion.
 - [ ] Verify login launch only after opting in; no orphan helper remains after quit.
 - [ ] Test macOS 14 and other claimed supported versions on named targets.
 

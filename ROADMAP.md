@@ -9,7 +9,7 @@ milestones, not date estimates or authorization to publish/merge/release.
 | 1 · Harden the bench | Single CI run per change, project drift check, consistent formatter and signing, widget extension with App Group and shared snapshot format | CI gate; widget appears from a locally signed build (manual) | Toolchain merged (#2); widget built and signed locally; manual widget check pending |
 | 2 · Measure real slop | Source records, timezone bucketing, cache v2, public-profile calendar, optional token with GraphQL calendar and PR search, recorded fixtures | Reconciliation, deduplication, removed-PR, timezone, search-window, rate-limit, and token-mismatch tests | MVP: tests pass locally; live sync exercised on one account; manual provider checks pending |
 | 3 · Set the daily quota | PR goals, evidence inspector, three charts, 7/30-day averages, widget views | Same-series chart/widget agreement; boundary, missing-data and quota tests | MVP: implemented without login launch or notifications; token gate, typed quota target, and fitted grid added; size-specific widget windows and per-size widget settings added; repository filter is a checklist of synced repositories; several tokens (one per organization) and opt-in classic tokens (InsecuSlopometer™); manual checks pending |
-| 4 · Calibrate and package | Theme editor, saved configurations, accessibility, login launch, optional notification | Consolidated manual gates and explicit license/signing/distribution decisions | Planned |
+| 4 · Calibrate and package | Theme editor, saved configurations, accessibility, login launch, optional notification | Consolidated manual gates and explicit license/signing/distribution decisions | Theme editor implemented (0.12.0); the rest planned; manual checks pending |
 
 First technical priority: settle data contracts and widget plumbing before
 visual polish. First data priority: agree on what counts before celebrating a
@@ -84,4 +84,14 @@ processes launched from other checkouts' builds, and the app stamps the shared s
 with its version, build, and commit. The widget shows a one-line caption when its own
 version or build differs from the app's. Core tests cover the stamp's tolerant decoding
 and the comparison; the manual check in the
+[desktop guide](testing/MANUAL%20TO-DO/desktop-and-appearance.md) is pending.
+
+Color themes (0.12.0): Settings › Appearance offers gradient presets (Slop Green default,
+GitHub, Electric, Vibe Coded, Rainbow, Sunset, Ocean, Halloween, Mono, Viridis, Cividis) and
+a custom gradient of 2–8 colors per appearance, with 4-level or Smooth mapping, automatic or
+chosen accent, average-line color, and an accent or gradient quota meter. The app, menu bar
+panel, and widget draw from the same saved theme; text and window backgrounds stay with the
+system (SPEC updated on the user's direction). Readability advice is shown, never enforced.
+Core tests cover OKLab mixing, readable text, sampling, Smooth mapping, presets, advice, and
+settings migration; every rendering check in the
 [desktop guide](testing/MANUAL%20TO-DO/desktop-and-appearance.md) is pending.

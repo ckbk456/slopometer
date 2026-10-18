@@ -25,6 +25,8 @@ public struct DashboardSettings: Codable, Equatable, Sendable {
     public var repositories: [String] = []
     public var goal: Goal?
     public var widgets = WidgetSettings()
+    /// Colors for the app, menu bar, and widget.
+    public var theme = ColorTheme.standard
 
     public init() {}
 
@@ -52,6 +54,7 @@ public struct DashboardSettings: Codable, Equatable, Sendable {
         widgets =
             try container.decodeIfPresent(WidgetSettings.self, forKey: .widgets)
             ?? WidgetSettings(following: metric, chartStyle: chartStyle)
+        theme = try container.decodeIfPresent(ColorTheme.self, forKey: .theme) ?? defaults.theme
     }
 
     public var timeZone: TimeZone { TimeZone(identifier: timeZoneID) ?? .current }
@@ -65,6 +68,13 @@ public struct DashboardSnapshot: Codable, Equatable, Sendable {
         public let average: Double?
         public let isIncomplete: Bool
         public var id: CalendarDay { day }
+
+        public init(day: CalendarDay, count: Int?, average: Double?, isIncomplete: Bool) {
+            self.day = day
+            self.count = count
+            self.average = average
+            self.isIncomplete = isIncomplete
+        }
     }
 
     public struct Quota: Codable, Equatable, Sendable {
@@ -136,6 +146,9 @@ public struct DashboardSnapshot: Codable, Equatable, Sendable {
     /// The build that wrote the shared copy; nil in memory and in snapshots from before 0.11.1,
     /// which still decode because the key is optional.
     public var writerBuild: BuildStamp? = nil
+    /// The app's colors, so the widget draws what the app shows. Nil in snapshots written
+    /// before themes; readers fall back to the standard theme.
+    public var theme: ColorTheme? = nil
 
     public var unit: String { metric.unit }
 
@@ -290,7 +303,7 @@ public enum SnapshotBuilder {
             averageWindow: settings.averageWindow, sourceLabel: sourceLabel,
             scopeLabel: scopeLabel, points: points, widgets: widgets,
             todayCount: points.last?.count, quota: quota,
-            lastSuccessfulSync: lastSync, notices: notices)
+            lastSuccessfulSync: lastSync, notices: notices, theme: settings.theme)
     }
 }
 
@@ -343,6 +356,7 @@ extension DashboardSnapshot {
             tier: tier, metric: metric, chartStyle: chartStyle, rangeDays: rangeDays,
             averageWindow: averageWindow, sourceLabel: sourceLabel, scopeLabel: scopeLabel,
             points: points, widgets: widgets, todayCount: todayCount, quota: quota,
-            lastSuccessfulSync: lastSuccessfulSync, notices: notices, writerBuild: writerBuild)
+            lastSuccessfulSync: lastSuccessfulSync, notices: notices, writerBuild: writerBuild,
+            theme: theme)
     }
 }
