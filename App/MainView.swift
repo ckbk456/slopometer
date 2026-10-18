@@ -35,17 +35,18 @@ struct MainView: View {
         .frame(minWidth: 640, minHeight: 540)
         .toolbar {
             ToolbarItem(placement: .principal) {
-                Picker("Section", selection: $tab) {
-                    Text("Activity").tag(Tab.dashboard)
-                    Text("Widgets").tag(Tab.widgets)
-                    Text("Settings").tag(Tab.settings)
-                }
-                .pickerStyle(.segmented)
-                .labelsHidden()
+                SectionPicker(
+                    selection: $tab,
+                    options: [
+                        .init(value: .dashboard, title: "Activity"),
+                        .init(value: .widgets, title: "Widgets"),
+                        .init(value: .settings, title: "Settings"),
+                    ]
+                )
                 // Toolbar size in both densities.
                 .controlSize(.regular)
-                .accessibilityLabel("Section")
             }
+            .hidesSharedGlassBackground()
         }
         .onAppear { if model.accountLogin.isEmpty && !model.hasToken { tab = .settings } }
     }

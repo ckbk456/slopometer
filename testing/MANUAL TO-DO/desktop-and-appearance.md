@@ -246,8 +246,11 @@ checks below were not separately reported and remain pending.
 - [ ] Small shows the headline and "Synced <time>"; medium shows 7 labeled day tiles;
       large shows a 5-week calendar for grid and the chosen 30 or 90 days for columns/line, with
       no average line. Footer age is left, window label right, and does not shift.
-- [ ] The window toolbar's segmented control reads Activity, Widgets, Settings at the same
-      size in Comfortable and Compact density, on macOS 14 and 26. The Widgets tab shows a Small,
+- [ ] The window toolbar's section switcher reads Activity, Widgets, Settings at the same
+      size in Comfortable and Compact density. On macOS 26 it is a glass capsule whose
+      selected pill follows the track's curve and slides between sections (no slide with
+      Reduce Motion), with no second glass layer behind it; on macOS 14–15 it is the
+      standard segmented control. VoiceOver reads it as "Section" and marks the selected one. The Widgets tab shows a Small,
       Medium, and Large section, each with a preview matching the desktop widget. Changing
       a size's headline, metric, view, or window updates only that size and its preview;
       changing the Activity tab's metric or view changes no widget. Quota headline without an active quota shows
