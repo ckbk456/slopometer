@@ -146,6 +146,7 @@ struct SettingsView: View {
                             Text(goal.metric.unit).foregroundStyle(.secondary)
                         }
                     }
+                    quotaNotification
                 }
                 .disabled(model.settings.goal == nil)
             } header: {
@@ -204,7 +205,10 @@ struct SettingsView: View {
             // The person can change login items in System Settings while the window is open.
             .onReceive(
                 NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)
-            ) { _ in loginItem.refresh() }
+            ) { _ in
+                loginItem.refresh()
+                Task { await model.quotaNotifier.refreshPermission() }
+            }
 
             Section("Updates") {
                 Toggle("Check for updates automatically", isOn: $updater.checksAutomatically)
@@ -219,6 +223,24 @@ struct SettingsView: View {
             }
         }
         .formStyle(.grouped)
+    }
+
+    /// Opt-in; once per goal and day, never while some PRs may be missing.
+    @ViewBuilder
+    private var quotaNotification: some View {
+        let notifier = model.quotaNotifier
+        Toggle(
+            "Notify when reached",
+            isOn: Binding(get: { notifier.isOn }, set: { on in Task { await notifier.set(on) } }))
+        if notifier.isOn, notifier.isBlocked {
+            HStack {
+                Text("Notifications for Slopometer are off in System Settings.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                Spacer()
+                Button("Open Notifications") { notifier.openSystemSettings() }
+            }
+        }
     }
 
     /// Scrolls to a section the dashboard asked for, then clears the request. Asking for

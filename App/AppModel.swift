@@ -57,6 +57,8 @@ final class AppModel {
     private(set) var widgetProblem: String?
 
     var openWindowAction: OpenWindowAction?
+    /// The opt-in notification for reaching the daily PR quota.
+    let quotaNotifier = QuotaNotifier()
 
     private let cache: MeasurementCache?
     private let coordinator: SyncCoordinator?
@@ -86,6 +88,7 @@ final class AppModel {
             startupError = "The local cache could not be opened: \(error.localizedDescription)"
         }
         rebuild()
+        quotaNotifier.openWindow = { [weak self] in self?.openMainWindow() }
         startPolling()
         NSWorkspace.shared.notificationCenter.addObserver(
             forName: NSWorkspace.didWakeNotification, object: nil, queue: .main
@@ -199,6 +202,11 @@ final class AppModel {
             ? 0 : consecutiveFailures + 1
         syncStage = nil
         rebuild()
+        // Only a sync that verified a token and fetched PRs confirms today's count.
+        let confirmed = currentReport.map { $0.tokenVerified && $0.pullRequestError == nil }
+        quotaNotifier.check(
+            quota: snapshot.quota, goal: settings.goal, repositories: settings.repositories,
+            timeZone: settings.timeZone, confirmed: confirmed ?? false)
     }
 
     /// Shows each stage and publishes data the sync has already written, so the calendar

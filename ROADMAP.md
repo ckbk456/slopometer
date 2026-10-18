@@ -9,7 +9,7 @@ milestones, not date estimates or authorization to publish/merge/release.
 | 1 · Harden the bench | Single CI run per change, project drift check, consistent formatter and signing, widget extension with App Group and shared snapshot format | CI gate; widget appears from a locally signed build (manual) | Toolchain merged (#2); widget built and signed locally; manual widget check pending |
 | 2 · Measure real slop | Source records, timezone bucketing, cache v2, public-profile calendar, optional token with GraphQL calendar and PR search, recorded fixtures | Reconciliation, deduplication, removed-PR, timezone, search-window, rate-limit, and token-mismatch tests | MVP: tests pass locally; live sync exercised on one account; manual provider checks pending |
 | 3 · Set the daily quota | PR goals, evidence inspector, three charts, 7/30-day averages, widget views | Same-series chart/widget agreement; boundary, missing-data and quota tests | MVP: implemented without login launch or notifications; token gate, typed quota target, and fitted grid added; size-specific widget windows and per-size widget settings added; repository filter is a checklist of synced repositories; several tokens (one per organization) and opt-in classic tokens (InsecuSlopometer™); manual checks pending |
-| 4 · Calibrate and package | Theme editor, saved configurations, accessibility, login launch, optional notification | Consolidated manual gates and explicit license/signing/distribution decisions | Theme editor implemented (0.12.0); release identity, in-app updater, and open at login implemented (1.0.0); release job, notification, saved configurations, and accessibility planned; manual checks pending |
+| 4 · Calibrate and package | Theme editor, saved configurations, accessibility, login launch, optional notification | Consolidated manual gates and explicit license/signing/distribution decisions | Theme editor implemented (0.12.0); release identity, in-app updater, open at login, and quota notification implemented (1.0.0); release job, saved configurations, and accessibility planned; manual checks pending |
 
 First technical priority: settle data contracts and widget plumbing before
 visual polish. First data priority: agree on what counts before celebrating a
@@ -120,4 +120,10 @@ upload to R2). Updater and identity checks in the
 Open at login (1.0.0): implemented on `codex/launch-at-login` with `SMAppService.mainApp`
 behind Settings › General, off by default, reading the system status back (including
 approval pending). Checks in the [desktop guide](testing/MANUAL%20TO-DO/desktop-and-appearance.md)
+are pending.
+
+Quota notification (1.0.0): implemented on `codex/quota-notification`. Opt-in "Notify
+when reached" under Settings › Pull requests posts one notification per goal and day,
+only after a sync confirms PR data with complete coverage. Core tests cover the rules;
+the checks in the [measurements guide](testing/MANUAL%20TO-DO/measurements-and-sync.md)
 are pending.

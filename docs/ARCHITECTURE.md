@@ -16,7 +16,8 @@
 Settings › General › "Open at login" registers the app itself as a login item with
 `SMAppService.mainApp` (no helper app); macOS owns the setting, so the toggle reads the
 system status back, including "waiting for approval" in System Settings. It is off until
-turned on. It does not send notifications.
+turned on. The opt-in quota notification is posted by `QuotaNotifier` after syncs, using
+the rules in [Measurements](logic/measurements.md).
 
 ## Intended flow
 
