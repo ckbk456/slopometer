@@ -1,7 +1,7 @@
 import AppKit
 import Observation
 import SlopometerCore
-import UserNotifications
+@preconcurrency import UserNotifications
 
 /// The opt-in "Daily slop quota reached" notification, at most once per goal and day.
 /// The rules are in `QuotaCompletion`; this posts it and remembers what was announced.
