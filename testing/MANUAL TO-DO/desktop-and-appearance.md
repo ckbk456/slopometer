@@ -140,8 +140,7 @@ checks below were not separately reported and remain pending.
       meter, tint, menu bar panel, Widgets tab previews, and desktop widgets together, in
       light and dark appearance.
 - [ ] Slop Electric is the first preset and selected on a fresh install; Reset to Slop
-      Electric restores it; no Slop Green preset is offered. A 0.12.0 development build
-      that had Slop Green selected opens with Slop Electric. A new widget placed before the
+      Electric restores it; no Slop Green preset is offered. A new widget placed before the
       app has run shows Slop Electric.
 - [ ] Custom gradient: add up to 8 and remove down to 2 colors, edit by picker and hex,
       Reverse, Surprise Me; the caption switches to "Edited from …, not saved"; the choice
@@ -249,7 +248,6 @@ checks below were not separately reported and remain pending.
       a size's headline, metric, view, or window updates only that size and its preview;
       changing the Activity tab's metric or view changes no widget. Quota headline without an active quota shows
       today's count; a PR metric without a token shows the token message in that size.
-- [ ] After upgrading from 0.5.0, each widget keeps the metric and view it showed before.
 - [ ] With the desktop widget unfocused (tinted), grid levels, today's outline, tiles,
       and the quota meter stay distinguishable.
 - [ ] Widget matches the app's counts and shows snapshot age when the app is quit.

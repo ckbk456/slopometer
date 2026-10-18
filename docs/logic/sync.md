@@ -108,8 +108,7 @@ The app writes the snapshot as JSON to the App Group container
 `5U4584QFCQ.vn.infinitex.slopometer` and reloads widget timelines only when the bytes change.
 The widget decodes it and never fetches or reads Keychain. Tokens live only in
 Keychain (service `vn.infinitex.slopometer.github-token`, one item per token ID); their names
-and kinds are nonsecret preferences (`tokenEntries`). The single token saved by
-earlier versions (account `default`) is adopted as "Personal".
+and kinds are nonsecret preferences (`tokenEntries`).
 
 macOS refuses App Group access to unsigned builds and to a copy signed differently
 from the one that owns the container. A failed write is shown in the app window as
@@ -189,8 +188,7 @@ into the background (below 1.2:1). Mono, Viridis, and Cividis are marked colorbl
 The default, Slop Electric (`ThemePreset.electric`, id `electric`), runs electric blue to
 indigo: #93C5FD, #3B82F6, #4F46E5, #3730A3 in light and #312E81, #4338CA, #3B82F6, #7DD3FC
 in dark. Neighboring levels differ by at least 1.45:1 and lightness is ordered, so it draws
-no advice. The earlier Slop Green preset was removed; a stored theme whose `presetID` is
-`slop-green` decodes as the default.
+no advice.
 
 | Role | Light (vs #F5F5F5) | Dark (vs #1E1E1E) |
 | --- | --- | --- |

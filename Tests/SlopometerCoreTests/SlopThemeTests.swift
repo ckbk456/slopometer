@@ -147,11 +147,7 @@ struct ColorThemeTests {
         #expect(roundTrip.theme == edited.theme)
     }
 
-    @Test func retiredSlopGreenDecodesToTheStandardTheme() throws {
-        let data = Data(
-            #"{"presetID":"slop-green","light":{"gradient":[],"trend":{"red":0,"green":0,"blue":0}}}"#
-                .utf8)
-        #expect(try JSONDecoder().decode(ColorTheme.self, from: data) == .standard)
+    @Test func slopGreenIsNoLongerAPreset() {
         #expect(ThemePreset.preset(id: "slop-green") == nil)
     }
 

@@ -194,9 +194,6 @@ public struct ColorTheme: Codable, Equatable, Sendable {
     /// The default theme: Slop Electric.
     public static var standard: ColorTheme { ThemePreset.electric.theme }
 
-    /// Removed presets; a theme still saved with one of these ids decodes as the default.
-    static let retiredPresetIDs: Set<String> = ["slop-green"]
-
     /// Colors by role for both appearances, with text made readable on each background.
     public func resolved() -> SlopTheme {
         SlopTheme(
@@ -212,10 +209,6 @@ public struct ColorTheme: Codable, Equatable, Sendable {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         let defaults = Self.standard
         presetID = try container.decodeIfPresent(String.self, forKey: .presetID)
-        if let presetID, Self.retiredPresetIDs.contains(presetID) {
-            self = defaults
-            return
-        }
         light = try container.decodeIfPresent(Palette.self, forKey: .light) ?? defaults.light
         dark = try container.decodeIfPresent(Palette.self, forKey: .dark)
         mapping =

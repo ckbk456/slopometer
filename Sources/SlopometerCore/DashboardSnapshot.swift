@@ -81,7 +81,7 @@ public struct DashboardSettings: Codable, Equatable, Sendable {
         goal = try container.decodeIfPresent(Goal.self, forKey: .goal)
         widgets =
             try container.decodeIfPresent(WidgetSettings.self, forKey: .widgets)
-            ?? WidgetSettings(following: metric, chartStyle: chartStyle)
+            ?? defaults.widgets
         theme = try container.decodeIfPresent(ColorTheme.self, forKey: .theme) ?? defaults.theme
         appearance =
             try container.decodeIfPresent(AppearanceMode.self, forKey: .appearance)

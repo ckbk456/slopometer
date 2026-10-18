@@ -145,6 +145,11 @@ person has run the accessibility checks; they are in the
 
 Default theme (1.0.0): Slop Green is removed because it read as GitHub's
 own green. Slop Electric, retuned to an ordered electric blue to indigo ramp, is the first
-preset and the default, including for the widget before the app writes a snapshot. A theme
-saved with the retired Slop Green id loads as Slop Electric. Core tests cover the default's
-contrast targets, advice, and the migration; rendering checks are pending.
+preset and the default, including for the widget before the app writes a snapshot. Core
+tests cover the default's contrast targets and advice; rendering checks are pending.
+
+Pre-release cutover (1.0.0): nothing was released before 1.0.0, and the new identity starts
+with empty preferences, cache, and Keychain, so code that adopted earlier development data
+was removed: the single-token Keychain adoption, the 0.5.0 widget-settings fallback, the
+Slop Green theme mapping, and `make run`'s handling of the old bundle ID. Missing settings
+still decode to their defaults, which protects 1.0.x itself.
