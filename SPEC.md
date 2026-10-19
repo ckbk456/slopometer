@@ -167,7 +167,7 @@ counts, labels, and freshness, never credentials. When the app is not running,
 the widget shows the last snapshot with its age.
 
 Tokens belong in Keychain. Never place tokens in source, preferences, logs,
-the shared snapshot, or chart exports. The sample-data scaffold needs no
+the shared snapshot, chart exports, or any HTTP cache. The sample-data scaffold needs no
 credentials.
 
 ## Updates

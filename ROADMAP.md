@@ -166,3 +166,12 @@ Timezone picker (1.0.0): Settings › Timezone is a searchable popover (city, re
 identifier, zone name, or offset such as "+7"), listed west to east with each zone's
 current GMT offset and a "Use This Mac's Timezone" shortcut, instead of a menu of 400
 identifiers. `TimeZoneChoice` in the core holds the naming and search, with tests.
+
+Token cache hotfix (1.0.1): development builds sent GitHub requests through the shared URL
+session, whose disk cache stored them with the Authorization header (found by a Codex audit,
+confirmed against the caches of earlier builds). The transport now uses a session that keeps
+no cache, cookies, or credentials; authorized requests ignore caches; launch empties the
+shared cache and removes earlier builds' cache files; a refused Keychain delete keeps the
+token listed with a notice. 1.0.0 was never published, so 1.0.1 is the first public build.
+Core tests cover the session configuration and the request cache policy; the checks in the
+[measurements guide](testing/MANUAL%20TO-DO/measurements-and-sync.md) are pending.

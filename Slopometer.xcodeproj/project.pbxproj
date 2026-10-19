@@ -19,6 +19,7 @@
 		3D703F1C2C249E008AEF7F87 /* LoginItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 746E186733F38F8693F19BE6 /* LoginItem.swift */; };
 		446D228ACFA5B9E9D255D051 /* MainView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E01B7F1D13FF129C1B3877CE /* MainView.swift */; };
 		5333B9EFCADBD19CEDA57972 /* MenuPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7FB30203F2B9554B613E1009 /* MenuPanel.swift */; };
+		550ABED53CAFE2E4AC925536 /* HTTPCacheCleanup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20469BC87A892A7A96CDCB22 /* HTTPCacheCleanup.swift */; };
 		59F7189D91F09A7B448DDF29 /* QuotaMeter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FA4514AA2C3D0088573E5A6 /* QuotaMeter.swift */; };
 		5E1A783D176203CD4C6A9450 /* TokenStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CE86D6528E0B4B124751C3E /* TokenStore.swift */; };
 		6B047609193F8335AD141E3C /* SlopChart.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4BD827FF20CC2FB09AC22E9 /* SlopChart.swift */; };
@@ -72,6 +73,7 @@
 		181AD593328CA6011FFD3AC5 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		1901BE7E81DEB4F4F0F7616B /* GRDB-LICENSE.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = "GRDB-LICENSE.txt"; sourceTree = "<group>"; };
 		1FA4514AA2C3D0088573E5A6 /* QuotaMeter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuotaMeter.swift; sourceTree = "<group>"; };
+		20469BC87A892A7A96CDCB22 /* HTTPCacheCleanup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HTTPCacheCleanup.swift; sourceTree = "<group>"; };
 		2CE86D6528E0B4B124751C3E /* TokenStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TokenStore.swift; sourceTree = "<group>"; };
 		325C0AB1F343F8C48BED92F2 /* BuildInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BuildInfo.swift; sourceTree = "<group>"; };
 		4293BFD7B2150A12590C6C3E /* AppModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppModel.swift; sourceTree = "<group>"; };
@@ -133,6 +135,7 @@
 				325C0AB1F343F8C48BED92F2 /* BuildInfo.swift */,
 				80C4116B948FAE2B393D5113 /* ConfigurationMenu.swift */,
 				93D504B3D0A8761AC6CC1321 /* Glass.swift */,
+				20469BC87A892A7A96CDCB22 /* HTTPCacheCleanup.swift */,
 				44DDBF9308A7EA23DC93648A /* InlineColorPicker.swift */,
 				746E186733F38F8693F19BE6 /* LoginItem.swift */,
 				E01B7F1D13FF129C1B3877CE /* MainView.swift */,
@@ -323,6 +326,7 @@
 				A138EFD2A03DB78FBB9EA276 /* BuildInfo.swift in Sources */,
 				15F594F243958A2AD762E78D /* ConfigurationMenu.swift in Sources */,
 				C8512F9249C0687A0E8B4B10 /* Glass.swift in Sources */,
+				550ABED53CAFE2E4AC925536 /* HTTPCacheCleanup.swift in Sources */,
 				046F6A0DF8313CBFFBD3CB16 /* InlineColorPicker.swift in Sources */,
 				3D703F1C2C249E008AEF7F87 /* LoginItem.swift in Sources */,
 				446D228ACFA5B9E9D255D051 /* MainView.swift in Sources */,
@@ -422,7 +426,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 1.0.0;
+				MARKETING_VERSION = 1.0.1;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -486,7 +490,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 1.0.0;
+				MARKETING_VERSION = 1.0.1;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";

@@ -53,9 +53,13 @@ enum TokenStore {
         persist(updated)
     }
 
-    static func remove(_ id: String) {
-        SecItemDelete(query(id) as CFDictionary)
+    /// False when Keychain refused to delete the item; the entry is kept so the token stays
+    /// visible and the removal can be tried again.
+    static func remove(_ id: String) -> Bool {
+        let status = SecItemDelete(query(id) as CFDictionary)
+        guard status == errSecSuccess || status == errSecItemNotFound else { return false }
         persist(entries().filter { $0.id != id })
+        return true
     }
 
     private static func read(_ id: String) -> String? {

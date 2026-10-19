@@ -604,3 +604,26 @@ struct IncrementalSyncTests {
         #expect(try cache.pullRequests().map(\.id) == ["old", "recent"])
     }
 }
+
+@Suite("Token-carrying requests leave nothing behind")
+struct TransportHygieneTests {
+    @Test func theDefaultSessionHasNoCacheCookiesOrCredentialStore() {
+        let configuration = URLSessionTransport.makeSession().configuration
+        #expect(configuration.urlCache == nil)
+        #expect(configuration.httpCookieStorage == nil)
+        #expect(configuration.httpShouldSetCookies == false)
+        #expect(configuration.urlCredentialStorage == nil)
+        #expect(configuration.requestCachePolicy == .reloadIgnoringLocalAndRemoteCacheData)
+    }
+
+    @Test func authorizedRequestsIgnoreEveryCache() async throws {
+        let transport = FakeTransport { _ in
+            (200, [:], json(["data": ["viewer": ["login": "octocat"]]]))
+        }
+        let client = GitHubClient(transport: transport)
+        _ = try await client.viewerLogin(token: "ghp_test")
+        let request = try #require(transport.requests.first)
+        #expect(request.value(forHTTPHeaderField: "Authorization") == "Bearer ghp_test")
+        #expect(request.cachePolicy == .reloadIgnoringLocalAndRemoteCacheData)
+    }
+}

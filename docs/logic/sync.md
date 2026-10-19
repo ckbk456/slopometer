@@ -108,7 +108,13 @@ The app writes the snapshot as JSON to the App Group container
 `5U4584QFCQ.vn.infinitex.slopometer` and reloads widget timelines only when the bytes change.
 The widget decodes it and never fetches or reads Keychain. Tokens live only in
 Keychain (service `vn.infinitex.slopometer.github-token`, one item per token ID); their names
-and kinds are nonsecret preferences (`tokenEntries`).
+and kinds are nonsecret preferences (`tokenEntries`). Requests go through a URL session
+that keeps nothing (`URLSessionTransport.makeSession()`: ephemeral, no URL cache, cookies,
+or credential storage), and every authorized request ignores caches, because the shared
+session's disk cache stores requests with their Authorization header. At launch
+`HTTPCacheCleanup` empties the shared cache and deletes the cache files that development
+builds before 1.0.1 wrote. A refused Keychain delete keeps the token listed and shows a
+notice instead of pretending it is gone.
 
 macOS refuses App Group access to unsigned builds and to a copy signed differently
 from the one that owns the container. A failed write is shown in the app window as
