@@ -188,6 +188,13 @@ mirrors the DMG. Steps are in the [updates guide](docs/logic/updates.md); a rele
 is still planned. Install and update checks in the
 [desktop guide](testing/MANUAL%20TO-DO/desktop-and-appearance.md) are pending.
 
+Branded installer (1.0.2): implemented the website-inspired static DMG background
+with standard/Retina representations, explicit drag-to-Applications guidance and
+a gauge app/volume icon. Editable vectors, bundled OFL fonts and locked artwork/
+DMG commands make packaging repeatable. Local validation and release evidence are
+reported with delivery; Finder visual/drag-install and supported-OS checks remain
+pending in the desktop guide.
+
 Remove All Data (1.0.3): Settings › Uninstall › Remove All Data… deletes every Keychain
 token item, the cache, the widget snapshot, preferences, the login item, and notifications.
 It then lists the deleted tokens with links to revoke them on GitHub, and quits. SPEC and

@@ -72,6 +72,23 @@ any future update. The public key is in `App/Info.plist`. Sparkle's tools are in
 
 ## Releasing
 
+### Branded disk image (1.0.2)
+
+The direct-download image uses the website's liquid lettering, Slop Electric
+colors and gauge icon in a 720 × 470-point Finder window. Drag the real app on
+the left onto the real Applications link on the right, then open the installed
+app from Applications. The background includes that instruction and points out
+the menu bar. Both app and mounted volume carry the gauge icon. The artwork is
+static; no installer code or Finder automation is involved.
+
+The editable vectors, bundled font licenses, generated standard/Retina assets,
+and layout contract live in [packaging](../../packaging/README.md). Regenerate
+artwork with `make packaging-art`; normal builds use the checked-in outputs.
+Build an image from an already-built app with `make dmg APP=/path/to/Slopometer.app
+DMG=/new/path/Slopometer.dmg`. The command refuses to overwrite an existing image
+and leaves the supplied bundle unchanged. Finder visual, accessibility and
+drag-install checks remain in the consolidated manual guide.
+
 Releases are cut by hand on the release machine; there is no release job yet (see
 [ROADMAP](../../ROADMAP.md)). From a clean checkout of merged `main`:
 
@@ -82,7 +99,8 @@ Releases are cut by hand on the release machine; there is no release job yet (se
    entitlement remains.
 2. Notarize the app with `notarytool` (Keychain profile `slopometer-notary`, an App Store
    Connect API key) and staple it.
-3. Build `Slopometer.dmg` from the stapled app and an Applications link, sign it with
+3. Run `make dmg APP=/path/to/stapled/Slopometer.app DMG=/new/path/Slopometer.dmg`
+   to package the stapled app with the branded layout. Sign the image with
    Developer ID, then notarize and staple it.
 4. Zip the stapled app with `ditto -c -k --sequesterRsrc --keepParent` as
    `Slopometer-<version>.zip`, put the release notes beside it as
@@ -94,6 +112,9 @@ Releases are cut by hand on the release machine; there is no release job yet (se
    immutable`), then the DMG and `appcast.xml` (both `public, max-age=300`). Download each
    back and compare checksums.
 6. Mirror the DMG on a GitHub release tagged `v<version>` at the release commit.
+
+The first public release baseline is recorded below. Subsequent release commits,
+notes and DMG checksums are recorded in [GitHub releases](https://github.com/ckbk456/slopometer/releases).
 
 | Version | Build | Commit | Published |
 | --- | --- | --- | --- |
