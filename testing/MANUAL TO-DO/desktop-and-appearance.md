@@ -196,6 +196,9 @@ checks below were not separately reported and remain pending.
 - [ ] Settings › About and the menu bar panel read version 1.0.1.
 - [ ] Downloading from `slopometer.infinitex.vn` gives a DMG that opens without a
       Gatekeeper warning; the app copied to Applications launches without one.
+- [ ] Versioned download: the button fetches `Slopometer-<version>.dmg` for the current
+      release, and after a browser has downloaded an older release, downloading again
+      gives the new branded image with the new version.
 - [ ] With the next release: 1.0.1 finds it, the alert shows release notes, Install
       relaunches into the new version, and data and widgets are kept.
 - [ ] A scheduled check (release build) shows a Dock icon and the menu bar panel row
