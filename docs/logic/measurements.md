@@ -35,6 +35,12 @@ current day only, so restarts do not repeat it, while a changed goal or the next
 be announced again. Clicking the notification opens the app window. Editing the target
 alone posts nothing until the next sync confirms the count.
 
+The Daily target field accepts digits only (`Goal.targetDigits`, at most three): anything
+else typed or pasted is dropped as it arrives. Digits apply immediately, clamped into
+1–999 (`Goal.target(typed:)`); leaving the field, or pressing Return, shows the current
+target. A number-formatted field kept letters and then refused to give up focus, which
+also made the form scroll back to it when a color popover closed.
+
 The snapshot builder feeds `MovingAverage` completed days only, so today has no
 average. Sync and snapshot rules are in the [sync guide](sync.md).
 

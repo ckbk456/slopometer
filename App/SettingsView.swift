@@ -145,13 +145,8 @@ struct SettingsView: View {
                     }
                     LabeledContent("Daily target") {
                         HStack(spacing: 6) {
-                            TextField(
-                                "Daily target", value: targetBinding(bindable.settings, goal),
-                                format: .number.grouping(.never)
-                            )
-                            .labelsHidden()
-                            .multilineTextAlignment(.trailing)
-                            .frame(width: 56)
+                            TargetField(value: targetBinding(bindable.settings, goal))
+                                .frame(width: 56)
                             Stepper(
                                 "Daily target", value: targetBinding(bindable.settings, goal),
                                 in: Goal.targetRange
@@ -704,6 +699,38 @@ private struct RepositoryPicker: View {
         .help(
             RepositoryFilter.isLastIncluded(choice.name, in: selection, choices: choices)
                 ? "At least one repository stays selected." : "")
+    }
+}
+
+/// The daily target as typed text that only ever holds digits.
+///
+/// A number-formatted `TextField` keeps letters it cannot parse and then refuses to give up
+/// focus, so `releaseWindowFocus()` could not clear it and closing a color popover scrolled
+/// the form back to it. Digits apply as they are typed; leaving the field empty restores
+/// the current target.
+private struct TargetField: View {
+    @Binding var value: Int
+    @State private var text = ""
+    @FocusState private var isFocused: Bool
+
+    var body: some View {
+        TextField("Daily target", text: $text)
+            .labelsHidden()
+            .multilineTextAlignment(.trailing)
+            .focused($isFocused)
+            .onAppear { text = String(value) }
+            .onChange(of: text) { _, typed in
+                let digits = Goal.targetDigits(typed)
+                if digits != typed { text = digits }
+                if let target = Goal.target(typed: digits), target != value { value = target }
+            }
+            .onChange(of: value) { _, new in
+                if Goal.target(typed: text) != new { text = String(new) }
+            }
+            .onChange(of: isFocused) { _, focused in
+                if !focused { text = String(value) }
+            }
+            .onSubmit { text = String(value) }
     }
 }
 
