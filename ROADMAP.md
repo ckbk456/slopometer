@@ -200,3 +200,10 @@ forcing a hidden app extension adds disallowed Finder metadata after signing.
 Packaging no longer writes it and now strictly verifies identity-signed apps
 both before copying and from the completed image. This gate is separate from
 Apple's app/DMG notarization and the pending Finder UI checks.
+
+Remove All Data (1.0.3): Settings › Uninstall › Remove All Data… deletes every Keychain
+token item, the cache, the widget snapshot, preferences, the login item, and notifications.
+It then lists the deleted tokens with links to revoke them on GitHub, and quits. SPEC and
+SCOPE were updated on the user's direction, and the README gained uninstall steps. Core
+tests cover `MeasurementCache.eraseAll()`. The checks in the
+[measurements guide](testing/MANUAL%20TO-DO/measurements-and-sync.md) are pending.

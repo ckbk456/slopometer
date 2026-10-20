@@ -34,6 +34,14 @@ final class QuotaNotifier: NSObject {
         await refreshPermission()
     }
 
+    /// Turns the notification off and clears any already shown, for Remove All Data.
+    func removeAll() {
+        isOn = false
+        let center = UNUserNotificationCenter.current()
+        center.removeAllPendingNotificationRequests()
+        center.removeAllDeliveredNotifications()
+    }
+
     func refreshPermission() async {
         let settings = await UNUserNotificationCenter.current().notificationSettings()
         isBlocked = settings.authorizationStatus == .denied

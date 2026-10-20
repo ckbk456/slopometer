@@ -170,6 +170,13 @@ Tokens belong in Keychain. Never place tokens in source, preferences, logs,
 the shared snapshot, chart exports, or any HTTP cache. The sample-data scaffold needs no
 credentials.
 
+macOS runs no code when an app is moved to the Trash, so Settings offers Remove All
+Data before uninstalling. After confirmation it deletes every Keychain token item,
+the cache, the shared snapshot, preferences, the login item, and notifications. It
+then lists the deleted tokens by name and kind and links to GitHub's token pages,
+saying the tokens stay valid until revoked there. The app does not revoke tokens
+itself, and it quits rather than syncing again.
+
 ## Updates
 
 Releases are signed with Developer ID, notarized, and offered through an in-app

@@ -30,6 +30,12 @@ final class LoginItem {
         status = SMAppService.mainApp.status
     }
 
+    /// Takes Slopometer out of the login items, for Remove All Data.
+    static func remove() {
+        guard SMAppService.mainApp.status != .notRegistered else { return }
+        try? SMAppService.mainApp.unregister()
+    }
+
     func openSystemSettings() {
         SMAppService.openSystemSettingsLoginItems()
     }

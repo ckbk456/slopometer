@@ -22,9 +22,26 @@ GitHub account, and shows a dashboard window and a desktop widget.
 
 Grid, column, and line views; 30/90/365-day ranges; 7/30-day averages. Color themes:
 gradient presets (Slop Electric, GitHub, Vibe Coded, Rainbow, and more) or a custom
-gradient of up to 8 colors, saved under your own names, with a System/Light/Dark switch. Saved configurations, launch at login, and notifications are
-planned. See
-the [short roadmap](ROADMAP.md).
+gradient of up to 8 colors, saved under your own names, with a System/Light/Dark switch.
+Saved configurations, optional launch at login, an opt-in notification when the daily
+quota is reached, and in-app updates. See the [short roadmap](ROADMAP.md).
+
+## Uninstall
+
+1. Open Slopometer › Settings › Uninstall › **Remove All Data…**. This deletes your tokens
+   from Keychain and everything else the app saved, and lists the tokens it deleted.
+2. Revoke those tokens on GitHub: [fine-grained tokens](https://github.com/settings/personal-access-tokens)
+   or [classic tokens](https://github.com/settings/tokens). Deleting a token on your Mac
+   does not stop it working on GitHub.
+3. Quit Slopometer, move it from Applications to the Trash, and remove its widget from
+   the desktop.
+
+If the app is already in the Trash, delete the tokens by hand: in Keychain Access, search
+for `vn.infinitex.slopometer.github-token` and delete each item, or run
+`security delete-generic-password -s vn.infinitex.slopometer.github-token` until it reports
+that the item could not be found. Then delete `~/Library/Containers/vn.infinitex.slopometer`
+and `~/Library/Group Containers/5U4584QFCQ.vn.infinitex.slopometer`, and revoke the tokens
+on GitHub as above.
 
 ## Develop
 
