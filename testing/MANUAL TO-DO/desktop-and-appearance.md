@@ -278,6 +278,16 @@ checks below were not separately reported and remain pending.
 - [ ] Keyboard and VoiceOver can select the real app and Applications link and
       complete installation without depending on text baked into the background.
 
+## DMG safe area and hidden files (1.0.4): pending
+
+- [ ] With Finder's tab, path and status bars all on (View menu), a fresh download of
+      the 1.0.4 DMG shows the title, "Drag Slopometer into Applications, then open it
+      from there.", both icons and their labels without scrolling; only the wave band
+      may be cropped.
+- [ ] With those bars off, the whole 720 × 470 background shows with no blank strip.
+- [ ] With hidden files shown (⌘⇧.), `.background.tiff` and `.VolumeIcon.icns` are
+      not drawn over the art; at most a scrollbar appears.
+
 ## Widget and background app: pending
 
 - [ ] App runs from the menu bar without a Dock icon; the window opens on demand.

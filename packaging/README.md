@@ -6,7 +6,13 @@ artwork behind real Finder items, with no installer application or scripts run
 on the user's Mac.
 
 - Content area: 720 × 470 points, with toolbar, sidebar, path and status bars hidden.
-- Native icons: 96 points; app centered at (210, 270), Applications at (510, 270).
+- Safe area: everything essential, including the install instruction and both icon
+  labels, stays above y = 330. Finder keeps the window's outer size, so a person whose
+  Finder always shows the tab, path and status bars loses about 125 points of content
+  and sees the bottom cropped; the wave band below is decoration only.
+- Native icons: 96 points; app centered at (210, 250), Applications at (510, 250).
+- Hidden files: `.background.tiff` and `.VolumeIcon.icns` sit below the window at
+  y = 620, so showing hidden files in Finder adds a scrollbar instead of covering the art.
 - Native filename labels: 14 points, below the icons; not baked into the artwork.
 - Background: 720 × 470 and 1440 × 940 PNGs. dmgbuild combines these into a
   multi-resolution TIFF for Finder's standard and Retina rendering.

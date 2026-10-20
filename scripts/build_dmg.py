@@ -66,7 +66,14 @@ def main():
         "icon": str(ROOT / "packaging/Slopometer.icns"),
         "background": str(ROOT / "packaging/background.png"),
         "window_rect": ((100, 100), (720, 470)),
-        "icon_locations": {"Slopometer.app": (210, 270), "Applications": (510, 270)},
+        "icon_locations": {
+            "Slopometer.app": (210, 250),
+            "Applications": (510, 250),
+            # Below the window, so Finder's show-hidden-files mode does not drop
+            # these dot-files on top of the artwork.
+            ".background.tiff": (160, 620),
+            ".VolumeIcon.icns": (560, 620),
+        },
         "icon_size": 96,
         "text_size": 14,
         "label_pos": "bottom",

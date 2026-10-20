@@ -219,6 +219,13 @@ immutable; the fixed name stays as a `no-cache` copy for older links. Release st
 the [updates guide](docs/logic/updates.md). The download check in the
 [desktop guide](testing/MANUAL%20TO-DO/desktop-and-appearance.md) is pending.
 
+DMG safe area (1.0.4): the install instruction and both icons now sit in the top
+~330 points of the disk image window, because Finder keeps the window's size and a
+person's always-on tab, path and status bars cropped the old bottom band ("Then open
+it from Applications"). The background and volume-icon files sit below the window,
+so Finder's show-hidden-files mode no longer drops them on the art. Finder checks
+are pending in the [desktop guide](testing/MANUAL%20TO-DO/desktop-and-appearance.md).
+
 Remove All Data (1.0.3): Settings › Uninstall › Remove All Data… deletes every Keychain
 token item, the cache, the widget snapshot, preferences, the login item, and notifications.
 It then lists the deleted tokens with links to revoke them on GitHub, and quits. SPEC and
