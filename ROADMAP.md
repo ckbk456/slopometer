@@ -182,3 +182,10 @@ the download site is live on `slopometer.infinitex.vn`, and GitHub release `v1.0
 mirrors the DMG. Steps are in the [updates guide](docs/logic/updates.md); a release job
 is still planned. Install and update checks in the
 [desktop guide](testing/MANUAL%20TO-DO/desktop-and-appearance.md) are pending.
+
+Remove All Data (1.0.3): Settings › Uninstall › Remove All Data… deletes every Keychain
+token item, the cache, the widget snapshot, preferences, the login item, and notifications.
+It then lists the deleted tokens with links to revoke them on GitHub, and quits. SPEC and
+SCOPE were updated on the user's direction, and the README gained uninstall steps. Core
+tests cover `MeasurementCache.eraseAll()`. The checks in the
+[measurements guide](testing/MANUAL%20TO-DO/measurements-and-sync.md) are pending.

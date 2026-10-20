@@ -50,6 +50,18 @@ Provider integration and PR quotas are not yet implemented. All gates are pendin
 - [ ] With Keychain refusing a delete (for example a locked keychain), removing a token
       keeps it listed and shows the Keychain notice; a later removal clears it (1.0.1).
 - [ ] Verify persisted settings/cache after restart and upgrades without losing source records.
+- [ ] Remove All Data (1.0.3), with two tokens (one classic) and the login item, quota
+      notification, and widget on: the confirmation states the token count; afterwards
+      Keychain Access finds no `vn.infinitex.slopometer.github-token` items; the sheet lists
+      both tokens with their kinds and shows both GitHub links (only the fine-grained one
+      when no classic token was saved); the widget shows its empty state; Login Items no
+      longer lists Slopometer; Quit is the only way out.
+- [ ] Relaunch after Remove All Data: the app starts empty (no username, tokens, themes,
+      saved configurations, or cached activity) and the Sparkle and login prompts are at
+      their first-run defaults. Run once with a sync in progress: the sheet waits, then
+      finishes, and the relaunch is still empty.
+- [ ] README uninstall fallback: with the app already in the Trash, the `security` command
+      deletes the token items one per run and then reports that none are found.
 
 Deterministic numeric/cache tests are separate from this provider checklist.
 Record actual account/permission coverage without exposing credential values.

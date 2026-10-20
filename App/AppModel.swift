@@ -57,6 +57,8 @@ final class AppModel {
     private(set) var widgetProblem: String?
     /// Set when Keychain refused to delete a token, so the token is still saved.
     private(set) var keychainProblem: String?
+    /// Set once Remove All Data has started. Nothing syncs again until the app relaunches.
+    private(set) var dataRemoved = false
 
     var openWindowAction: OpenWindowAction?
     /// The opt-in notification for reaching the daily PR quota.
@@ -174,7 +176,7 @@ final class AppModel {
     /// Syncs now, or right after the sync in progress, so a change made during a sync
     /// (new token, removed token, new username) is never dropped.
     func refresh() async {
-        guard let coordinator, !accountLogin.isEmpty || hasToken else { return }
+        guard let coordinator, !dataRemoved, !accountLogin.isEmpty || hasToken else { return }
         guard gate.request() else { return }
         repeat {
             await sync(with: coordinator)
@@ -182,7 +184,7 @@ final class AppModel {
     }
 
     private func sync(with coordinator: SyncCoordinator) async {
-        guard !accountLogin.isEmpty || hasToken else { return }
+        guard !dataRemoved, !accountLogin.isEmpty || hasToken else { return }
         lastAttempt = Date()
         // Read at the start of each run, so a queued run uses the latest settings and tokens.
         let report = await coordinator.sync(
@@ -266,6 +268,57 @@ final class AppModel {
         lastReport = nil
         rebuild()
         Task { await refresh() }
+    }
+
+    // MARK: Remove All Data
+
+    /// What Remove All Data deleted, so the person can revoke the same tokens on GitHub.
+    struct Removal {
+        /// The tokens deleted from Keychain, captured before the wipe.
+        let tokens: [TokenEntry]
+        /// False when Keychain refused, so token items may remain.
+        let keychainCleared: Bool
+        /// Anything else that could not be deleted.
+        let problems: [String]
+    }
+
+    /// Deletes everything Slopometer keeps on this Mac: the Keychain tokens first, then,
+    /// once a running sync has finished, the cache, the widget's snapshot, preferences,
+    /// the login item, and notifications. GitHub keeps the tokens valid; that is for the
+    /// person to revoke. The app stays inert until it quits.
+    func removeAllData() async -> Removal {
+        dataRemoved = true
+        pollTask?.cancel()
+        let removed = tokens
+        let keychainCleared = TokenStore.removeAll()
+        // A sync already running could write records back after the cache is erased.
+        while gate.isRunning { try? await Task.sleep(for: .milliseconds(200)) }
+
+        var problems: [String] = []
+        do {
+            try cache?.eraseAll()
+        } catch {
+            problems.append("The local cache could not be erased: \(error.localizedDescription)")
+        }
+        tokens = []
+        lastReport = nil
+        keychainProblem = nil
+        records = []
+        snapshot = .placeholder
+        LoginItem.remove()
+        quotaNotifier.removeAll()
+        do {
+            try SharedSnapshot.remove()
+        } catch {
+            problems.append(
+                "The widget's shared snapshot could not be deleted: \(error.localizedDescription)")
+        }
+        WidgetCenter.shared.reloadAllTimelines()
+        // Last, so nothing above writes a preference back.
+        if let bundleID = Bundle.main.bundleIdentifier {
+            UserDefaults.standard.removePersistentDomain(forName: bundleID)
+        }
+        return Removal(tokens: removed, keychainCleared: keychainCleared, problems: problems)
     }
 
     // MARK: Saved configurations

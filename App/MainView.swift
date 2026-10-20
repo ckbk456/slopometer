@@ -664,6 +664,10 @@ private struct FillingStack: Layout {
 /// Shared wording and links for creating the optional token.
 enum TokenGuide {
     static let creationURL = URL(string: "https://github.com/settings/personal-access-tokens/new")!
+    /// Where each kind of token is revoked; Slopometer can't revoke them itself.
+    static let fineGrainedListURL = URL(
+        string: "https://github.com/settings/personal-access-tokens")!
+    static let classicListURL = URL(string: "https://github.com/settings/tokens")!
 }
 
 extension String {

@@ -26,6 +26,7 @@ connected GitHub dashboard, a working widget, or a signed release.
   inspectable PR evidence.
 - Local cache, pagination, delayed-event reconciliation, rate-limit handling,
   offline/stale indicators, shared widget snapshot, and token storage in Keychain.
+- Remove All Data before uninstalling, with a prompt to revoke the deleted tokens on GitHub.
 - Optional launch at login and opt-in quota-completion notification.
 - Direct download, signed with Developer ID and notarized, with an in-app updater
   (Sparkle 2) that reads a signed static feed at `updates.infinitex.vn`. Release

@@ -11,6 +11,10 @@ struct SettingsView: View {
     @State private var login = ""
     @State private var addsToken = false
     @State private var loginItem = LoginItem()
+    @State private var confirmsRemoval = false
+    @State private var removes = false
+    /// Nil while Remove All Data is still running.
+    @State private var removal: AppModel.Removal?
 
     var body: some View {
         @Bindable var model = model
@@ -23,6 +27,15 @@ struct SettingsView: View {
             login = model.settings.login
         }
         .sheet(isPresented: $addsToken) { AddTokenSheet().environment(model) }
+        .sheet(isPresented: $removes) {
+            RemovalSheet(removal: removal).interactiveDismissDisabled()
+        }
+        .alert("Remove all Slopometer data?", isPresented: $confirmsRemoval) {
+            Button("Remove All Data", role: .destructive, action: removeAllData)
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text(removalWarning)
+        }
     }
 
     private func form(bindable: Bindable<AppModel>) -> some View {
@@ -217,6 +230,23 @@ struct SettingsView: View {
                 Button("Check for Updates…") { updater.checkForUpdates() }
             }
 
+            Section {
+                HStack(alignment: .firstTextBaseline) {
+                    Text(
+                        "Deletes your tokens from Keychain and everything else Slopometer saved on this Mac, then shows where to revoke the tokens on GitHub. Do this before moving the app to the Trash."
+                    )
+                    .font(.caption).foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+                    Spacer()
+                    Button("Remove All Data…", role: .destructive) {
+                        releaseWindowFocus()
+                        confirmsRemoval = true
+                    }
+                }
+            } header: {
+                Text("Uninstall")
+            }
+
             Section("About") {
                 LabeledContent("Version", value: BuildInfo.version)
                 LabeledContent("Build", value: BuildInfo.build)
@@ -225,6 +255,22 @@ struct SettingsView: View {
             }
         }
         .formStyle(.grouped)
+    }
+
+    private var removalWarning: String {
+        let count = model.tokens.count
+        let tokens =
+            count == 0
+            ? "No tokens are saved."
+            : "\(count == 1 ? "1 token" : "\(count) tokens") will be deleted from Keychain."
+        return
+            "\(tokens) Settings, themes, saved configurations, cached activity, the widget's data, and the login item are removed too. This can't be undone. Slopometer then needs to quit."
+    }
+
+    private func removeAllData() {
+        removal = nil
+        removes = true
+        Task { removal = await model.removeAllData() }
     }
 
     /// Opt-in; once per goal and day, never while some PRs may be missing.
@@ -481,6 +527,95 @@ private struct AddTokenSheet: View {
         case .keychainFailed: message = "Couldn't save the token to Keychain."
         }
         token = ""
+    }
+}
+
+/// Shown after Remove All Data. Deleting a token here leaves it valid on GitHub, so this
+/// lists what was deleted and links to where each kind is revoked. Quitting is the only
+/// way out: the app keeps nothing and syncs nothing until it is opened again.
+private struct RemovalSheet: View {
+    let removal: AppModel.Removal?
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            if let removal {
+                finished(removal)
+            } else {
+                HStack(spacing: 10) {
+                    ProgressView().controlSize(.small)
+                    Text("Removing data. A sync in progress finishes first…")
+                }
+            }
+        }
+        .padding(20)
+        .frame(width: 460)
+    }
+
+    @ViewBuilder
+    private func finished(_ removal: AppModel.Removal) -> some View {
+        let complete = removal.keychainCleared && removal.problems.isEmpty
+        Text(complete ? "Slopometer's data is removed" : "Some data couldn't be removed")
+            .font(.title3.weight(.semibold))
+        if !removal.keychainCleared {
+            warning(
+                "Keychain refused to delete the tokens. Open Keychain Access, search for \(TokenStore.service), and delete those items."
+            )
+        }
+        ForEach(removal.problems, id: \.self) { warning($0) }
+        if removal.tokens.isEmpty {
+            Text("No tokens were saved, so there is nothing to revoke on GitHub.")
+                .foregroundStyle(.secondary)
+        } else {
+            revokeGuide(removal.tokens)
+        }
+        Text(
+            "To finish uninstalling, quit, then move Slopometer from Applications to the Trash. Remove the widget from the desktop if you added one."
+        )
+        .foregroundStyle(.secondary)
+        .fixedSize(horizontal: false, vertical: true)
+        HStack {
+            Spacer()
+            Button("Quit Slopometer") { NSApp.terminate(nil) }
+                .keyboardShortcut(.defaultAction)
+        }
+    }
+
+    @ViewBuilder
+    private func revokeGuide(_ tokens: [TokenEntry]) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text("Now revoke your tokens on GitHub").fontWeight(.semibold)
+            Text(
+                "They were deleted from this Mac, but they keep working on GitHub until they expire or you revoke them. Anyone with a copy could still use them."
+            )
+            .foregroundStyle(.secondary)
+            .fixedSize(horizontal: false, vertical: true)
+        }
+        VStack(alignment: .leading, spacing: 6) {
+            ForEach(tokens) { entry in
+                HStack(spacing: 8) {
+                    Text(entry.label)
+                    TokenKindChip(kind: entry.kind)
+                    if let owner = entry.owner {
+                        Text("@\(owner)").foregroundStyle(.secondary)
+                    }
+                }
+            }
+        }
+        .textSelection(.enabled)
+        HStack(spacing: 16) {
+            if tokens.contains(where: { $0.kind == .fineGrained }) {
+                Link("Fine-grained tokens on GitHub", destination: TokenGuide.fineGrainedListURL)
+            }
+            if tokens.contains(where: { $0.kind == .classic }) {
+                Link("Classic tokens on GitHub", destination: TokenGuide.classicListURL)
+            }
+        }
+    }
+
+    private func warning(_ text: String) -> some View {
+        Label(text, systemImage: "exclamationmark.triangle.fill")
+            .foregroundStyle(.orange)
+            .fixedSize(horizontal: false, vertical: true)
     }
 }
 

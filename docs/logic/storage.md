@@ -31,6 +31,35 @@ Empty series IDs are rejected by the API.
 The derived `daily_measurements` table is not used by the MVP; series are derived
 from source records on demand.
 
+`eraseAll()` deletes every row in every table, sync state included, and keeps the
+schema; Remove All Data uses it (see below).
+
+## Remove All Data (1.0.3)
+
+Owner: `AppModel.removeAllData()`. macOS runs nothing when the app is moved to the
+Trash, so Settings › Uninstall offers this first. In order, it:
+
+1. Stops polling and marks the model removed, so no new sync starts until relaunch.
+2. Deletes every Keychain item under `vn.infinitex.slopometer.github-token`, querying by
+   service only, so items whose entry was lost go too. The delete repeats until none
+   remain. If Keychain refuses, it reports that and gives the Keychain Access fallback.
+   The token list entries go with them.
+3. Waits for a sync already running to finish, so it cannot write records back.
+4. Erases the cache (`eraseAll()`), unregisters the login item, clears pending and
+   shown notifications, deletes the App Group `snapshot.json`, and reloads widgets,
+   so the widget shows its empty state.
+5. Removes the app's preferences domain last, so nothing above writes one back.
+
+The sheet then lists the deleted tokens by label and kind (and owner if known) and links
+to GitHub's fine-grained or classic token page. Deleting a token locally leaves it
+valid on GitHub, and the app does not revoke it. GitHub's public credential-revocation
+endpoint exists, but it is built for reporting leaked credentials, so it is not used.
+The only way out of the sheet is Quit.
+
+Left behind: the empty `cache.sqlite` file, Sparkle's own caches, and the empty sandbox
+and App Group container folders. macOS does not let a sandboxed app delete these. The
+[README](../../README.md#uninstall) gives the manual steps.
+
 Future schema changes add a named migration and preserve prior user data. Do not
 enable erase-on-schema-change or use this derived cache as PR quota evidence.
 Credentials never belong in this database.

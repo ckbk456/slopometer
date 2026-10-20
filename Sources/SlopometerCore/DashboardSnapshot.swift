@@ -389,6 +389,12 @@ public enum SharedSnapshot {
         return true
     }
 
+    /// Deletes the shared file, so the widget shows its empty state. A missing file is fine.
+    public static func remove() throws {
+        guard let url = url(), FileManager.default.fileExists(atPath: url.path) else { return }
+        try FileManager.default.removeItem(at: url)
+    }
+
     public static func read() -> DashboardSnapshot? {
         guard let url = url(), let data = try? Data(contentsOf: url) else { return nil }
         return try? decode(data)

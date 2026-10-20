@@ -15,7 +15,7 @@ struct TokenEntry: Codable, Equatable, Identifiable {
 /// GitHub tokens kept in Keychain, one item per token. The list of entries is
 /// nonsecret and kept in preferences.
 enum TokenStore {
-    private static let service = "vn.infinitex.slopometer.github-token"
+    static let service = "vn.infinitex.slopometer.github-token"
     private static let entriesKey = "tokenEntries"
 
     static func entries() -> [TokenEntry] {
@@ -60,6 +60,25 @@ enum TokenStore {
         guard status == errSecSuccess || status == errSecItemNotFound else { return false }
         persist(entries().filter { $0.id != id })
         return true
+    }
+
+    /// Deletes every Keychain item under the service, including any whose entry was lost,
+    /// then the entries. False when Keychain refused, leaving items behind.
+    static func removeAll() -> Bool {
+        let all: [String: Any] = [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrService as String: service,
+        ]
+        // The file-based Keychain can delete one match per call, so repeat until none remain.
+        for _ in 0..<100 {
+            let status = SecItemDelete(all as CFDictionary)
+            if status == errSecItemNotFound {
+                UserDefaults.standard.removeObject(forKey: entriesKey)
+                return true
+            }
+            guard status == errSecSuccess else { return false }
+        }
+        return false
     }
 
     private static func read(_ id: String) -> String? {

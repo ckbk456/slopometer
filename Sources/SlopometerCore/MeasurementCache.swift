@@ -177,6 +177,17 @@ public final class MeasurementCache: Sendable {
         }
     }
 
+    /// Deletes every record and the sync state, for Remove All Data. The tables and their
+    /// migrations stay, so the cache can be used again.
+    public func eraseAll() throws {
+        try database.write { db in
+            try CachedDay.deleteAll(db)
+            try PullRequestRecord.deleteAll(db)
+            try ContributionRow.deleteAll(db)
+            try StateRow.deleteAll(db)
+        }
+    }
+
     /// Replaces the whole calendar so a series never mixes sources or keeps stale days.
     public func replaceCalendar(_ counts: [CalendarDay: Int], source: CalendarSource, at date: Date)
         throws

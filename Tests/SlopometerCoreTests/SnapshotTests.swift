@@ -4,6 +4,27 @@ import Testing
 
 @Suite("Source record cache")
 struct SourceCacheTests {
+    @Test func erasingAllRemovesEveryRecordAndTheSyncState() throws {
+        let cache = try MeasurementCache()
+        try cache.reset(for: "me")
+        try cache.save(CachedDay(seriesID: "demo", day: "2026-10-01", count: 2))
+        try cache.replaceCalendar(
+            [CalendarDay(year: 2026, month: 10, day: 1)!: 4], source: .profilePage,
+            at: date("2026-10-15T00:00:00Z"))
+        try cache.replacePullRequests(
+            [pr("a", created: "2026-10-01T00:00:00Z")], coveringFrom: date("2026-01-01T00:00:00Z"),
+            incomplete: false, checkpoints: ["token": date("2026-10-15T00:00:00Z")],
+            at: date("2026-10-15T00:00:00Z"))
+        try cache.eraseAll()
+        #expect(try cache.days(in: "demo").isEmpty)
+        #expect(try cache.calendar().isEmpty)
+        #expect(try cache.pullRequests().isEmpty)
+        #expect(try cache.syncState() == SyncState())
+        // Still usable afterwards.
+        try cache.reset(for: "someone")
+        #expect(try cache.holds("someone"))
+    }
+
     @Test func replacingPRsRemovesDeletedOnesAndDeduplicates() throws {
         let cache = try MeasurementCache()
         let start = date("2026-01-01T00:00:00Z")
