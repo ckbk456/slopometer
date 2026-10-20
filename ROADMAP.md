@@ -29,11 +29,13 @@ running app; see 1.0.4.
 
 Settings field fixes (1.0.4): the user confirmed on 1.0.2 that letters still appeared in
 Daily target and closing a color popover still scrolled the form to it. SwiftUI's
-`TextField` does not redraw text its binding rewrites mid-edit, and its focus tracking put
-focus back on the field. Daily target is now an AppKit field with a digits-only formatter,
-outside SwiftUI focus tracking; `releaseWindowFocus()` also ends editing when a field will
-not resign. Both causes are reasoned from AppKit and SwiftUI behavior; the user's local
-check of a signed Debug build is pending before any release.
+`TextField` does not redraw text its binding rewrites mid-edit, and when a popover closed
+focus was restored to the field even after `releaseWindowFocus()` cleared it. Daily target
+is now an AppKit field with a digits-only formatter that accepts focus only from a click
+in it, Tab, or an assistive technology; `releaseWindowFocus()` also ends editing when a
+field will not resign. A plain AppKit field alone did not stop the jump. The user
+confirmed both fixes on a signed Debug build on 2026-10-21. Which component restored the
+focus was not traced, so other text fields could still do it.
 
 Menu-bar metric icons (0.3.1): implemented with calendar, pull-request, and merge
 Octicons that follow the displayed count, plus full tooltip and accessibility

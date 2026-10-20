@@ -39,9 +39,9 @@ The Daily target field accepts digits only (`Goal.targetDigits`, at most three):
 else typed or pasted is dropped as it arrives. Digits apply immediately, clamped into
 1–999 (`Goal.target(typed:)`); leaving the field, or pressing Return, shows the current
 target. It is an AppKit field whose formatter rejects non-digits as they arrive: a
-SwiftUI `TextField` filtered through its binding kept showing typed letters (1.0.2), and
-its focus tracking returned focus to the field, scrolling the form back to it, when a
-color popover closed.
+SwiftUI `TextField` filtered through its binding kept showing typed letters (1.0.2). The
+field takes focus only from a click inside it, Tab, or an assistive technology: when a
+popover closed, focus was otherwise restored to it and the form scrolled back to it.
 
 The snapshot builder feeds `MovingAverage` completed days only, so today has no
 average. Sync and snapshot rules are in the [sync guide](sync.md).

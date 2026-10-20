@@ -706,15 +706,15 @@ private struct RepositoryPicker: View {
 ///
 /// SwiftUI's `TextField` does not redraw text its binding rewrites while the field is being
 /// edited, so filtering letters out of a text binding left them on screen. A formatter on
-/// the AppKit field rejects them as they are typed or pasted instead. It also keeps this
-/// field out of SwiftUI's focus tracking, which put focus back on it, and scrolled the form
-/// to it, when a color popover closed. Digits apply as they are typed; leaving the field or
-/// pressing Return shows the current target again, so an empty field restores it.
+/// the AppKit field rejects them as they are typed or pasted instead. `TargetTextField`
+/// keeps closing popovers from scrolling the form back to it. Digits apply as they are
+/// typed; leaving the field or pressing Return shows the current target again, so an empty
+/// field restores it.
 private struct TargetField: NSViewRepresentable {
     @Binding var value: Int
 
     func makeNSView(context: Context) -> NSTextField {
-        let field = NSTextField(string: String(value))
+        let field = TargetTextField(string: String(value))
         field.formatter = DigitsFormatter()
         field.delegate = context.coordinator
         field.alignment = .right
@@ -757,6 +757,32 @@ private struct TargetField: NSViewRepresentable {
             field.stringValue = String(value.wrappedValue)
         }
     }
+}
+
+/// Takes focus only when someone clicks it or tabs to it.
+///
+/// When a popover closes, the Settings window becomes key again and focus is restored to
+/// the field that last had it, which scrolls the form back to the field. Refusing focus
+/// that no click or Tab asked for keeps the form where it was.
+private final class TargetTextField: NSTextField {
+    override func becomeFirstResponder() -> Bool {
+        isRequestedFocus(NSApp.currentEvent) && super.becomeFirstResponder()
+    }
+
+    private func isRequestedFocus(_ event: NSEvent?) -> Bool {
+        // No event: VoiceOver or another assistive technology moved focus.
+        guard let event else { return true }
+        switch event.type {
+        case .keyDown:
+            return event.keyCode == 48  // Tab or Shift-Tab
+        case .leftMouseDown, .rightMouseDown, .otherMouseDown:
+            return event.window === window
+                && bounds.contains(convert(event.locationInWindow, from: nil))
+        default:
+            return false
+        }
+    }
+
 }
 
 /// Lets an edit through only when the result is digits, at most three of them.

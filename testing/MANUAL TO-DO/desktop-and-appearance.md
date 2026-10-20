@@ -21,7 +21,8 @@
       target comes back. The stepper still updates the field, including while typing.
 - [ ] (1.0.4; failed on 1.0.2) Click into Daily target, scroll to Appearance, open the
       Accent swatch and a gradient color, then click the Settings window to close each.
-      The form stays at Appearance. Repeat after typing a name into a token or theme field.
+      The form stays at Appearance (user-confirmed on a 1.0.4 Debug build). Repeat after
+      typing into another text field, and check Tab and VoiceOver still reach Daily target.
 - [ ] (1.0.4) Daily target matches the neighboring controls in light and dark mode, and is
       grayed out with Counts while the quota is off.
 
