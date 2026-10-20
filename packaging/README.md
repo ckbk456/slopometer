@@ -36,7 +36,15 @@ make dmg APP=/path/to/Slopometer.app DMG=/new/path/Slopometer.dmg
 This uses locked dmgbuild 1.6.7 to copy the app unchanged and write the background,
 Applications symlink and Finder layout without automating Finder. The output
 path must not already exist. For a release, pass the Developer ID export after
-notarizing/stapling the app, then sign/notarize/staple the resulting DMG. Packaging
-alone does not sign, notarize, publish, or launch anything. See the
+notarizing/stapling the app, then sign/notarize/staple the resulting DMG.
+
+Packaging verifies identity-signed apps with `codesign --deep --strict` before
+copying and again from a read-only mount of the completed image, detaching its
+verification mount even if the signature check fails. It deliberately does not
+force-hide the app's extension: that would
+add `com.apple.FinderInfo` to the signed bundle and break strict verification.
+Unsigned/linker-ad-hoc Debug apps are permitted only for local layout review.
+
+Packaging alone does not sign, notarize, publish, or launch anything. See the
 [release procedure](../docs/logic/updates.md#releasing) and the
 [pending Finder checks](../testing/MANUAL%20TO-DO/desktop-and-appearance.md).
