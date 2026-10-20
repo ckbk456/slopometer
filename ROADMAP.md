@@ -194,3 +194,9 @@ a gauge app/volume icon. Editable vectors, bundled OFL fonts and locked artwork/
 DMG commands make packaging repeatable. Local validation and release evidence are
 reported with delivery; Finder visual/drag-install and supported-OS checks remain
 pending in the desktop guide.
+
+Installer signature preservation (1.0.2): release verification caught that
+forcing a hidden app extension adds disallowed Finder metadata after signing.
+Packaging no longer writes it and now strictly verifies identity-signed apps
+both before copying and from the completed image. This gate is separate from
+Apple's app/DMG notarization and the pending Finder UI checks.
