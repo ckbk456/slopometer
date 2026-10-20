@@ -187,11 +187,13 @@ checks below were not separately reported and remain pending.
 - [ ] The app starts empty (new identity): enter the username and tokens again; sync,
       the menu bar, and the widget work as before.
 - [ ] Settings › Updates shows "Check for updates automatically" (off in Debug) and
-      "Check for Updates…". Before a feed is published, checking reports that the update
-      server cannot be reached, with no crash or hang.
-- [ ] Settings › About and the menu bar panel read version 1.0.0.
-- [ ] After a feed is published: an older release finds the newer one, the alert shows
-      release notes, Install relaunches into the new version, and data and widgets are kept.
+      "Check for Updates…". In the published 1.0.1, checking reports that it is up to date,
+      with no crash or hang.
+- [ ] Settings › About and the menu bar panel read version 1.0.1.
+- [ ] Downloading from `slopometer.infinitex.vn` gives a DMG that opens without a
+      Gatekeeper warning; the app copied to Applications launches without one.
+- [ ] With the next release: 1.0.1 finds it, the alert shows release notes, Install
+      relaunches into the new version, and data and widgets are kept.
 - [ ] A scheduled check (release build) shows a Dock icon and the menu bar panel row
       "Slopometer x is available"; clicking the row brings the alert forward; both clear
       after the alert is dismissed.
