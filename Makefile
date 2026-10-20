@@ -12,10 +12,10 @@ LOCKED_PACKAGES := -disableAutomaticPackageResolution -onlyUsePackageVersionsFro
 SWIFT_FORMAT := swift run --package-path Tools --scratch-path .build/tools-build --disable-automatic-resolution -c release swift-format
 FORMATTED := Package.swift Tools/Package.swift App Shared Widget Sources Tests
 
-.PHONY: help doctor setup generate generate-check resolve lint format docs-check test build build-signed validate open run
+.PHONY: help doctor setup generate generate-check resolve lint format docs-check test build build-signed validate open run packaging-art dmg
 
 help:
-	@printf '%s\n' 'setup       Check tools, regenerate the Xcode project, fetch locked dependencies' 'validate    Run lint, structure/docs checks, core tests, and native app build' 'test        Run the core package tests once' 'build       Build the unsigned Debug app (CI and validation)' 'run         Build a signed Debug app and launch it (manual)' 'open        Open the Xcode project' 'generate-check Fail if the Xcode project differs from project.yml' 'format      Format project-owned Swift files' 'generate    Regenerate the checked-in Xcode project with XcodeGen 2.46.0'
+	@printf '%s\n' 'setup       Check tools, regenerate the Xcode project, fetch locked dependencies' 'validate    Run lint, structure/docs checks, core tests, and native app build' 'test        Run the core package tests once' 'build       Build the unsigned Debug app (CI and validation)' 'run         Build a signed Debug app and launch it (manual)' 'open        Open the Xcode project' 'generate-check Fail if the Xcode project differs from project.yml' 'format      Format project-owned Swift files' 'generate    Regenerate the checked-in Xcode project with XcodeGen 2.46.0' 'packaging-art Render the checked-in DMG backgrounds and app icons' 'dmg         Package an app: APP=/path/Slopometer.app DMG=/new/path/Slopometer.dmg'
 
 doctor:
 	@bash scripts/doctor.sh
@@ -56,6 +56,14 @@ validate:
 	@$(MAKE) docs-check
 	@$(MAKE) test
 	@$(MAKE) build
+
+# Packaging is separate from compilation; APP may point to a stapled Release export.
+packaging-art:
+	uv run --locked scripts/render_packaging_art.py
+
+dmg:
+	@test -n "$(APP)" -a -n "$(DMG)" || (printf '%s\n' 'Usage: make dmg APP=/path/to/Slopometer.app DMG=/new/path/Slopometer.dmg'; exit 1)
+	uv run --locked scripts/build_dmg.py "$(APP)" "$(DMG)"
 
 open:
 	open $(PROJECT)

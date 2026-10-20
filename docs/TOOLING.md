@@ -14,6 +14,8 @@ not a claim that another OS or CI run passed.
 | Sparkle | Exact 2.10.0 (binary framework) in `project.yml`, pinned in `Package.resolved` | App target only; resolved 2026-10-18 |
 | Python | 3.9+ standard library for structural checks | 3.14 installation available |
 | Make | GNU Make-compatible commands | Apple-provided GNU Make 3.81 |
+| Artwork regeneration | Python 3.11+, uv, fonttools 4.67.0 and resvg-py 0.5.0; adjacent script lockfile | Separate from app build; bundled Fontsource 5.3.0 fonts |
+| Disk image assembly | Python 3.10+, uv and dmgbuild 1.6.7; adjacent script lockfile | Uses macOS hdiutil/iconutil/tiffutil without Finder automation |
 
 No dependencies or system tools are installed by `make doctor` or `make setup`.
 Initial package resolution downloads GRDB source into ignored build caches.

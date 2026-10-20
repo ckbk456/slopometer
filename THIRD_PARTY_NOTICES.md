@@ -25,3 +25,10 @@ In-app updates use [Sparkle](https://github.com/sparkle-project/Sparkle) 2.10.0,
 embedded as `Sparkle.framework`. Copyright (c) 2006-2013 Andy Matuschak and other
 contributors; licensed under the [MIT License](App/Resources/Sparkle-LICENSE.txt),
 which also lists the licenses of the components Sparkle bundles.
+
+## Packaging artwork fonts
+
+The DMG artwork uses Fredoka Variable and Bricolage Grotesque Variable, both from
+Fontsource 5.3.0, matching the download website. Their source fonts and SIL Open
+Font License texts are in `packaging/fonts/`. They are rendered into the artwork;
+the app does not load or install these fonts.

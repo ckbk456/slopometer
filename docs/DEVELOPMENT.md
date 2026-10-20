@@ -36,11 +36,13 @@ controlled. Agents must still inspect for separately running commands.
 | Native app: `make build` | generated Xcode project, `Makefile` | 10s–5m cold | Yes | Unsigned Debug build used by validation and CI; writes `.build/`; no launch |
 | Signed app: `make build-signed` | `project.yml` team, `Makefile` | 10s–5m cold | Yes | Automatic signing with the project team; needs a signed-in Xcode account; required for the sandbox and widget |
 | Complete local gate: `make validate` | `Makefile` | 15s–8m cold | Yes | Sequential lint, docs, tests, build; internet if caches empty |
+| Render packaging artwork: `make packaging-art` | `scripts/render_packaging_art.py`, adjacent uv lockfile, `packaging/artwork/`, `packaging/fonts/` | <30s warm | Low | macOS, uv, Python 3.11+; writes checked-in backgrounds and icons; network on first locked dependency fetch |
+| Package disk image: `make dmg APP=/path/to/Slopometer.app DMG=/new/path/Slopometer.dmg` | `scripts/build_dmg.py`, adjacent uv lockfile, `packaging/README.md` | 10s–2m | Yes | macOS, uv, Python 3.10+; copies app into a new image, briefly mounts its own temporary image, detaches on completion; no Finder UI, signing or publication |
 | Open Xcode: `make open` | `Makefile` | <10s | No | Human-owned GUI action |
 | Preview app: `make run` | `Makefile`, `scripts/register_build.sh` | Build + launch | Yes | Signed build, so it matches Xcode runs; unregisters (does not delete) Slopometer builds from other checkouts that are not running, so the widget and `slopometer://` use this one, then sends TERM to widget extension processes launched from any other build so chronod relaunches this one; a still-running app from another checkout is reported and skipped; human-owned app process; quit via menu bar |
 
 There is no separate JS lint, typecheck, codegen service, migration CLI, dev
-server, deployment command, release job, or UI test suite. Swift compilation
+server, automatic deployment command, release job, or UI test suite. Swift compilation
 checks types. Database migration runs in the cache initializer; tests use
 isolated databases. Those absent gates are not applicable, not passed.
 
@@ -61,6 +63,10 @@ package uses `.build/`; Xcode dependency clones use `.build/SourcePackages/`.
 These are ignored. No global shell config or background service is needed.
 
 ## Versioning
+
+Packaging artwork and its locked tools are described in
+[packaging](../packaging/README.md). Only regeneration and DMG assembly need those
+tools; `make validate` builds the app icon using Xcode's asset compiler.
 
 The app and widget share one [semantic version](https://semver.org) in `project.yml`
 (`MARKETING_VERSION`). From 1.0.0, bump the patch version for fixes, the minor version

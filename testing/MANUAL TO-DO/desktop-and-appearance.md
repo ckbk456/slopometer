@@ -249,6 +249,20 @@ checks below were not separately reported and remain pending.
 - [ ] Offsets show half hours (Kolkata GMT+5:30) and current daylight saving (New York).
 - [ ] VoiceOver reads each row as city, region, offset and marks the selected one.
 
+## Branded DMG and app icon (1.0.2): pending
+
+- [ ] Open a downloaded, notarized DMG on named supported macOS versions. Finder
+      opens in icon view with a 720 × 470-point content area; the liquid title,
+      arrow and footer fit without scrolling or a sidebar/toolbar obscuring them.
+- [ ] On standard and Retina displays, the background is sharp and the gauge app
+      icon and Applications folder align with the arrow; labels remain readable
+      in light/dark appearance and when selected. The volume carries the gauge icon.
+- [ ] Drag the real Slopometer app onto Applications, eject the image, and open
+      the installed copy. The gauge icon appears in Finder/About, the app runs in
+      the menu bar, and the signed app/widget identities and saved data persist.
+- [ ] Keyboard and VoiceOver can select the real app and Applications link and
+      complete installation without depending on text baked into the background.
+
 ## Widget and background app: pending
 
 - [ ] App runs from the menu bar without a Dock icon; the window opens on demand.
