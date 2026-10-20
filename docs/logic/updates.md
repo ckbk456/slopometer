@@ -70,9 +70,31 @@ Keychain (Sparkle's `generate_keys`, account `ed25519`). It must be backed up
 any future update. The public key is in `App/Info.plist`. Sparkle's tools are in
 `.build/SourcePackages/artifacts/sparkle/Sparkle/bin/` after `make resolve`.
 
-## Not yet implemented
+## Releasing
 
-There is no release job: archiving with Developer ID, notarization, appcast
-generation, and upload to the R2 bucket behind `updates.infinitex.vn` are planned
-next (see [ROADMAP](../../ROADMAP.md)). Until a feed is published, "Check for
-Updates…" reports that it cannot reach the update server.
+Releases are cut by hand on the release machine; there is no release job yet (see
+[ROADMAP](../../ROADMAP.md)). From a clean checkout of merged `main`:
+
+1. Archive Release with `CURRENT_PROJECT_VERSION` set to `git rev-list --count HEAD` and
+   `SLOPOMETER_COMMIT` to the short commit, then export with Developer ID (team
+   `5U4584QFCQ`). Check that the app, the widget, and Sparkle's helpers carry the
+   Developer ID signature and the hardened runtime, and that no `get-task-allow`
+   entitlement remains.
+2. Notarize the app with `notarytool` (Keychain profile `slopometer-notary`, an App Store
+   Connect API key) and staple it.
+3. Build `Slopometer.dmg` from the stapled app and an Applications link, sign it with
+   Developer ID, then notarize and staple it.
+4. Zip the stapled app with `ditto -c -k --sequesterRsrc --keepParent` as
+   `Slopometer-<version>.zip`, put the release notes beside it as
+   `Slopometer-<version>.html` and the published `appcast.xml` with them, and run
+   `generate_appcast --download-url-prefix https://updates.infinitex.vn/slopometer/
+   --embed-release-notes` on that folder.
+5. Upload to the R2 bucket `slopometer-releases` under `slopometer/`, in this order so the
+   feed never names a missing archive: the zip (`Cache-Control: public, max-age=31536000,
+   immutable`), then the DMG and `appcast.xml` (both `public, max-age=300`). Download each
+   back and compare checksums.
+6. Mirror the DMG on a GitHub release tagged `v<version>` at the release commit.
+
+| Version | Build | Commit | Published |
+| --- | --- | --- | --- |
+| 1.0.1 | 23 | `13a87fd` | 2026-10-20, the first public release |

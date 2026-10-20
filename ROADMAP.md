@@ -9,7 +9,7 @@ milestones, not date estimates or authorization to publish/merge/release.
 | 1 · Harden the bench | Single CI run per change, project drift check, consistent formatter and signing, widget extension with App Group and shared snapshot format | CI gate; widget appears from a locally signed build (manual) | Toolchain merged (#2); widget built and signed locally; manual widget check pending |
 | 2 · Measure real slop | Source records, timezone bucketing, cache v2, public-profile calendar, optional token with GraphQL calendar and PR search, recorded fixtures | Reconciliation, deduplication, removed-PR, timezone, search-window, rate-limit, and token-mismatch tests | MVP: tests pass locally; live sync exercised on one account; manual provider checks pending |
 | 3 · Set the daily quota | PR goals, evidence inspector, three charts, 7/30-day averages, widget views | Same-series chart/widget agreement; boundary, missing-data and quota tests | MVP: implemented without login launch or notifications; token gate, typed quota target, and fitted grid added; size-specific widget windows and per-size widget settings added; repository filter is a checklist of synced repositories; several tokens (one per organization) and opt-in classic tokens (InsecuSlopometer™); manual checks pending |
-| 4 · Calibrate and package | Theme editor, saved configurations, accessibility, login launch, optional notification | Consolidated manual gates and explicit license/signing/distribution decisions | Theme editor implemented (0.12.0); release identity, MIT license, in-app updater, open at login, quota notification, saved configurations, density, and a source-level accessibility pass implemented (1.0.0); release job planned; manual checks pending |
+| 4 · Calibrate and package | Theme editor, saved configurations, accessibility, login launch, optional notification | Consolidated manual gates and explicit license/signing/distribution decisions | Theme editor implemented (0.12.0); release identity, MIT license, in-app updater, open at login, quota notification, saved configurations, density, and a source-level accessibility pass implemented (1.0.0); 1.0.1 published by hand (2026-10-20); release job planned; manual checks pending |
 
 First technical priority: settle data contracts and widget plumbing before
 visual polish. First data priority: agree on what counts before celebrating a
@@ -175,3 +175,10 @@ shared cache and removes earlier builds' cache files; a refused Keychain delete 
 token listed with a notice. 1.0.0 was never published, so 1.0.1 is the first public build.
 Core tests cover the session configuration and the request cache policy; the checks in the
 [measurements guide](testing/MANUAL%20TO-DO/measurements-and-sync.md) are pending.
+
+First public release (1.0.1, build 23, `13a87fd`): published by hand on 2026-10-20. The
+notarized DMG, update archive, and Sparkle feed are on `updates.infinitex.vn/slopometer/`,
+the download site is live on `slopometer.infinitex.vn`, and GitHub release `v1.0.1`
+mirrors the DMG. Steps are in the [updates guide](docs/logic/updates.md); a release job
+is still planned. Install and update checks in the
+[desktop guide](testing/MANUAL%20TO-DO/desktop-and-appearance.md) are pending.
