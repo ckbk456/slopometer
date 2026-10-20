@@ -255,6 +255,9 @@ checks below were not separately reported and remain pending.
 
 ## Branded DMG and app icon (1.0.2): pending
 
+- [ ] Before distribution, the app copied from the mounted final DMG passes
+      `codesign --verify --deep --strict`; the app and DMG both pass stapler and
+      Gatekeeper checks. Notarization alone does not establish payload integrity.
 - [ ] Open a downloaded, notarized DMG on named supported macOS versions. Finder
       opens in icon view with a 720 × 470-point content area; the liquid title,
       arrow and footer fit without scrolling or a sidebar/toolbar obscuring them.

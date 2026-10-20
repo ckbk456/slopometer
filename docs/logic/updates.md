@@ -89,6 +89,11 @@ DMG=/new/path/Slopometer.dmg`. The command refuses to overwrite an existing imag
 and leaves the supplied bundle unchanged. Finder visual, accessibility and
 drag-install checks remain in the consolidated manual guide.
 
+For identity-signed apps, packaging checks the source signature and then mounts
+the completed image read-only to verify the copied app with `codesign --deep
+--strict`. This catches metadata changes that a notarized DMG alone does not
+rule out. Do not add Finder extension-hiding metadata to the signed app bundle.
+
 Releases are cut by hand on the release machine; there is no release job yet (see
 [ROADMAP](../../ROADMAP.md)). From a clean checkout of merged `main`:
 
