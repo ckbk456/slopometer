@@ -87,6 +87,13 @@ app from Applications. The background includes that instruction and points out
 the menu bar. Both app and mounted volume carry the gauge icon. The artwork is
 static; no installer code or Finder automation is involved.
 
+Since 1.0.4 the layout keeps the install instruction ("Drag Slopometer into
+Applications, then open it from there.") and both icons in the top ~330 points. A
+DMG fixes the window's outer size, so when someone's Finder always shows the tab,
+path and status bars, those bars crop the bottom of the art. The bottom band is
+now decoration only. The background and volume-icon files also sit below the
+window, so showing hidden files no longer covers the art.
+
 The editable vectors, bundled font licenses, generated standard/Retina assets,
 and layout contract live in [packaging](../../packaging/README.md). Regenerate
 artwork with `make packaging-art`; normal builds use the checked-in outputs.
