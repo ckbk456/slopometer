@@ -16,10 +16,15 @@
       grayed out without a token; Counts and Daily target stay visible but grayed out while
       the quota is off, and turning it back on restores their earlier values.
 - [ ] Type a daily quota target (for example 100); values outside 1–999 snap into range.
-- [ ] (1.0.2) Type or paste letters into Daily target; they never appear. Clear the field
-      and click elsewhere; the previous target comes back.
-- [ ] (1.0.2) Click into Daily target, scroll to Appearance, open the Accent swatch, then
-      click the Settings window to close it. The form stays at Appearance.
+- [ ] (1.0.4; failed on 1.0.2) Type or paste letters into Daily target; they never appear,
+      and pasting `4x2` leaves `42`. Clear the field and click elsewhere; the previous
+      target comes back. The stepper still updates the field, including while typing.
+- [ ] (1.0.4; failed on 1.0.2) Click into Daily target, scroll to Appearance, open the
+      Accent swatch and a gradient color, then click the Settings window to close each.
+      The form stays at Appearance (user-confirmed on a 1.0.4 Debug build). Repeat after
+      typing into another text field, and check Tab and VoiceOver still reach Daily target.
+- [ ] (1.0.4) Daily target matches the neighboring controls in light and dark mode, and is
+      grayed out with Counts while the quota is off.
 
 ## App window polish (0.7.0): pending
 

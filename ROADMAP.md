@@ -24,7 +24,18 @@ informs; it cannot override [SPEC](SPEC.md) or [SCOPE](SCOPE.md).
 Settings fixes (1.0.2): Daily target accepts digits only, so a typed letter can no
 longer pin focus to it and make the form jump back there when a color popover closes
 (root cause reasoned from AppKit formatter behavior; manual check pending). Core tests
-cover the digit filter and clamping.
+cover the digit filter and clamping. The shipped 1.0.2 build did not fix either bug in the
+running app; see 1.0.4.
+
+Settings field fixes (1.0.4): the user confirmed on 1.0.2 that letters still appeared in
+Daily target and closing a color popover still scrolled the form to it. SwiftUI's
+`TextField` does not redraw text its binding rewrites mid-edit, and when a popover closed
+focus was restored to the field even after `releaseWindowFocus()` cleared it. Daily target
+is now an AppKit field with a digits-only formatter that accepts focus only from a click
+in it, Tab, or an assistive technology; `releaseWindowFocus()` also ends editing when a
+field will not resign. A plain AppKit field alone did not stop the jump. The user
+confirmed both fixes on a signed Debug build on 2026-10-21. Which component restored the
+focus was not traced, so other text fields could still do it.
 
 Menu-bar metric icons (0.3.1): implemented with calendar, pull-request, and merge
 Octicons that follow the displayed count, plus full tooltip and accessibility
