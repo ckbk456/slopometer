@@ -21,6 +21,11 @@ Data-source evidence behind the account-level, optional-token design is in
 Update status only with evidence. Research belongs alongside the decision it
 informs; it cannot override [SPEC](SPEC.md) or [SCOPE](SCOPE.md).
 
+Settings fixes (1.0.2): Daily target accepts digits only, so a typed letter can no
+longer pin focus to it and make the form jump back there when a color popover closes
+(root cause reasoned from AppKit formatter behavior; manual check pending). Core tests
+cover the digit filter and clamping.
+
 Menu-bar metric icons (0.3.1): implemented with calendar, pull-request, and merge
 Octicons that follow the displayed count, plus full tooltip and accessibility
 wording. `make validate` passed locally on 2026-10-17 (formatting, documentation,

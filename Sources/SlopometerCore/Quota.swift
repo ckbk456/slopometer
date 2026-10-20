@@ -13,6 +13,19 @@ public struct Goal: Codable, Equatable, Sendable {
     /// Targets a person can type or step to; typed values are clamped into it.
     public static let targetRange = 1...999
 
+    /// Keeps only the digits someone typed, no longer than the largest target.
+    public static func targetDigits(_ typed: String) -> String {
+        String(
+            typed.filter(\.isASCII).filter(\.isNumber).prefix(String(targetRange.upperBound).count))
+    }
+
+    /// The target typed digits stand for, clamped into `targetRange`; nil while empty.
+    public static func target(typed: String) -> Int? {
+        Int(targetDigits(typed)).map {
+            min(max($0, targetRange.lowerBound), targetRange.upperBound)
+        }
+    }
+
     public var isValid: Bool { metric.requiresToken && target > 0 }
 
     /// Describes a repository filter; empty means every repository the token can read.

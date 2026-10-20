@@ -16,6 +16,10 @@
       grayed out without a token; Counts and Daily target stay visible but grayed out while
       the quota is off, and turning it back on restores their earlier values.
 - [ ] Type a daily quota target (for example 100); values outside 1–999 snap into range.
+- [ ] (1.0.2) Type or paste letters into Daily target; they never appear. Clear the field
+      and click elsewhere; the previous target comes back.
+- [ ] (1.0.2) Click into Daily target, scroll to Appearance, open the Accent swatch, then
+      click the Settings window to close it. The form stays at Appearance.
 
 ## App window polish (0.7.0): pending
 
