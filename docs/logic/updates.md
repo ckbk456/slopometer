@@ -30,11 +30,17 @@ publishes, under `/slopometer/`:
 | --- | --- |
 | `appcast.xml` | Sparkle feed listing every release |
 | `Slopometer-<version>.zip` | Signed, notarized update archive for Sparkle |
-| `Slopometer.dmg` | Latest notarized disk image; the download site's button links here |
+| `Slopometer-<version>.dmg` | Notarized disk image for one release; the download site's button links to the current one |
+| `Slopometer.dmg` | Copy of the latest disk image for older links, served with `Cache-Control: no-cache` |
 
 The download site (`ckbk456/slopometer-site`, intended for `slopometer.infinitex.vn`)
-hosts neither the feed nor the DMG; its release gate waits for `Slopometer.dmg` to exist
-here. A GitHub release may mirror the DMG, but nothing depends on it.
+hosts neither the feed nor the DMG; its release gate waits for the versioned DMG to exist
+here, and each app release needs a site release that bumps the version the button names.
+
+Downloads use a versioned file because a fixed "latest" name gets cached. After 1.0.2
+replaced `Slopometer.dmg`, a browser kept handing out its cached 1.0.1 copy from the same
+URL. A new URL per release makes that impossible; the versioned file never changes after
+upload, so it can be cached forever. A GitHub release may mirror the DMG, but nothing depends on it.
 
 ## How an update arrives
 
@@ -104,7 +110,7 @@ Releases are cut by hand on the release machine; there is no release job yet (se
    entitlement remains.
 2. Notarize the app with `notarytool` (Keychain profile `slopometer-notary`, an App Store
    Connect API key) and staple it.
-3. Run `make dmg APP=/path/to/stapled/Slopometer.app DMG=/new/path/Slopometer.dmg`
+3. Run `make dmg APP=/path/to/stapled/Slopometer.app DMG=/new/path/Slopometer-<version>.dmg`
    to package the stapled app with the branded layout. Sign the image with
    Developer ID, then notarize and staple it.
 4. Zip the stapled app with `ditto -c -k --sequesterRsrc --keepParent` as
@@ -113,10 +119,15 @@ Releases are cut by hand on the release machine; there is no release job yet (se
    `generate_appcast --download-url-prefix https://updates.infinitex.vn/slopometer/
    --embed-release-notes` on that folder.
 5. Upload to the R2 bucket `slopometer-releases` under `slopometer/`, in this order so the
-   feed never names a missing archive: the zip (`Cache-Control: public, max-age=31536000,
-   immutable`), then the DMG and `appcast.xml` (both `public, max-age=300`). Download each
-   back and compare checksums.
-6. Mirror the DMG on a GitHub release tagged `v<version>` at the release commit.
+   feed never names a missing archive: the zip and `Slopometer-<version>.dmg` (both
+   `Cache-Control: public, max-age=31536000, immutable`), then the same image again as
+   `Slopometer.dmg` (`no-cache`) and `appcast.xml` (`public, max-age=300`). Download each
+   back and compare checksums. Never re-upload a versioned file with different bytes; a
+   fixed image is a new version.
+6. Mirror the DMG on a GitHub release tagged `v<version>` at the release commit, as
+   `Slopometer.dmg` so `releases/latest/download/Slopometer.dmg` keeps working.
+7. Release the download site (`ckbk456/slopometer-site`): bump `release` in
+   `tools/generate/build.mjs` and follow its `docs/deployment.md`.
 
 The first public release baseline is recorded below. Subsequent release commits,
 notes and DMG checksums are recorded in [GitHub releases](https://github.com/ckbk456/slopometer/releases).

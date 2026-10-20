@@ -201,6 +201,13 @@ Packaging no longer writes it and now strictly verifies identity-signed apps
 both before copying and from the completed image. This gate is separate from
 Apple's app/DMG notarization and the pending Finder UI checks.
 
+Versioned download (after 1.0.3): the download site now links to
+`Slopometer-<version>.dmg` instead of the fixed `Slopometer.dmg`, which a browser had
+served from cache as 1.0.1 after 1.0.2 and 1.0.3 replaced it. Versioned images are
+immutable; the fixed name stays as a `no-cache` copy for older links. Release steps are in
+the [updates guide](docs/logic/updates.md). The download check in the
+[desktop guide](testing/MANUAL%20TO-DO/desktop-and-appearance.md) is pending.
+
 Remove All Data (1.0.3): Settings › Uninstall › Remove All Data… deletes every Keychain
 token item, the cache, the widget snapshot, preferences, the login item, and notifications.
 It then lists the deleted tokens with links to revoke them on GitHub, and quits. SPEC and
