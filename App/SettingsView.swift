@@ -702,35 +702,89 @@ private struct RepositoryPicker: View {
     }
 }
 
-/// The daily target as typed text that only ever holds digits.
+/// The daily target as an AppKit field that only ever holds digits.
 ///
-/// A number-formatted `TextField` keeps letters it cannot parse and then refuses to give up
-/// focus, so `releaseWindowFocus()` could not clear it and closing a color popover scrolled
-/// the form back to it. Digits apply as they are typed; leaving the field empty restores
-/// the current target.
-private struct TargetField: View {
+/// SwiftUI's `TextField` does not redraw text its binding rewrites while the field is being
+/// edited, so filtering letters out of a text binding left them on screen. A formatter on
+/// the AppKit field rejects them as they are typed or pasted instead. It also keeps this
+/// field out of SwiftUI's focus tracking, which put focus back on it, and scrolled the form
+/// to it, when a color popover closed. Digits apply as they are typed; leaving the field or
+/// pressing Return shows the current target again, so an empty field restores it.
+private struct TargetField: NSViewRepresentable {
     @Binding var value: Int
-    @State private var text = ""
-    @FocusState private var isFocused: Bool
 
-    var body: some View {
-        TextField("Daily target", text: $text)
-            .labelsHidden()
-            .multilineTextAlignment(.trailing)
-            .focused($isFocused)
-            .onAppear { text = String(value) }
-            .onChange(of: text) { _, typed in
-                let digits = Goal.targetDigits(typed)
-                if digits != typed { text = digits }
-                if let target = Goal.target(typed: digits), target != value { value = target }
-            }
-            .onChange(of: value) { _, new in
-                if Goal.target(typed: text) != new { text = String(new) }
-            }
-            .onChange(of: isFocused) { _, focused in
-                if !focused { text = String(value) }
-            }
-            .onSubmit { text = String(value) }
+    func makeNSView(context: Context) -> NSTextField {
+        let field = NSTextField(string: String(value))
+        field.formatter = DigitsFormatter()
+        field.delegate = context.coordinator
+        field.alignment = .right
+        field.bezelStyle = .roundedBezel
+        field.lineBreakMode = .byClipping
+        field.cell?.isScrollable = true
+        field.setAccessibilityLabel("Daily target")
+        field.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+        return field
+    }
+
+    func updateNSView(_ field: NSTextField, context: Context) {
+        context.coordinator.value = $value
+        field.isEnabled = context.environment.isEnabled
+        field.controlSize = context.environment.controlSize == .small ? .small : .regular
+        field.font = .systemFont(ofSize: NSFont.systemFontSize(for: field.controlSize))
+        // While typing, only a change from elsewhere (the stepper) rewrites the text.
+        let shown = field.currentEditor()?.string ?? field.stringValue
+        if Goal.target(typed: shown) != value, field.currentEditor() == nil || !shown.isEmpty {
+            field.stringValue = String(value)
+        }
+    }
+
+    func makeCoordinator() -> Coordinator { Coordinator(value: $value) }
+
+    final class Coordinator: NSObject, NSTextFieldDelegate {
+        var value: Binding<Int>
+
+        init(value: Binding<Int>) { self.value = value }
+
+        func controlTextDidChange(_ notification: Notification) {
+            guard let field = notification.object as? NSTextField,
+                let target = Goal.target(typed: field.stringValue), target != value.wrappedValue
+            else { return }
+            value.wrappedValue = target
+        }
+
+        func controlTextDidEndEditing(_ notification: Notification) {
+            guard let field = notification.object as? NSTextField else { return }
+            field.stringValue = String(value.wrappedValue)
+        }
+    }
+}
+
+/// Lets an edit through only when the result is digits, at most three of them.
+///
+/// Pasted text keeps just its digits. Any finished string is accepted, so the field never
+/// refuses to give up focus.
+private final class DigitsFormatter: Formatter {
+    override func string(for obj: Any?) -> String? {
+        (obj as? String) ?? (obj as? NSNumber)?.stringValue
+    }
+
+    override func getObjectValue(
+        _ obj: AutoreleasingUnsafeMutablePointer<AnyObject?>?, for string: String,
+        errorDescription error: AutoreleasingUnsafeMutablePointer<NSString?>?
+    ) -> Bool {
+        obj?.pointee = Goal.targetDigits(string) as NSString
+        return true
+    }
+
+    override func isPartialStringValid(
+        _ partialString: String,
+        newEditingString newString: AutoreleasingUnsafeMutablePointer<NSString?>?,
+        errorDescription error: AutoreleasingUnsafeMutablePointer<NSString?>?
+    ) -> Bool {
+        let digits = Goal.targetDigits(partialString)
+        if digits == partialString { return true }
+        newString?.pointee = digits as NSString
+        return false
     }
 }
 
@@ -746,7 +800,11 @@ private struct TargetField: View {
 func releaseWindowFocus() {
     guard let window = NSApp.keyWindow else { return }
     if window.firstResponder is NSText || window.firstResponder is NSTextField {
-        window.makeFirstResponder(nil)
+        // A field that will not resign still loses its editor here, so nothing is left to restore.
+        if !window.makeFirstResponder(nil) {
+            window.endEditing(for: nil)
+            window.makeFirstResponder(nil)
+        }
     }
 }
 
