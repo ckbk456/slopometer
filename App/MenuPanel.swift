@@ -138,7 +138,11 @@ struct MenuPanel: View {
             Label(statusText(quota), systemImage: "checkmark.seal.fill")
                 .foregroundStyle(colors.markText)
         } else {
-            Label(statusText(quota), systemImage: "hourglass")
+            Label {
+                Text(statusText(quota))
+            } icon: {
+                OcticonImage(metric: metric)
+            }
         }
     }
 
@@ -443,5 +447,18 @@ private struct PanelButtonStyle: ViewModifier {
         } else {
             content.buttonStyle(.bordered)
         }
+    }
+}
+
+/// A metric's Octicon sized to sit beside text like an SF Symbol in a `Label`.
+struct OcticonImage: View {
+    let metric: Metric
+    @ScaledMetric(relativeTo: .body) private var side: CGFloat = 13
+
+    var body: some View {
+        Image(MenuPanel.iconName(for: metric))
+            .renderingMode(.template)
+            .resizable()
+            .frame(width: side, height: side)
     }
 }

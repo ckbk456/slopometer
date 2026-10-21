@@ -319,3 +319,19 @@ checks below were not separately reported and remain pending.
 
 Evidence: 2026-10-17, macOS 27.0.1, signed Debug build launched and quit cleanly by an
 agent (no UI interaction). Every checklist item above remains pending.
+
+## Chart annotations and quota icon (1.0.5): pending
+
+- [ ] Grid: Mon/Wed/Fri row labels and month labels line up with their rows and weeks
+      at 30, 90, and 365 days, and in a narrow window; no month label overlaps another
+      or runs past the right edge.
+- [ ] Grid key: Less to More swatches match the cells for both level and smooth color
+      mapping; "Busiest day" matches the brightest cell; today's outline and a selected
+      day's outline are distinguishable.
+- [ ] Columns legend shows "Daily" with Less to More swatches, the dashed "7-day average"
+      (or 30-day) only when the average is on, and "Today, so far" for the faded bar.
+      Line legend shows the line color and the average.
+- [ ] "N to go" on the quota card and in the menu bar panel uses the merge Octicon
+      (or the quota metric's), legible in light and dark.
+- [ ] With no saved configurations, Activity › Configurations shows the explanatory
+      line above "Save as New Configuration…".

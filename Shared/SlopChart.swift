@@ -10,6 +10,8 @@ struct SlopChart: View {
     let style: ChartStyle
     let unit: String
     var showsAverage = true
+    /// The average's legend label, such as "7-day average".
+    var averageLabel = "Average"
     var compact = false
     var selection: Binding<CalendarDay?>? = nil
     /// Caps the grid's height; nil lets it use all the height it is offered.
@@ -23,7 +25,7 @@ struct SlopChart: View {
         case .columns, .line:
             TrendChart(
                 points: points, style: style, unit: unit, showsAverage: showsAverage,
-                compact: compact, selection: selection)
+                averageLabel: averageLabel, compact: compact, selection: selection)
         }
     }
 }
@@ -68,17 +70,56 @@ private struct HeatmapGrid: View {
     var body: some View {
         let weeks = Self.weeks(points)
         let busiest = points.compactMap(\.count).max() ?? 0
-        WeekGridLayout(columns: weeks.count, gap: 2, maxHeight: maxHeight) {
-            ForEach(weeks.indices, id: \.self) { column in
-                ForEach(0..<7, id: \.self) { row in
-                    if let point = weeks[column][row] {
-                        cell(point, busiest: busiest)
-                    } else {
-                        Color.clear
+        VStack(alignment: .leading, spacing: 8) {
+            WeekGridLayout(columns: weeks.count, gap: 2, maxHeight: maxHeight) {
+                ForEach(weeks.indices, id: \.self) { column in
+                    ForEach(0..<7, id: \.self) { row in
+                        if let point = weeks[column][row] {
+                            cell(point, busiest: busiest)
+                        } else {
+                            Color.clear
+                        }
                     }
                 }
+                // Rows are Sunday-first, so the symbols line up by index. Like GitHub,
+                // only every other weekday is named.
+                ForEach(0..<7, id: \.self) { row in
+                    Text(row % 2 == 1 ? Calendar.current.shortWeekdaySymbols[row] : "")
+                }
+                ForEach(Array(Self.monthLabels(weeks).enumerated()), id: \.offset) { label in
+                    Text(label.element ?? "")
+                }
+            }
+            .font(.caption2)
+            .foregroundStyle(.secondary)
+            legend(busiest: busiest)
+        }
+    }
+
+    /// Explains the shades and outlines: the scale is relative to the busiest day shown.
+    private func legend(busiest: Int) -> some View {
+        HStack(spacing: 14) {
+            ShadeScale(includesEmpty: true)
+            if busiest > 0 {
+                Text("Busiest day: \(busiest) \(unit)")
+            }
+            Spacer(minLength: 0)
+            HStack(spacing: 4) {
+                RoundedRectangle(cornerRadius: 2)
+                    .strokeBorder(Color.primary.opacity(0.6), lineWidth: 1)
+                    .frame(width: 10, height: 10)
+                Text("Today, so far")
+            }
+            HStack(spacing: 4) {
+                RoundedRectangle(cornerRadius: 2)
+                    .strokeBorder(SlopPalette.unknown, style: StrokeStyle(lineWidth: 1, dash: [2]))
+                    .frame(width: 10, height: 10)
+                Text("No data")
             }
         }
+        .font(.caption)
+        .foregroundStyle(.secondary)
+        .accessibilityElement(children: .combine)
     }
 
     @ViewBuilder
@@ -95,7 +136,10 @@ private struct HeatmapGrid: View {
             }
         }
         .overlay {
-            if point.isIncomplete || selection?.wrappedValue == point.day {
+            // The selected day gets a heavier outline than today's, so the two never look alike.
+            if selection?.wrappedValue == point.day {
+                shape.strokeBorder(Color.primary, lineWidth: 2)
+            } else if point.isIncomplete {
                 shape.strokeBorder(Color.primary.opacity(0.6), lineWidth: 1)
             }
         }
@@ -116,12 +160,76 @@ private struct HeatmapGrid: View {
         cells += Array(repeating: nil, count: (7 - cells.count % 7) % 7)
         return stride(from: 0, to: cells.count, by: 7).map { Array(cells[$0..<$0 + 7]) }
     }
+
+    /// One label per column: the abbreviated month above the first week holding a new
+    /// month's day, nil elsewhere. The first column's label is dropped when the next month
+    /// starts within three weeks, so the two never overlap.
+    static func monthLabels(_ weeks: [[DashboardSnapshot.Point?]]) -> [String?] {
+        var labels: [String?] = []
+        var previous: (year: Int, month: Int)?
+        for week in weeks {
+            let first = week.compactMap { $0 }.first { point in
+                previous.map { (point.day.year, point.day.month) != ($0.year, $0.month) } ?? true
+            }
+            if let day = first?.day {
+                previous = (day.year, day.month)
+                labels.append(
+                    day.start(in: .current).formatted(.dateTime.month(.abbreviated)))
+            } else {
+                labels.append(nil)
+            }
+        }
+        if labels.count > 1, labels[0] != nil,
+            labels[1..<min(labels.count, 4)].contains(where: { $0 != nil })
+        {
+            labels[0] = nil
+        }
+        return labels
+    }
+}
+
+/// Less-to-more swatches in the theme's colors: its four levels, or its gradient when days
+/// map smoothly. The grid includes the empty tile; columns draw nothing for empty days.
+struct ShadeScale: View {
+    var includesEmpty = false
+    @Environment(\.slopColors) private var colors
+
+    var body: some View {
+        HStack(spacing: 4) {
+            Text("Less")
+            HStack(spacing: 2) {
+                if includesEmpty { swatch(SlopColors.empty) }
+                switch colors.appearance.mapping {
+                case .levels:
+                    ForEach(1...4, id: \.self) { swatch(colors.fill(level: $0)) }
+                case .continuous:
+                    RoundedRectangle(cornerRadius: 2)
+                        .fill(
+                            LinearGradient(
+                                gradient: colors.gradient, startPoint: .leading, endPoint: .trailing
+                            )
+                        )
+                        .frame(width: 46, height: 10)
+                }
+            }
+            Text("More")
+        }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("Shades run from less to more activity")
+    }
+
+    private func swatch(_ color: Color) -> some View {
+        RoundedRectangle(cornerRadius: 2).fill(color).frame(width: 10, height: 10)
+    }
 }
 
 /// Lays cells out column by column, seven per week, with square cells sized from the
 /// width actually offered. It never reports more width than proposed, so a long range
 /// cannot widen its container, and its height follows the cells so short ranges leave
 /// no empty space below.
+///
+/// Subviews come in order: `columns × 7` cells, then seven weekday labels placed left of
+/// their rows, then one month label per column placed above it.
 private struct WeekGridLayout: Layout {
     let columns: Int
     let gap: CGFloat
@@ -130,31 +238,67 @@ private struct WeekGridLayout: Layout {
     /// Used only when no width is proposed. Small enough that a full year (54 weeks) stays
     /// narrower than the app window's minimum content width.
     private static let idealSide: CGFloat = 8
+    /// Space between the labels and the cells.
+    private static let labelGap: CGFloat = 4
 
     func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
-        let side = side(width: proposal.width, height: proposal.height)
-        return CGSize(width: span(side, count: columns), height: span(side, count: 7))
+        let insets = insets(subviews)
+        let side = side(width: proposal.width, height: proposal.height, insets: insets)
+        return CGSize(
+            width: insets.width + span(side, count: columns),
+            height: insets.height + span(side, count: 7))
     }
 
     func placeSubviews(
         in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()
     ) {
-        let side = side(width: bounds.width, height: bounds.height)
+        let insets = insets(subviews)
+        let side = side(width: bounds.width, height: bounds.height, insets: insets)
         let cell = ProposedViewSize(width: side, height: side)
+        let origin = CGPoint(x: bounds.minX + insets.width, y: bounds.minY + insets.height)
+        let cellCount = columns * 7
         for (index, subview) in subviews.enumerated() {
-            let column = CGFloat(index / 7)
-            let row = CGFloat(index % 7)
-            subview.place(
-                at: CGPoint(
-                    x: bounds.minX + column * (side + gap), y: bounds.minY + row * (side + gap)),
-                proposal: cell)
+            if index < cellCount {
+                let column = CGFloat(index / 7)
+                let row = CGFloat(index % 7)
+                subview.place(
+                    at: CGPoint(
+                        x: origin.x + column * (side + gap), y: origin.y + row * (side + gap)),
+                    proposal: cell)
+            } else if index < cellCount + 7 {
+                let row = CGFloat(index - cellCount)
+                subview.place(
+                    at: CGPoint(x: bounds.minX, y: origin.y + row * (side + gap) + side / 2),
+                    anchor: .leading, proposal: .unspecified)
+            } else {
+                // Kept inside the trailing edge when a month starts in the last weeks.
+                let column = CGFloat(index - cellCount - 7)
+                let width = subview.sizeThatFits(.unspecified).width
+                let x = min(origin.x + column * (side + gap), bounds.maxX - width)
+                subview.place(
+                    at: CGPoint(x: max(x, origin.x), y: bounds.minY), proposal: .unspecified)
+            }
         }
     }
 
-    private func side(width: CGFloat?, height: CGFloat?) -> CGFloat {
+    /// The weekday column's width and the month row's height, each with its gap.
+    private func insets(_ subviews: Subviews) -> CGSize {
+        let cellCount = columns * 7
+        guard subviews.count > cellCount else { return .zero }
+        let rows = subviews[cellCount..<min(cellCount + 7, subviews.count)]
+        let months = subviews[min(cellCount + 7, subviews.count)...]
+        let width = rows.map { $0.sizeThatFits(.unspecified).width }.max() ?? 0
+        let height = months.map { $0.sizeThatFits(.unspecified).height }.max() ?? 0
+        return CGSize(
+            width: width > 0 ? width + Self.labelGap : 0,
+            height: height > 0 ? height + Self.labelGap : 0)
+    }
+
+    private func side(width: CGFloat?, height: CGFloat?, insets: CGSize) -> CGFloat {
         let count = CGFloat(max(columns, 1))
-        let heightLimit = min(height ?? .infinity, maxHeight ?? .infinity)
-        let byWidth = width.map { ($0 - gap * (count - 1)) / count } ?? Self.idealSide
+        let heightLimit = min(height ?? .infinity, maxHeight ?? .infinity) - insets.height
+        let byWidth =
+            width.map { ($0 - insets.width - gap * (count - 1)) / count } ?? Self.idealSide
         let byHeight = heightLimit.isFinite ? (heightLimit - gap * 6) / 7 : .infinity
         return max(1, min(byWidth, byHeight))
     }
@@ -187,6 +331,7 @@ private struct TrendChart: View {
     let style: ChartStyle
     let unit: String
     let showsAverage: Bool
+    let averageLabel: String
     let compact: Bool
     let selection: Binding<CalendarDay?>?
     @Environment(\.slopColors) private var colors
@@ -205,6 +350,58 @@ private struct TrendChart: View {
     }
 
     var body: some View {
+        if compact {
+            chart
+        } else {
+            VStack(alignment: .leading, spacing: 8) {
+                chart
+                legend
+            }
+        }
+    }
+
+    /// Drawn by hand rather than by Swift Charts: columns take each day's shade from the
+    /// gradient, so a single "Daily" color swatch would contradict most of the bars.
+    private var legend: some View {
+        HStack(spacing: 14) {
+            if style == .columns {
+                HStack(spacing: 6) {
+                    Text("Daily")
+                    ShadeScale()
+                }
+            } else {
+                HStack(spacing: 4) {
+                    Capsule().fill(markColor).frame(width: 16, height: 2)
+                    Text("Daily")
+                }
+            }
+            if showsAverage, points.contains(where: { $0.average != nil }) {
+                HStack(spacing: 4) {
+                    Path { path in
+                        path.move(to: CGPoint(x: 0, y: 1))
+                        path.addLine(to: CGPoint(x: 18, y: 1))
+                    }
+                    .stroke(colors.average, style: StrokeStyle(lineWidth: 2, dash: [4, 3]))
+                    .frame(width: 18, height: 2)
+                    Text(averageLabel)
+                }
+            }
+            if style == .columns, points.contains(where: \.isIncomplete) {
+                HStack(spacing: 4) {
+                    RoundedRectangle(cornerRadius: 2).fill(colors.mark.opacity(0.4))
+                        .frame(width: 6, height: 10)
+                    Text("Today, so far")
+                }
+            }
+            Spacer(minLength: 0)
+        }
+        .font(.caption)
+        .foregroundStyle(.secondary)
+        .accessibilityElement(children: .combine)
+    }
+
+    @ViewBuilder
+    private var chart: some View {
         let busiest = points.compactMap(\.count).max() ?? 0
         Chart {
             ForEach(points) { point in
@@ -240,7 +437,7 @@ private struct TrendChart: View {
         .chartForegroundStyleScale([
             "Daily": markColor, "Average": colors.average,
         ])
-        .chartLegend(compact ? .hidden : .automatic)
+        .chartLegend(.hidden)
         .chartYAxisLabel(compact ? "" : unit)
         .chartYAxis {
             // Compact charts keep the scale but drop gridlines so the marks stand out.
