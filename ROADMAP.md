@@ -37,6 +37,12 @@ field will not resign. A plain AppKit field alone did not stop the jump. The use
 confirmed both fixes on a signed Debug build on 2026-10-21. Which component restored the
 focus was not traced, so other text fields could still do it.
 
+Chart annotations (1.0.5): the dashboard grid gains weekday and month labels and a
+key (shade scale, busiest day, today, no data); columns and line charts get a drawn
+legend whose daily entry matches how bars are shaded; "N to go" uses the quota metric's
+Octicon instead of an hourglass; the empty Configurations menu explains itself. Manual
+checks pending.
+
 Menu-bar metric icons (0.3.1): implemented with calendar, pull-request, and merge
 Octicons that follow the displayed count, plus full tooltip and accessibility
 wording. `make validate` passed locally on 2026-10-17 (formatting, documentation,

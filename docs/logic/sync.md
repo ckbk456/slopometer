@@ -261,6 +261,20 @@ Owners: `App/MainView.swift`, `App/SettingsView.swift`, `App/Glass.swift`.
   from the content, so resizing does not feed back into the layout. The grid keeps
   square cells, sized by the smaller of width and height, so a long range that is
   limited by width leaves its spare height below the notices rather than between rows.
+- Chart annotations (1.0.5): the dashboard grid labels every other weekday row (Mon,
+  Wed, Fri in the locale's names; rows stay Sunday-first) and the month above the first
+  week holding each new month, and has a key below it: Less to More swatches in the
+  theme's levels (or its gradient for smooth mapping, starting with the empty tile), the
+  busiest day's count the shades are scaled to, today's outline, and the dashed no-data
+  outline. The selected day has a heavier outline than today's. Columns and line charts
+  draw their own legend instead of Swift Charts': columns show "Daily" with the same
+  Less to More swatches, because each bar takes its own shade; line shows the daily line
+  color; both show the dashed "<N>-day average" and, for columns, the faded "Today, so
+  far" bar. Compact charts (widgets, previews) stay unlabeled.
+- The quota card and menu bar panel mark "N to go" with the goal metric's Octicon, not
+  an hourglass: it counts what is left to the target, not time left in the day.
+- With no saved configurations, the Configurations menu explains itself in a disabled
+  line above "Save as New Configuration…".
 - Settings (0.9.0) has no numbered tiers and no separate GitHub heading. **Username**
   comes first: one summary row (an initial, @account or "No account yet", the connection
   wording, and sync status), then the username field. **Tokens**

@@ -106,7 +106,9 @@ struct DashboardView: View {
                 }
             }
         } else {
-            if let quota = snapshot.quota { QuotaCard(quota: quota) }
+            if let quota = snapshot.quota {
+                QuotaCard(quota: quota, metric: model.settings.goal?.metric ?? .prsMerged)
+            }
             controls(settings)
             if gated {
                 TokenGate(metric: snapshot.metric) { openSettings(.token) }
@@ -114,6 +116,7 @@ struct DashboardView: View {
                 SlopChart(
                     points: snapshot.points, style: snapshot.chartStyle,
                     unit: snapshot.unit, showsAverage: snapshot.averageWindow > 0,
+                    averageLabel: "\(snapshot.averageWindow)-day average",
                     selection: $selectedDay
                 )
                 .layoutValue(key: FillsHeight.self, value: Self.chartMinHeight)
@@ -480,6 +483,8 @@ private struct TokenGate: View {
 
 private struct QuotaCard: View {
     let quota: DashboardSnapshot.Quota
+    /// The goal's metric, whose Octicon marks what is still to go.
+    let metric: Metric
     @State private var showsEvidence = false
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.slopColors) private var colors
@@ -552,8 +557,12 @@ private struct QuotaCard: View {
             Label("Target reached", systemImage: "checkmark.seal.fill")
                 .foregroundStyle(colors.markText)
         } else {
-            Label("\(quota.target - quota.count) to go", systemImage: "hourglass")
-                .foregroundStyle(.secondary)
+            Label {
+                Text("\(quota.target - quota.count) to go")
+            } icon: {
+                OcticonImage(metric: metric)
+            }
+            .foregroundStyle(.secondary)
         }
     }
 }

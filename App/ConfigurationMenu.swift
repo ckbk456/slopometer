@@ -29,7 +29,14 @@ struct ConfigurationMenu: View {
                         set: { _ in model.applyConfiguration(item.id) }))
             }
             if manages {
-                if !settings.savedConfigurations.isEmpty { Divider() }
+                if settings.savedConfigurations.isEmpty {
+                    // Without saved ones the menu is only "Save as New…", which alone does
+                    // not say what a configuration is.
+                    Text("Save this dashboard setup by name to switch back to it later.")
+                    Divider()
+                } else {
+                    Divider()
+                }
                 Button("Save as New Configuration…") { startNaming(.save) }
                 if let current = settings.configuration {
                     Button("Update “\(current.name)”") { model.updateConfiguration() }
