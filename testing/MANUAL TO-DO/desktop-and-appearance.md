@@ -335,3 +335,15 @@ agent (no UI interaction). Every checklist item above remains pending.
       (or the quota metric's), legible in light and dark.
 - [ ] With no saved configurations, Activity › Configurations shows the explanatory
       line above "Save as New Configuration…".
+
+## Grid launch crash fix (1.0.6): pending
+
+1.0.5 from the download site crashed before showing its window (EXC_BREAKPOINT in
+`LayoutSubviews.selecting(indices:)` under `WeekGridLayout`, four reports on 2026-10-24,
+macOS 27.0.1). The fix slices the layout's subviews with explicit `Range<Int>` values.
+
+- [ ] The installed 1.0.6 disk-image build opens its window with the calendar grid
+      selected, at 30, 90, and 365 days, with no new report in Console › Crash Reports.
+- [ ] The desktop widget in grid style renders after 1.0.6 is installed.
+- [ ] Check for Updates… on 1.0.5 offers 1.0.6 (only testable from a 1.0.5 that reaches
+      its menu bar item; the window crash does not stop the updater).

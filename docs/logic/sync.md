@@ -271,6 +271,11 @@ Owners: `App/MainView.swift`, `App/SettingsView.swift`, `App/Glass.swift`.
   Less to More swatches, because each bar takes its own shade; line shows the daily line
   color; both show the dashed "<N>-day average" and, for columns, the faded "Today, so
   far" bar. Compact charts (widgets, previews) stay unlabeled.
+- Grid layout slices (1.0.6): `WeekGridLayout` measures the weekday and month labels
+  with `Range<Int>` slices of its subviews. `n...` must not be used there: `Subviews` has
+  a subscript taking any sequence of indices, Swift prefers it over the range-expression
+  one, and a partial range is endless, so SwiftUI walked past the last subview and the
+  1.0.5 app trapped at launch before its window appeared.
 - The quota card and menu bar panel mark "N to go" with the goal metric's Octicon, not
   an hourglass: it counts what is left to the target, not time left in the day.
 - With no saved configurations, the Configurations menu explains itself in a disabled
