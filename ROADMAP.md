@@ -43,6 +43,14 @@ legend whose daily entry matches how bars are shaded; "N to go" uses the quota m
 Octicon instead of an hourglass; the empty Configurations menu explains itself. Manual
 checks pending.
 
+Grid launch crash (1.0.6): 1.0.5 trapped while laying out the labeled grid, so the app
+could not open its window (four identical crash reports on macOS 27.0.1, build 32). The
+grid layout sliced its subviews with `n...`, which Swift resolved to the `Subviews`
+subscript taking any sequence of indices; a partial range is endless, so SwiftUI read past
+the last subview. Both slices are now explicit `Range<Int>`. Verified by reading the
+crash backtrace and the compiler's chosen overload; launch evidence is recorded in the
+manual guide.
+
 Menu-bar metric icons (0.3.1): implemented with calendar, pull-request, and merge
 Octicons that follow the displayed count, plus full tooltip and accessibility
 wording. `make validate` passed locally on 2026-10-17 (formatting, documentation,

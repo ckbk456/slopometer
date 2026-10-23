@@ -285,8 +285,12 @@ private struct WeekGridLayout: Layout {
     private func insets(_ subviews: Subviews) -> CGSize {
         let cellCount = columns * 7
         guard subviews.count > cellCount else { return .zero }
-        let rows = subviews[cellCount..<min(cellCount + 7, subviews.count)]
-        let months = subviews[min(cellCount + 7, subviews.count)...]
+        // Both slices must be `Range<Int>`. `Subviews` also has a subscript taking any
+        // `Sequence` of indices, and Swift picks that one for `n...`, an endless sequence:
+        // SwiftUI then reads past the last subview and the app traps on launch (1.0.5).
+        let labelEnd = min(cellCount + 7, subviews.count)
+        let rows = subviews[cellCount..<labelEnd]
+        let months = subviews[labelEnd..<subviews.count]
         let width = rows.map { $0.sizeThatFits(.unspecified).width }.max() ?? 0
         let height = months.map { $0.sizeThatFits(.unspecified).height }.max() ?? 0
         return CGSize(
