@@ -432,7 +432,11 @@
 				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
+				SLOPOMETER_APP_GROUP = 5U4584QFCQ.vn.infinitex.slopometer.dev;
+				SLOPOMETER_BUNDLE_ID = vn.infinitex.slopometer.dev;
 				SLOPOMETER_COMMIT = unknown;
+				SLOPOMETER_DISPLAY_NAME = "Slopometer Dev";
+				SLOPOMETER_URL_SCHEME = "slopometer-dev";
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 6.0;
@@ -495,7 +499,11 @@
 				MTL_FAST_MATH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
+				SLOPOMETER_APP_GROUP = 5U4584QFCQ.vn.infinitex.slopometer;
+				SLOPOMETER_BUNDLE_ID = vn.infinitex.slopometer;
 				SLOPOMETER_COMMIT = unknown;
+				SLOPOMETER_DISPLAY_NAME = Slopometer;
+				SLOPOMETER_URL_SCHEME = slopometer;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				SWIFT_VERSION = 6.0;
@@ -514,7 +522,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = vn.infinitex.slopometer;
+				PRODUCT_BUNDLE_IDENTIFIER = "$(SLOPOMETER_BUNDLE_ID)";
 				PRODUCT_NAME = Slopometer;
 				SDKROOT = macosx;
 				SLOPOMETER_AUTOMATIC_UPDATE_CHECKS = YES;
@@ -533,7 +541,7 @@
 					"@executable_path/../Frameworks",
 					"@executable_path/../../../../Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = vn.infinitex.slopometer.widget;
+				PRODUCT_BUNDLE_IDENTIFIER = "$(SLOPOMETER_BUNDLE_ID).widget";
 				PRODUCT_NAME = SlopometerWidget;
 				SDKROOT = macosx;
 				SKIP_INSTALL = YES;
@@ -552,7 +560,7 @@
 					"@executable_path/../Frameworks",
 					"@executable_path/../../../../Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = vn.infinitex.slopometer.widget;
+				PRODUCT_BUNDLE_IDENTIFIER = "$(SLOPOMETER_BUNDLE_ID).widget";
 				PRODUCT_NAME = SlopometerWidget;
 				SDKROOT = macosx;
 				SKIP_INSTALL = YES;
@@ -571,7 +579,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = vn.infinitex.slopometer;
+				PRODUCT_BUNDLE_IDENTIFIER = "$(SLOPOMETER_BUNDLE_ID)";
 				PRODUCT_NAME = Slopometer;
 				SDKROOT = macosx;
 				SLOPOMETER_AUTOMATIC_UPDATE_CHECKS = NO;

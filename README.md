@@ -56,8 +56,9 @@ make open
 ```
 
 Run the `Slopometer` scheme in Xcode, or use `make run` to build a signed app and
-launch it. Signing needs an Xcode account for the project team. Add the widget from
-the desktop's Edit Widgets menu. `make build` (unsigned) does not launch anything. The checked-in
+launch it. Signing needs an Xcode account for the project team. Development builds are
+named "Slopometer Dev" and keep their own data and widget, so they run alongside an
+installed release. Add the widget from the desktop's Edit Widgets menu. `make build` (unsigned) does not launch anything. The checked-in
 Xcode project can be built without XcodeGen.
 
 The stack is Swift 6, SwiftUI, AppKit, Swift Charts, and SQLite through GRDB.

@@ -356,7 +356,11 @@ public enum SnapshotBuilder {
 
 /// The snapshot file shared with the widget through the App Group container.
 public enum SharedSnapshot {
-    public static let appGroup = "5U4584QFCQ.vn.infinitex.slopometer"
+    /// The running build's group from its Info.plist (Debug builds use their own), or the
+    /// release group where there is none, as in package tests.
+    public static let appGroup =
+        Bundle.main.object(forInfoDictionaryKey: "SlopometerAppGroup") as? String
+        ?? "5U4584QFCQ.vn.infinitex.slopometer"
     private static let fileName = "snapshot.json"
 
     public static func url() -> URL? {

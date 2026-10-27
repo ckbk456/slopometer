@@ -6,14 +6,24 @@ updater most directly distributed Mac apps use.
 
 ## Identity
 
-| Item | Value |
-| --- | --- |
-| App bundle ID | `vn.infinitex.slopometer` |
-| Widget bundle ID | `vn.infinitex.slopometer.widget` |
-| App Group | `5U4584QFCQ.vn.infinitex.slopometer` |
-| Keychain service for tokens | `vn.infinitex.slopometer.github-token` |
-| Signing team | `5U4584QFCQ` (Developer ID Application for releases) |
-| Update feed | `https://updates.infinitex.vn/slopometer/appcast.xml` |
+| Item | Release | Debug (development) |
+| --- | --- | --- |
+| App bundle ID | `vn.infinitex.slopometer` | `vn.infinitex.slopometer.dev` |
+| Widget bundle ID | `vn.infinitex.slopometer.widget` | `vn.infinitex.slopometer.dev.widget` |
+| App Group | `5U4584QFCQ.vn.infinitex.slopometer` | `5U4584QFCQ.vn.infinitex.slopometer.dev` |
+| Keychain service for tokens | `vn.infinitex.slopometer.github-token` | `vn.infinitex.slopometer.dev.github-token` |
+| URL scheme | `slopometer://` | `slopometer-dev://` |
+| Display name | Slopometer | Slopometer Dev |
+| Signing team | `5U4584QFCQ` (Developer ID Application) | `5U4584QFCQ` (Apple Development) |
+| Update feed | `https://updates.infinitex.vn/slopometer/appcast.xml` | same |
+
+`project.yml` sets these per build configuration (`SLOPOMETER_*` settings); the
+Info.plists and entitlements read them, and the code reads the App Group, URL scheme, and
+Keychain service from the running bundle. Debug builds used the release identity until
+the separate one was introduced (after 1.0.6). Sharing it let a development build's widget
+registration shadow the installed release's widget: on 2026-10-27 the release widget would
+not load because `chronod` still pointed `vn.infinitex.slopometer.widget` at a deleted
+Debug build. A Debug build now starts with empty data and needs its own username and tokens.
 
 Builds before 1.0.0 used `dev.slopometer.app`. macOS keeps preferences, the cache,
 the App Group container, and Keychain items per identity, so 1.0.0 starts empty: the
@@ -57,8 +67,8 @@ it already has outgoing network access, so the downloader service stays off.
   Settings › Updates › "Check for updates automatically" turns that off.
 - **Debug builds** (`make run`, Xcode) default to no scheduled checks, so a published
   release does not offer to replace the build under test. "Check for Updates…" still
-  works. Both builds share the bundle ID and preferences, so once the toggle has been
-  changed in either build, its saved value applies to both.
+  works. Debug builds have their own bundle ID and preferences, so the toggle is saved
+  separately for each.
 - **Gentle reminders:** when a scheduled check finds a release, the app shows a Dock
   icon while Sparkle's alert is up, and the menu bar panel shows "Slopometer x is
   available". Clicking it brings the alert forward. Both clear once the alert is

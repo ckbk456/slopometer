@@ -259,7 +259,7 @@ final class AppModel {
     func removeToken(_ id: String) {
         guard TokenStore.remove(id) else {
             keychainProblem =
-                "Keychain refused to delete the token (service vn.infinitex.slopometer.github-token). It is still saved; try removing it again."
+                "Keychain refused to delete the token (service \(TokenStore.service)). It is still saved; try removing it again."
             rebuild()
             return
         }

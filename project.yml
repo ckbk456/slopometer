@@ -17,6 +17,18 @@ settings:
     # Overridden by the Makefile with the commit count and short SHA of the build.
     CURRENT_PROJECT_VERSION: 1
     SLOPOMETER_COMMIT: unknown
+    # Release identity (SCOPE). Debug overrides it below so a development build never
+    # shares widget registrations, data, or links with an installed release.
+    SLOPOMETER_BUNDLE_ID: vn.infinitex.slopometer
+    SLOPOMETER_APP_GROUP: 5U4584QFCQ.vn.infinitex.slopometer
+    SLOPOMETER_URL_SCHEME: slopometer
+    SLOPOMETER_DISPLAY_NAME: Slopometer
+  configs:
+    Debug:
+      SLOPOMETER_BUNDLE_ID: vn.infinitex.slopometer.dev
+      SLOPOMETER_APP_GROUP: 5U4584QFCQ.vn.infinitex.slopometer.dev
+      SLOPOMETER_URL_SCHEME: slopometer-dev
+      SLOPOMETER_DISPLAY_NAME: Slopometer Dev
 packages:
   SlopometerCore:
     # Equivalent to the repository root, but the generated reference is not named after
@@ -42,7 +54,7 @@ targets:
       - target: SlopometerWidget
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: vn.infinitex.slopometer
+        PRODUCT_BUNDLE_IDENTIFIER: $(SLOPOMETER_BUNDLE_ID)
         PRODUCT_NAME: Slopometer
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         INFOPLIST_FILE: App/Info.plist
@@ -68,7 +80,7 @@ targets:
       - package: SlopometerCore
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: vn.infinitex.slopometer.widget
+        PRODUCT_BUNDLE_IDENTIFIER: $(SLOPOMETER_BUNDLE_ID).widget
         PRODUCT_NAME: SlopometerWidget
         INFOPLIST_FILE: Widget/Info.plist
         CODE_SIGN_ENTITLEMENTS: Widget/SlopometerWidget.entitlements

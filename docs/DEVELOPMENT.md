@@ -39,7 +39,7 @@ controlled. Agents must still inspect for separately running commands.
 | Render packaging artwork: `make packaging-art` | `scripts/render_packaging_art.py`, adjacent uv lockfile, `packaging/artwork/`, `packaging/fonts/` | <30s warm | Low | macOS, uv, Python 3.11+; writes checked-in backgrounds and icons; network on first locked dependency fetch |
 | Package disk image: `make dmg APP=/path/to/Slopometer.app DMG=/new/path/Slopometer.dmg` | `scripts/build_dmg.py`, adjacent uv lockfile, `packaging/README.md` | 10s–2m | Yes | macOS, uv, Python 3.10+; copies app into a new image, briefly mounts its own temporary image, detaches on completion; no Finder UI, signing or publication |
 | Open Xcode: `make open` | `Makefile` | <10s | No | Human-owned GUI action |
-| Preview app: `make run` | `Makefile`, `scripts/register_build.sh` | Build + launch | Yes | Signed build, so it matches Xcode runs; unregisters (does not delete) Slopometer builds from other checkouts that are not running, so the widget and `slopometer://` use this one, then sends TERM to widget extension processes launched from any other build so chronod relaunches this one; a still-running app from another checkout is reported and skipped; human-owned app process; quit via menu bar |
+| Preview app: `make run` | `Makefile`, `scripts/register_build.sh` | Build + launch | Yes | Signed build, so it matches Xcode runs; unregisters (does not delete) Debug builds from other checkouts that are not running, so the widget and `slopometer-dev://` use this one, then sends TERM to Debug widget extension processes launched from any other build so chronod relaunches this one; an installed release is left alone; a still-running app from another checkout is reported and skipped; human-owned app process; quit via menu bar |
 
 There is no separate JS lint, typecheck, codegen service, migration CLI, dev
 server, automatic deployment command, release job, or UI test suite. Swift compilation
@@ -56,8 +56,8 @@ supported Xcode emits one, the structural check verifies its pins agree.
 
 Build output is `.build/xcode/Build/Products/Debug/Slopometer.app`. `make build` and
 `make validate` write an unsigned app to the same path, which macOS will not load as a
-widget; run `make run` again before checking the widget. Only one build should be
-registered at a time: the app stamps the shared snapshot with its version and build, and
+widget; run `make run` again before checking the widget. Only one Debug build should be
+registered at a time (an installed release can stay alongside it): the app stamps the shared snapshot with its version and build, and
 the widget shows "Widget build differs from app" when its own build differs. The core
 package uses `.build/`; Xcode dependency clones use `.build/SourcePackages/`.
 These are ignored. No global shell config or background service is needed.
@@ -79,8 +79,11 @@ menu bar panel show all three, so a running build can be matched to its source.
 Builds started from Xcode keep build `1` and commit `unknown`.
 
 The app's identity (`vn.infinitex.slopometer`, App Group, Keychain service, update feed)
-is listed in [Updates](logic/updates.md). Debug builds share it with releases, including
-preferences and the cache, but default to no scheduled update checks.
+is listed in [Updates](logic/updates.md). Debug builds (`make run`, `make build`, Xcode)
+use their own identity, `vn.infinitex.slopometer.dev`, shown as "Slopometer Dev", so they
+keep separate preferences, cache, App Group, Keychain tokens, login item, `slopometer-dev://`
+links, and widgets, and never disturb an installed release. Debug builds also default to
+no scheduled update checks.
 
 ## Gates and ownership
 

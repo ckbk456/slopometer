@@ -15,7 +15,9 @@ struct TokenEntry: Codable, Equatable, Identifiable {
 /// GitHub tokens kept in Keychain, one item per token. The list of entries is
 /// nonsecret and kept in preferences.
 enum TokenStore {
-    static let service = "vn.infinitex.slopometer.github-token"
+    /// `vn.infinitex.slopometer.github-token` in releases; Debug builds keep their own.
+    static let service =
+        (Bundle.main.bundleIdentifier ?? "vn.infinitex.slopometer") + ".github-token"
     private static let entriesKey = "tokenEntries"
 
     static func entries() -> [TokenEntry] {

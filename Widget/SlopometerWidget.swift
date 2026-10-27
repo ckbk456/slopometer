@@ -34,11 +34,17 @@ struct SlopometerWidgetView: View {
     @Environment(\.widgetFamily) private var family
     let entry: SnapshotEntry
 
+    /// Opens the app that shipped this widget: `slopometer://` for releases,
+    /// `slopometer-dev://` for Debug builds.
+    private static let openURL = URL(
+        string: (Bundle.main.object(forInfoDictionaryKey: "SlopometerURLScheme") as? String
+            ?? "slopometer") + "://open")
+
     var body: some View {
         // The app shares its theme in the snapshot; older snapshots fall back to the standard.
         let content = WidgetContent(snapshot: entry.snapshot, size: size, now: entry.date)
             .slopTheme((entry.snapshot?.theme ?? .standard).resolved())
-            .widgetURL(URL(string: "slopometer://open"))
+            .widgetURL(Self.openURL)
         if let scheme = forcedScheme {
             // The environment sits above slopTheme, so the theme resolves for the forced
             // scheme, and the background matches it instead of the desktop's.
