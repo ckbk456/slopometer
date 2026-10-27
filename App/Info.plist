@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
     <key>CFBundleDevelopmentRegion</key><string>en</string>
-    <key>CFBundleDisplayName</key><string>Slopometer</string>
+    <key>CFBundleDisplayName</key><string>$(SLOPOMETER_DISPLAY_NAME)</string>
     <key>CFBundleExecutable</key><string>$(EXECUTABLE_NAME)</string>
     <key>CFBundleIdentifier</key><string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
     <key>CFBundleInfoDictionaryVersion</key><string>6.0</string>
@@ -12,6 +12,7 @@
     <key>CFBundleShortVersionString</key><string>$(MARKETING_VERSION)</string>
     <key>CFBundleVersion</key><string>$(CURRENT_PROJECT_VERSION)</string>
     <key>SlopometerCommit</key><string>$(SLOPOMETER_COMMIT)</string>
+    <key>SlopometerAppGroup</key><string>$(SLOPOMETER_APP_GROUP)</string>
     <key>LSMinimumSystemVersion</key><string>$(MACOSX_DEPLOYMENT_TARGET)</string>
     <key>NSPrincipalClass</key><string>NSApplication</string>
     <key>LSUIElement</key><true/>
@@ -23,8 +24,8 @@
     <key>CFBundleURLTypes</key>
     <array>
         <dict>
-            <key>CFBundleURLName</key><string>vn.infinitex.slopometer</string>
-            <key>CFBundleURLSchemes</key><array><string>slopometer</string></array>
+            <key>CFBundleURLName</key><string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+            <key>CFBundleURLSchemes</key><array><string>$(SLOPOMETER_URL_SCHEME)</string></array>
         </dict>
     </array>
 </dict>

@@ -51,6 +51,14 @@ the last subview. Both slices are now explicit `Range<Int>`. Verified by reading
 crash backtrace and the compiler's chosen overload; launch evidence is recorded in the
 manual guide.
 
+Separate development identity (after 1.0.6): Debug builds use `vn.infinitex.slopometer.dev`
+("Slopometer Dev") with their own widget ID, App Group, Keychain service, and
+`slopometer-dev://` scheme, set per build configuration in `project.yml`; releases keep the
+SCOPE identity unchanged. A development build had shadowed the installed release's widget,
+which stayed blank after a clean reinstall until `chronod` was restarted. `make run` now
+manages only Debug builds and leaves a release and its widget alone. Checks in the
+[desktop guide](testing/MANUAL%20TO-DO/desktop-and-appearance.md) are pending.
+
 Menu-bar metric icons (0.3.1): implemented with calendar, pull-request, and merge
 Octicons that follow the displayed count, plus full tooltip and accessibility
 wording. `make validate` passed locally on 2026-10-17 (formatting, documentation,

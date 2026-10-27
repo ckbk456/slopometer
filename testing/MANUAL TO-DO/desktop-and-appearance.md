@@ -347,3 +347,18 @@ macOS 27.0.1). The fix slices the layout's subviews with explicit `Range<Int>` v
 - [ ] The desktop widget in grid style renders after 1.0.6 is installed.
 - [ ] Check for Updates… on 1.0.5 offers 1.0.6 (only testable from a 1.0.5 that reaches
       its menu bar item; the window crash does not stop the updater).
+
+## Separate development identity (after 1.0.6): pending
+
+- [ ] With a release in `/Applications`, `make run` leaves it registered and running: the
+      widget gallery offers both "Slopometer" and "Slopometer Dev", and
+      `pluginkit -mAvvvD -i vn.infinitex.slopometer.widget` lists only the release.
+- [ ] A release widget and a Slopometer Dev widget placed side by side each show their
+      own app's data; syncing in one app does not change the other's widget.
+- [ ] Clicking each widget opens its own app (`slopometer://` for the release,
+      `slopometer-dev://` for the Debug build).
+- [ ] The Debug build starts with no username or tokens; adding a token there does not
+      add an item under the release's `vn.infinitex.slopometer.github-token` service.
+- [ ] A Release export still has the bundle IDs, App Group, and URL scheme in
+      [Updates](../../docs/logic/updates.md), and 1.0.6 installs update to it in place.
+
