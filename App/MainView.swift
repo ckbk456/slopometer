@@ -48,6 +48,7 @@ struct MainView: View {
             }
             .hidesSharedGlassBackground()
         }
+        .translucentWindowBackground()
         .onAppear { if model.accountLogin.isEmpty && !model.hasToken { tab = .settings } }
     }
 }
@@ -108,6 +109,7 @@ struct DashboardView: View {
         } else {
             if let quota = snapshot.quota {
                 QuotaCard(quota: quota, metric: model.settings.goal?.metric ?? .prsMerged)
+                    .id(model.settings.goal?.metric)
             }
             controls(settings)
             if gated {
@@ -216,9 +218,18 @@ struct DashboardView: View {
         }
         let scope = snapshot.scopeLabel.isEmpty ? "" : ", \(snapshot.scopeLabel.lowercased())"
         parts.append("Source: \(snapshot.sourceLabel)\(scope).")
-        return Text(parts.joined(separator: " "))
-            .font(.caption)
-            .foregroundStyle(.secondary)
+        return VStack(alignment: .leading, spacing: 4) {
+            Text(parts.joined(separator: " "))
+            if let win = snapshot.points.compactMap(\.achievement).first {
+                Text(
+                    win.metric == .contributions
+                        ? "Achievement borders mark contribution goals reached on GitHub's calendar dates."
+                        : "Achievement borders mark \(win.metric?.unit ?? "PR") quotas on those dates in \(win.timeZoneID)."
+                )
+            }
+        }
+        .font(.caption)
+        .foregroundStyle(.secondary)
     }
 
     @ViewBuilder
@@ -492,49 +503,51 @@ private struct QuotaCard: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(alignment: .firstTextBaseline, spacing: 14) {
-                Button {
-                    showsEvidence.toggle()
-                } label: {
-                    HStack(alignment: .firstTextBaseline, spacing: 4) {
-                        Text("\(quota.count)")
-                            .font(.system(size: 44, weight: .semibold, design: .rounded))
-                        Text("/ \(quota.target)")
-                            .font(.system(size: 22, weight: .medium, design: .rounded))
-                            .foregroundStyle(.secondary)
+                if metric.requiresToken {
+                    Button {
+                        showsEvidence.toggle()
+                    } label: {
+                        countLabel
                     }
-                    .monospacedDigit()
+                    .buttonStyle(.plain)
+                    .help("Show the PRs counted today")
+                } else {
+                    countLabel
                 }
-                .buttonStyle(.plain)
-                .help("Show the PRs counted today")
                 VStack(alignment: .leading, spacing: 2) {
                     Text("Daily slop quota").font(.headline)
-                    Text("\(quota.unit.capitalizedFirst) today in \(quota.scopeLabel)")
+                    Text("\(quota.unit.capitalizedFirst) today · \(quota.scopeLabel)")
                         .font(.callout)
                         .foregroundStyle(.secondary)
                 }
                 Spacer()
                 status
             }
+            if let achievement = quota.achievement {
+                QuotaAchievementLabel(achievement: achievement)
+            }
             QuotaMeter(count: quota.count, target: quota.target)
                 .accessibilityLabel(quota.headline)
-            Button {
-                withAnimation(reduceMotion ? nil : .snappy) { showsEvidence.toggle() }
-            } label: {
-                Label(
-                    showsEvidence ? "Hide PRs" : evidenceTitle,
-                    systemImage: showsEvidence ? "chevron.up" : "chevron.down")
-            }
-            .buttonStyle(.borderless)
-            .font(.callout)
-            if showsEvidence {
-                if quota.evidence.isEmpty {
-                    Text("No PRs yet today.").foregroundStyle(.secondary)
-                } else {
-                    VStack(alignment: .leading, spacing: 6) {
-                        ForEach(quota.evidence) { item in
-                            EvidenceRow(
-                                repository: item.repository, number: item.number,
-                                title: item.title, url: item.url, isDraft: item.isDraft)
+            if metric.requiresToken {
+                Button {
+                    withAnimation(reduceMotion ? nil : .snappy) { showsEvidence.toggle() }
+                } label: {
+                    Label(
+                        showsEvidence ? "Hide PRs" : evidenceTitle,
+                        systemImage: showsEvidence ? "chevron.up" : "chevron.down")
+                }
+                .buttonStyle(.borderless)
+                .font(.callout)
+                if showsEvidence {
+                    if quota.evidence.isEmpty {
+                        Text("No PRs yet today.").foregroundStyle(.secondary)
+                    } else {
+                        VStack(alignment: .leading, spacing: 6) {
+                            ForEach(quota.evidence) { item in
+                                EvidenceRow(
+                                    repository: item.repository, number: item.number,
+                                    title: item.title, url: item.url, isDraft: item.isDraft)
+                            }
                         }
                     }
                 }
@@ -542,6 +555,20 @@ private struct QuotaCard: View {
         }
         .padding(16)
         .glassCard(cornerRadius: 12)
+        .overlay {
+            if quota.achievement != nil { QuotaAchievementBorder() }
+        }
+    }
+
+    private var countLabel: some View {
+        HStack(alignment: .firstTextBaseline, spacing: 4) {
+            Text("\(quota.count)")
+                .font(.system(size: 44, weight: .semibold, design: .rounded))
+            Text("/ \(quota.target)")
+                .font(.system(size: 22, weight: .medium, design: .rounded))
+                .foregroundStyle(.secondary)
+        }
+        .monospacedDigit()
     }
 
     private var evidenceTitle: String {
@@ -555,7 +582,7 @@ private struct QuotaCard: View {
                 .foregroundStyle(.secondary)
         } else if quota.isReached {
             Label("Target reached", systemImage: "checkmark.seal.fill")
-                .foregroundStyle(colors.markText)
+                .foregroundStyle(colors.achievementText)
         } else {
             Label {
                 Text("\(quota.target - quota.count) to go")

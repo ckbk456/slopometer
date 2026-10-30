@@ -111,13 +111,18 @@ public struct DashboardSnapshot: Codable, Equatable, Sendable {
         public let count: Int?
         public let average: Double?
         public let isIncomplete: Bool
+        public var achievement: QuotaAchievement? = nil
         public var id: CalendarDay { day }
 
-        public init(day: CalendarDay, count: Int?, average: Double?, isIncomplete: Bool) {
+        public init(
+            day: CalendarDay, count: Int?, average: Double?, isIncomplete: Bool,
+            achievement: QuotaAchievement? = nil
+        ) {
             self.day = day
             self.count = count
             self.average = average
             self.isIncomplete = isIncomplete
+            self.achievement = achievement
         }
     }
 
@@ -138,6 +143,7 @@ public struct DashboardSnapshot: Codable, Equatable, Sendable {
         public let isReached: Bool
         public let coverageComplete: Bool
         public let evidence: [Evidence]
+        public var achievement: QuotaAchievement? = nil
     }
 
     /// One widget size's content, built from the same daily series as the dashboard.
@@ -243,7 +249,10 @@ public enum SnapshotBuilder {
         var notices = problems
         if !holdsAccount { notices.insert(notSyncedNotice(for: settings.login), at: 0) }
         let records = holdsAccount ? try cache.pullRequests() : []
-        let prCoverageComplete = tokenUsable && !state.pullRequestResultsIncomplete
+        let prCoverageComplete =
+            tokenUsable && !state.pullRequestResultsIncomplete
+            && state.lastPullRequestSync != nil
+            && state.pullRequestCoverageStart.map { $0 <= today.start(in: timeZone) } == true
         let calendar = holdsAccount ? try cache.calendar() : [:]
         /// Every surface reads its metric's counts from here, so they agree day by day.
         func dailySeries(_ metric: Metric) -> [DailyCount] {
@@ -301,10 +310,19 @@ public enum SnapshotBuilder {
             ? (try? MovingAverage.trailing(completed, window: warmUp))
                 ?? Array(repeating: nil, count: series.count)
             : Array(repeating: nil, count: series.count)
+        let achievementsByMetric = try Dictionary(
+            uniqueKeysWithValues: Metric.allCases.map { metric in
+                (
+                    metric,
+                    holdsAccount && (!metric.requiresToken || tokenUsable)
+                        ? try cache.quotaAchievements(settings: settings, metric: metric) : [:]
+                )
+            })
         let points = zip(series, averages).suffix(settings.rangeDays).map { daily, average in
             DashboardSnapshot.Point(
                 day: daily.day, count: daily.count, average: average,
-                isIncomplete: daily.day == today)
+                isIncomplete: daily.day == today,
+                achievement: achievementsByMetric[settings.metric]?[daily.day])
         }
         var seriesByMetric = [settings.metric: series]
         let widgets = WidgetSize.allCases.map { size in
@@ -318,28 +336,48 @@ public enum SnapshotBuilder {
                     panel.days(for: size, through: today, firstWeekday: firstWeekday)
                 ).map {
                     DashboardSnapshot.Point(
-                        day: $0.day, count: $0.count, average: nil, isIncomplete: $0.day == today)
+                        day: $0.day, count: $0.count, average: nil, isIncomplete: $0.day == today,
+                        achievement: achievementsByMetric[panel.metric]?[$0.day])
                 },
                 todayCount: daily.last?.count)
         }
 
         var quota: DashboardSnapshot.Quota?
-        if let goal = settings.goal, goal.isValid, tokenUsable, holdsAccount {
-            let progress = QuotaProgress(
-                goal: goal, repositories: settings.repositories, records: records, today: today,
-                timeZone: timeZone,
-                coverageComplete: prCoverageComplete)
-            quota = DashboardSnapshot.Quota(
-                headline: progress.headline, count: progress.count, target: progress.target,
-                unit: goal.metric.unit, scopeLabel: progress.scopeLabel,
-                isReached: progress.isReached, coverageComplete: progress.coverageComplete,
-                evidence: progress.evidence.map {
-                    .init(
-                        id: $0.id, number: $0.number, title: $0.title, repository: $0.repository,
-                        url: $0.url, isDraft: $0.isDraft)
-                })
-        } else if settings.goal != nil, !tokenUsable {
-            notices.append("The daily PR quota needs a GitHub token.")
+        if let goal = settings.goal, goal.isValid, holdsAccount {
+            let progress: QuotaProgress?
+            if goal.metric == .contributions {
+                if let count = calendar[today], let source = state.calendarSource,
+                    state.lastCalendarSync != nil
+                {
+                    progress = QuotaProgress(goal: goal, contributionCount: count, source: source)
+                } else {
+                    progress = nil
+                    notices.append(
+                        "Today's contribution count is not available yet; your daily goal is saved."
+                    )
+                }
+            } else if tokenUsable {
+                progress = QuotaProgress(
+                    goal: goal, repositories: settings.repositories, records: records, today: today,
+                    timeZone: timeZone, coverageComplete: prCoverageComplete)
+            } else {
+                progress = nil
+                notices.append(
+                    "Your PR goal needs a GitHub token. Choose Contributions in Settings to use a public username."
+                )
+            }
+            if let progress {
+                quota = DashboardSnapshot.Quota(
+                    headline: progress.headline, count: progress.count, target: progress.target,
+                    unit: goal.metric.unit, scopeLabel: progress.scopeLabel,
+                    isReached: progress.isReached, coverageComplete: progress.coverageComplete,
+                    evidence: progress.evidence.map {
+                        .init(
+                            id: $0.id, number: $0.number, title: $0.title,
+                            repository: $0.repository,
+                            url: $0.url, isDraft: $0.isDraft)
+                    }, achievement: achievementsByMetric[goal.metric]?[today])
+            }
         }
 
         return DashboardSnapshot(

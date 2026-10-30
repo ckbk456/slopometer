@@ -147,6 +147,63 @@ struct ColorThemeTests {
         #expect(roundTrip.theme == edited.theme)
     }
 
+    @Test func achievementsDefaultToSystemEvenWithCustomActivityColors() throws {
+        let legacy = Data(
+            #"{"gradient":[{"red":1,"green":0,"blue":1},{"red":0,"green":0,"blue":1}],"accent":{"red":1,"green":0,"blue":1},"trend":{"red":0,"green":0,"blue":0}}"#
+                .utf8)
+        let palette = try JSONDecoder().decode(ColorTheme.Palette.self, from: legacy)
+        #expect(palette.achievement == nil)
+        let theme = ColorTheme(light: palette).resolved()
+        #expect(theme.light.achievement == nil)
+        #expect(theme.dark.achievement == nil)
+        for preset in ThemePreset.all {
+            #expect(preset.theme.light.achievement == nil)
+            #expect(preset.theme.dark?.achievement == nil)
+        }
+    }
+
+    @Test func achievementColorsSurviveSettingsSavedThemesAndPaletteSharing() throws {
+        let light = ThemeColor(hex: 0x246A9C)
+        let dark = ThemeColor(hex: 0xFFD15C)
+        var theme = ColorTheme.standard
+        theme.light.achievement = light
+        theme.dark = theme.light
+        theme.dark?.achievement = dark
+        var settings = DashboardSettings()
+        settings.theme = theme
+        settings.savedThemes = [SavedTheme(name: "Wins", theme: theme)]
+        settings.savedConfigurations = [SavedConfiguration(name: "Work", settings: settings)]
+        settings.setAsidePalette = SetAsidePalette(palette: theme.dark!, isDark: true)
+        // Sharing retains the explicit light color in both appearances while dark is parked.
+        settings.theme.dark = nil
+        let saved = try JSONDecoder().decode(
+            DashboardSettings.self, from: JSONEncoder().encode(settings))
+        #expect(saved == settings)
+        #expect(saved.theme.resolved().dark.achievement == light)
+        #expect(saved.setAsidePalette?.palette.achievement == dark)
+        #expect(saved.savedThemes.first?.theme.resolved().dark.achievement == dark)
+        let restored = try #require(saved.savedConfigurations.first).applied(to: saved)
+        #expect(restored.theme.resolved().light.achievement == light)
+        #expect(restored.theme.resolved().dark.achievement == dark)
+    }
+
+    @Test func widgetSnapshotsCarryCustomAchievementColorsAndAllowSystemReset() throws {
+        var settings = DashboardSettings()
+        settings.login = "me"
+        settings.theme.light.achievement = ThemeColor(hex: 0xF2C94C)
+        settings.theme.dark = nil
+        let snapshot = try SnapshotBuilder.build(
+            settings: settings, cache: MeasurementCache(), tokenUsable: false, problems: [])
+        let decoded = try SharedSnapshot.decode(SharedSnapshot.encode(snapshot))
+        #expect(decoded.theme?.resolved().light.achievement == settings.theme.light.achievement)
+        #expect(decoded.theme?.resolved().dark.achievement == settings.theme.light.achievement)
+        var reset = try #require(decoded.theme)
+        reset.light.achievement = nil
+        let saved = try JSONDecoder().decode(ColorTheme.self, from: JSONEncoder().encode(reset))
+        #expect(saved.resolved().light.achievement == nil)
+        #expect(saved.resolved().dark.achievement == nil)
+    }
+
     @Test func slopGreenIsNoLongerAPreset() {
         #expect(ThemePreset.preset(id: "slop-green") == nil)
     }

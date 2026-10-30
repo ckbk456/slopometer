@@ -84,6 +84,14 @@ private struct StateRow: Codable, FetchableRecord, PersistableRecord {
     let json: String
 }
 
+private struct QuotaDayRow: Codable, FetchableRecord, PersistableRecord {
+    static let databaseTableName = "quota_days"
+    let scope: String
+    let day: String
+    var target: Int
+    var achievedCount: Int?
+}
+
 /// Local cache of GitHub source records and derived values. Not the source of truth.
 public final class MeasurementCache: Sendable {
     private let database: DatabaseQueue
@@ -125,6 +133,15 @@ public final class MeasurementCache: Sendable {
                 table.column("json", .text).notNull()
             }
         }
+        migrator.registerMigration("createQuotaHistory") { db in
+            try db.create(table: QuotaDayRow.databaseTableName) { table in
+                table.column("scope", .text).notNull()
+                table.column("day", .text).notNull()
+                table.column("target", .integer).notNull().check { $0 > 0 }
+                table.column("achievedCount", .integer)
+                table.primaryKey(["scope", "day"])
+            }
+        }
         try migrator.migrate(database)
     }
 
@@ -149,6 +166,104 @@ public final class MeasurementCache: Sendable {
         }
     }
 
+    // MARK: Daily quota history
+
+    /// Save today's target. Only a confirmed sync of the goal metric can earn a win.
+    /// Historical targets and earned wins never change; days before tracking stay unknown.
+    public func recordQuota(
+        settings: DashboardSettings, confirmed: Bool, now: Date = Date()
+    ) throws {
+        guard !settings.login.isEmpty, let goal = settings.goal, goal.isValid else { return }
+        let today = CalendarDay.containing(now, in: settings.timeZone)
+        try database.write { db in
+            let state = try Self.state(db)
+            guard let login = state.login,
+                login.lowercased() == settings.login.lowercased()
+            else { return }
+            guard
+                let scope = try Self.quotaScope(
+                    settings, metric: goal.metric, source: state.calendarSource)
+            else { return }
+            var rows = try QuotaDayRow.filter(Column("scope") == scope).fetchAll(db)
+            if let index = rows.firstIndex(where: { $0.day == today.description }) {
+                if rows[index].achievedCount == nil { rows[index].target = goal.target }
+            } else {
+                rows.append(QuotaDayRow(scope: scope, day: today.description, target: goal.target))
+            }
+            let canConfirmPRs =
+                confirmed && goal.metric.requiresToken
+                && !state.pullRequestResultsIncomplete && state.lastPullRequestSync != nil
+            let records = canConfirmPRs ? try PullRequestRecord.fetchAll(db) : []
+            let contributionCounts =
+                confirmed && goal.metric == .contributions
+                    && state.lastCalendarSync != nil
+                ? try Dictionary(
+                    uniqueKeysWithValues: ContributionRow.fetchAll(db).map {
+                        ($0.day, $0.count)
+                    }) : [:]
+            let prScope =
+                goal.metric.requiresToken
+                ? PullRequestScope(
+                    metric: goal.metric, repositories: Set(settings.repositories),
+                    timeZone: settings.timeZone) : nil
+            for var row in rows {
+                if row.achievedCount == nil, let day = CalendarDay(row.day), day <= today {
+                    var count: Int?
+                    if goal.metric == .contributions {
+                        count = contributionCounts[row.day]
+                    } else if canConfirmPRs, let start = state.pullRequestCoverageStart,
+                        day.start(in: settings.timeZone) >= start
+                    {
+                        count = prScope?.evidence(on: day, in: records).count
+                    }
+                    if let count, count >= row.target { row.achievedCount = count }
+                }
+                try row.save(db)
+            }
+        }
+    }
+
+    public func quotaAchievements(settings: DashboardSettings, metric: Metric) throws
+        -> [CalendarDay: QuotaAchievement]
+    {
+        guard try holds(settings.login) else { return [:] }
+        return try database.read { db in
+            guard
+                let scope = try Self.quotaScope(
+                    settings, metric: metric, source: Self.state(db).calendarSource)
+            else { return [:] }
+            var result: [CalendarDay: QuotaAchievement] = [:]
+            for row in try QuotaDayRow.filter(Column("scope") == scope).fetchAll(db) {
+                guard let count = row.achievedCount, let day = CalendarDay(row.day) else {
+                    continue
+                }
+                result[day] = QuotaAchievement(
+                    day: day, target: row.target, count: count, timeZoneID: settings.timeZoneID,
+                    metric: metric)
+            }
+            return result
+        }
+    }
+
+    /// Target is intentionally absent: changing tomorrow's quota cannot relabel old days.
+    private static func quotaScope(
+        _ settings: DashboardSettings, metric: Metric, source: CalendarSource?
+    ) throws -> String? {
+        let parts: [String]
+        if metric == .contributions {
+            // Calendar sources may label activity on different dates. Never mix their wins.
+            guard let source else { return nil }
+            parts = [
+                settings.login.lowercased(), metric.rawValue, "provider-calendar", source.rawValue,
+            ]
+        } else {
+            parts =
+                [settings.login.lowercased(), metric.rawValue, settings.timeZoneID]
+                + Set(settings.repositories.map { $0.lowercased() }).sorted()
+        }
+        return String(decoding: try JSONEncoder().encode(parts), as: UTF8.self)
+    }
+
     // MARK: Source records
 
     public func syncState() throws -> SyncState {
@@ -169,6 +284,7 @@ public final class MeasurementCache: Sendable {
     /// Clears everything recorded for a previous account.
     public func reset(for login: String) throws {
         try database.write { db in
+            try QuotaDayRow.deleteAll(db)
             try PullRequestRecord.deleteAll(db)
             try ContributionRow.deleteAll(db)
             var state = SyncState()
@@ -182,6 +298,7 @@ public final class MeasurementCache: Sendable {
     public func eraseAll() throws {
         try database.write { db in
             try CachedDay.deleteAll(db)
+            try QuotaDayRow.deleteAll(db)
             try PullRequestRecord.deleteAll(db)
             try ContributionRow.deleteAll(db)
             try StateRow.deleteAll(db)

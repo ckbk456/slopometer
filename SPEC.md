@@ -1,7 +1,7 @@
 # Slopometer specification
 
-Status: product contract, revised 2026-10-16 to account-level measurement, an
-optional token, and a desktop widget. Features below are requirements unless
+Status: product contract, revised 2026-10-29 to include contribution daily goals
+with a public username, alongside token-backed PR goals. Features below are requirements unless
 explicitly marked implemented; see [SCOPE](SCOPE.md) and [ROADMAP](ROADMAP.md).
 
 ## Purpose and voice
@@ -39,8 +39,8 @@ before asking for one:
 
 | Tier | Requires | Provides |
 | --- | --- | --- |
-| Username only | Public profile | Account contribution calendar |
-| Token | One or more user-pasted read-only GitHub tokens | Official contribution calendar, PRs opened, authored PRs merged, PR evidence, PR quotas, optional repository filters |
+| Username only | Public profile | Account contribution calendar and contribution goals |
+| Token | One or more user-pasted read-only GitHub tokens | Official contribution calendar, PRs opened, authored PRs merged, PR evidence, contribution or PR goals, optional repository filters |
 
 - **Username only** reads GitHub's public profile contribution calendar. It is
   not a documented API and may change or break; label it as an unofficial source.
@@ -101,7 +101,7 @@ Display last successful sync and incomplete coverage alongside cached data.
 - Views share the same scope and data completeness policy, and every surface
   reads a metric's counts from the same daily series.
 - Each widget size has its own settings, with a live preview, in the app
-  window's Widgets tab, and does not follow the Activity tab's metric or view. Every size chooses its headline (the daily PR
+  window's Widgets tab, and does not follow the Activity tab's metric or view. Every size chooses its headline (the daily
   quota when one is active, else today's count) and its metric. Small shows the
   headline only; medium shows the last 7 days as daily tiles; large chooses grid
   (a calendar of the last 5 weeks, one tile per day) or columns/line (last 30 or 90 days). Each window is labeled.
@@ -114,23 +114,34 @@ Display last successful sync and incomplete coverage alongside cached data.
 - Today is labeled incomplete. The default trend uses completed days; today's
   live count and quota remain visible separately.
 
-## Daily PR quota
+## Daily goal
 
-Requires a token. One active goal in v1: metric (`PRs opened` or `authored PRs
-merged`), positive integer target, scope (all readable repositories or a
-selected repository filter), and timezone. The suggested metric is authored PRs
-merged. Goals are personal targets and never assess code quality.
+One active goal: metric (`Contributions`, `PRs opened`, or `Authored PRs merged`) and
+positive integer target. Contributions work with a public username or a token;
+PR goals require a usable token and use all readable repositories or the selected
+repository filter, with dates bucketed in the selected timezone. The Settings
+section keeps token-only options visible but disabled without a usable token.
+New goals default to Contributions in username-only mode and authored PRs merged
+in token mode. Goals are personal targets and never assess code quality.
 
-Show "Daily slop quota: 3 / 5 authored PRs merged" with unit and scope. Progress
-may exceed the target; do not cap the numeric count. Clicking the count in the
-app window reveals the exact PRs counted. Reset at calendar midnight in the goal
-timezone, not by subtracting 24 hours. Target edits apply immediately and do not
-alter raw events.
+Contribution goals use the account-wide provider calendar total for today's date
+label in the selected timezone. Never filter or re-bucket those counts. A missing
+date is unknown, not zero. The public source is labeled unofficial; contributions
+expose totals rather than an invented list of individual events. Public and API
+calendars can label activity on different dates, so their earned histories are
+kept separately and shown only with the matching source.
 
-Keep the goal count separate when the chart displays another metric. Completion
-notifications are opt-in, at most once per goal/day after confirmed data, and
-cannot claim a target was reached when coverage is incomplete. No streak penalty
-or guilt notification is required.
+Show "Daily slop quota: 3 / 5 authored PRs merged" (or contributions) with unit and
+scope. Progress may exceed the target. Clicking a PR goal's count reveals its exact
+PR evidence. Today changes at calendar midnight in the selected timezone; target
+edits apply immediately without altering raw events. Historical achievements keep
+the target and confirmed count for their day. Untracked days are never inferred.
+
+Keep the goal count separate when the chart displays another metric. Each chart
+only displays achievements earned for its own metric and scope. Completion
+notifications are opt-in, at most once per goal/day after a successful sync of that
+metric, and cannot claim a target was reached from unknown or incomplete data.
+No streak penalty or guilt notification is required.
 
 ## Appearance and behavior
 

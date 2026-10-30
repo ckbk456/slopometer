@@ -254,3 +254,21 @@ It then lists the deleted tokens with links to revoke them on GitHub, and quits.
 SCOPE were updated on the user's direction, and the README gained uninstall steps. Core
 tests cover `MeasurementCache.eraseAll()`. The checks in the
 [measurements guide](testing/MANUAL%20TO-DO/measurements-and-sync.md) are pending.
+
+Daily goals and achievements (1.1.0): each day that reaches its goal keeps the target it
+was earned against, so later target changes never erase a win. A confirmed sync records
+the target and count; unknown or incomplete data and days without a recorded target stay
+unmarked. Earned days get a border and checkmark on the quota card, menu bar panel,
+widgets, and Activity charts (only for the chart's own metric), with the target in
+accessible labels. The achievement color defaults to the system light/dark foreground and
+can be customized per palette; saved themes, configurations, and widget snapshots keep it.
+The Colors section uses compact four-part rows (title, switch, swatch, `?`) with help in
+popovers. The daily goal can count Contributions with a public username or a token (SPEC
+and SCOPE updated on the user's direction); PR goals still need a token, and their
+controls stay visible but disabled without one. Contribution wins are kept per account
+and calendar source. The app window sits on a translucent sidebar material that shows the
+desktop's colors, and the menu bar panel drops its opaque backing on macOS 26+. Core tests
+cover persistence, delayed confirmation, metric and source separation, and theme
+compatibility; appearance, legibility, notifications, and public-account checks in the
+[desktop](testing/MANUAL%20TO-DO/desktop-and-appearance.md) and
+[measurements](testing/MANUAL%20TO-DO/measurements-and-sync.md) guides are pending.

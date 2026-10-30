@@ -4,7 +4,7 @@ import SwiftUI
 
 /// Settings › Appearance: light, dark, or system, then a preset, a saved theme, or the
 /// person's own edit of one. Only the activity gradient, accent, average line, mapping,
-/// and meter are themable; text and window backgrounds follow the chosen appearance so no
+/// meter, and quota achievements are themable; text and window backgrounds follow the chosen appearance so no
 /// choice can make labels unreadable.
 ///
 /// Edits go to a local draft first so color drags redraw the preview at once, then reach
@@ -160,7 +160,7 @@ struct AppearanceSettings: View {
             header(
                 "Appearance",
                 caption:
-                    "Light or Dark applies to the window, menu bar panel, and widget. Colors cover activity, the accent, and the average line."
+                    "Light or Dark applies to the window, menu bar panel, and widget. Colors cover activity, the accent, the average line, and quota achievements."
             )
         }
     }
@@ -254,7 +254,24 @@ struct AppearanceSettings: View {
 
     private var colorsSection: some View {
         Section {
-            Toggle("Same colors in dark and light mode", isOn: sharesPalette)
+            HStack(spacing: 12) {
+                Toggle("Same colors in dark and light mode", isOn: sharesPalette)
+                    .toggleStyle(.switch)
+                InfoButton("About shared colors") {
+                    Text(
+                        "Use one palette for both appearances, or turn this off to edit Light and Dark separately."
+                    )
+                    if let setAside {
+                        Text(
+                            "Your \(setAside.isDark ? "dark" : "light") colors are kept. Turn sharing off to get them back."
+                        )
+                    } else {
+                        Text(
+                            "Sharing keeps the palette being edited and sets the other palette aside for later."
+                        )
+                    }
+                }
+            }
             if draft.dark != nil {
                 Picker("Editing", selection: $editsDark) {
                     Text("Light").tag(false)
@@ -262,11 +279,6 @@ struct AppearanceSettings: View {
                 }
                 .pickerStyle(.segmented)
                 .fixedSize()
-            } else if let setAside {
-                Text(
-                    "Your \(setAside.isDark ? "dark" : "light") colors are kept. Turn this off to get them back."
-                )
-                .font(.caption).foregroundStyle(.secondary)
             }
             GradientEditor(
                 colors: palette.gradient, selection: stopIndex, editing: $editingStop,
@@ -280,8 +292,6 @@ struct AppearanceSettings: View {
                 },
                 remove: removeStop)
             gradientActions
-            Text("Click a color to change it. Drag a color left or right to reorder.")
-                .font(.caption).foregroundStyle(.secondary)
             HStack(alignment: .firstTextBaseline) {
                 Picker("Mapping", selection: field(\.mapping)) {
                     ForEach(ColorMapping.allCases) { Text($0.title).tag($0) }
@@ -291,51 +301,62 @@ struct AppearanceSettings: View {
                 Spacer()
                 InfoButton("About mapping") {
                     Text(
-                        "4 levels works like GitHub: each day is one of four colors, scaled to the busiest day shown."
+                        "4 levels works like GitHub: four shades sampled from the gradient, with the busiest visible day at the highest level."
                     )
                     Text(
                         "Smooth gives every count its own color along the gradient, from 1 to the busiest day. It suits rainbows and gradients with many colors."
                     )
                 }
             }
-            Text(
-                draft.mapping == .levels
-                    ? "Four steps from the gradient, like GitHub."
-                    : "Every count gets its own color. Best for rainbows."
-            )
-            .font(.caption).foregroundStyle(.secondary)
-            Picker("Quota meter", selection: field(\.meter)) {
-                ForEach(MeterColoring.allCases) { Text($0.title).tag($0) }
-            }
-            .pickerStyle(.segmented)
-            .fixedSize()
-            HStack {
-                Toggle("Automatic accent", isOn: automaticAccent)
+            HStack(alignment: .firstTextBaseline) {
+                Picker("Quota meter", selection: field(\.meter)) {
+                    ForEach(MeterColoring.allCases) { Text($0.title).tag($0) }
+                }
+                .pickerStyle(.segmented)
+                .fixedSize()
                 Spacer()
-                if let accent = palette.accent {
-                    ColorSwatchButton(
-                        title: "Accent",
-                        color: themeColorBinding { _ in
-                            accent
-                        } set: {
-                            $0.accent = $1
-                        }
+                InfoButton("About quota meter colors") {
+                    Text(
+                        "Accent fills every completed tick with the accent color. Gradient walks the activity colors from the first tick to the target."
                     )
-                    .fixedSize()
                 }
             }
-            Text(
-                "Tints controls, badges, and highlighted numbers. Automatic uses the strongest gradient color."
-            )
-            .font(.caption).foregroundStyle(.secondary)
-            .fixedSize(horizontal: false, vertical: true)
-            ColorSwatchButton(
-                title: "Average line",
+            AutomaticColorRow(
+                title: "Automatic accent color", colorTitle: "Accent",
+                automatic: automaticAccent,
                 color: themeColorBinding {
-                    $0.trend
+                    $0.accent ?? draft.resolved().appearance(isDark: editingAppearanceIsDark).accent
                 } set: {
-                    $0.trend = $1
-                })
+                    $0.accent = $1
+                },
+                explanation:
+                    "Tints controls, badges, and highlighted numbers. Automatic uses the strongest gradient color. Turn it off to choose a color."
+            )
+            AutomaticColorRow(
+                title: "Automatic achievement border", colorTitle: "Achievement border",
+                automatic: automaticAchievementBorder,
+                color: themeColorBinding {
+                    $0.achievement ?? achievementFallback
+                } set: {
+                    $0.achievement = $1
+                },
+                explanation:
+                    "Borders and checkmarks for reached quotas. Automatic uses the system light or dark foreground, independent of activity colors. Turn it off to choose a color."
+            )
+            HStack(spacing: 12) {
+                ColorSwatchButton(
+                    title: "Average line",
+                    color: themeColorBinding {
+                        $0.trend
+                    } set: {
+                        $0.trend = $1
+                    })
+                InfoButton("About the average line") {
+                    Text(
+                        "Sets the moving-average line color in the Activity chart. Choose an average window and Columns or Line to see it."
+                    )
+                }
+            }
         } header: {
             header("Colors", caption: themeCaption)
         }
@@ -371,6 +392,14 @@ struct AppearanceSettings: View {
             Button("Surprise Me", systemImage: "dice", action: surprise)
                 .help("Random colors that still run from light to dark")
             Spacer()
+            InfoButton("About activity colors") {
+                Text(
+                    "Click a color to change it. Drag a color left or right to reorder. The gradient runs from less to more activity."
+                )
+                Text(
+                    "Add Color inserts a color beside the selected one, up to eight colors. Reverse flips the gradient. Surprise Me chooses a new gradient."
+                )
+            }
         }
         .labelStyle(.titleAndIcon)
     }
@@ -551,14 +580,57 @@ struct AppearanceSettings: View {
             })
     }
 
+    private var editingAppearanceIsDark: Bool {
+        draft.dark == nil ? colorScheme == .dark : editsDark
+    }
+
+    private var achievementFallback: ThemeColor {
+        editingAppearanceIsDark ? .white : .black
+    }
+
+    private var automaticAchievementBorder: Binding<Bool> {
+        Binding(
+            get: { palette.achievement == nil },
+            set: { automatic in
+                releaseWindowFocus()
+                let color = palette.achievement ?? achievementFallback
+                editPalette { $0.achievement = automatic ? nil : color }
+            })
+    }
+
     /// Manual starts from the automatic color so nothing jumps.
     private var automaticAccent: Binding<Bool> {
         Binding(
             get: { palette.accent == nil },
             set: { automatic in
-                let current = draft.resolved().appearance(isDark: editsDark).accent
+                releaseWindowFocus()
+                let current = draft.resolved().appearance(isDark: editingAppearanceIsDark).accent
                 editPalette { $0.accent = automatic ? nil : current }
             })
+    }
+}
+
+/// All four controls stay mounted, so neither switch changes position when toggled.
+private struct AutomaticColorRow: View {
+    let title: String
+    let colorTitle: String
+    @Binding var automatic: Bool
+    @Binding var color: ThemeColor
+    let explanation: String
+
+    var body: some View {
+        HStack(spacing: 12) {
+            Text(title)
+            Spacer(minLength: 12)
+            Toggle(title, isOn: $automatic)
+                .labelsHidden()
+                .toggleStyle(.switch)
+                .fixedSize()
+            ColorSwatchButton(title: colorTitle, color: $color, showsTitle: false)
+                .disabled(automatic)
+                .opacity(automatic ? 0.45 : 1)
+            InfoButton("About \(colorTitle.lowercased())") { Text(explanation) }
+        }
     }
 }
 
@@ -788,13 +860,21 @@ private struct ThemePreview: View {
             Text(title).font(.caption.weight(.semibold)).foregroundStyle(.secondary)
             HStack(spacing: 3) {
                 ForEach(Sample.week) { point in
-                    DayTile(point: point, busiest: Sample.weekBusiest, textStyle: .caption2)
-                        .frame(height: 22)
+                    DayTile(
+                        point: point, busiest: Sample.weekBusiest, unit: "authored PRs merged",
+                        textStyle: .caption2
+                    )
+                    .frame(height: 22)
                 }
             }
-            SlopChart(points: Sample.month, style: .columns, unit: "contributions", compact: true)
-                .frame(height: 54)
+            SlopChart(
+                points: Sample.month, style: .columns, unit: "authored PRs merged", compact: true
+            )
+            .frame(height: 54)
             QuotaMeter(count: 3, target: 5, height: 8)
+            QuotaAchievementLabel(achievement: Sample.achievement)
+                .padding(6)
+                .overlay { QuotaAchievementBorder(cornerRadius: 6) }
         }
         .foregroundStyle(.primary)
         .padding(10)
@@ -806,6 +886,8 @@ private struct ThemePreview: View {
 
 /// Fixed sample counts for the preview, so it looks the same for everyone.
 private enum Sample {
+    static let achievement = QuotaAchievement(
+        day: CalendarDay(year: 2026, month: 1, day: 10)!, target: 5, count: 6, timeZoneID: "UTC")
     static let weekBusiest = 6
     static let week = points(Array(0...6), averages: false)
     static let month = points(
@@ -818,7 +900,11 @@ private enum Sample {
             return DashboardSnapshot.Point(
                 day: start.adding(days: index), count: counts[index],
                 average: averages ? Double(window.reduce(0, +)) / Double(window.count) : nil,
-                isIncomplete: false)
+                isIncomplete: false,
+                achievement: counts[index] >= 5
+                    ? QuotaAchievement(
+                        day: start.adding(days: index), target: 5,
+                        count: counts[index], timeZoneID: "UTC") : nil)
         }
     }
 }

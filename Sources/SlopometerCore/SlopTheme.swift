@@ -172,11 +172,17 @@ public struct ColorTheme: Codable, Equatable, Sendable {
         public var accent: ThemeColor?
         /// The moving average line.
         public var trend: ThemeColor
+        /// Earned quota borders and badges; nil follows the system foreground, not the accent.
+        public var achievement: ThemeColor?
 
-        public init(gradient: [ThemeColor], accent: ThemeColor? = nil, trend: ThemeColor) {
+        public init(
+            gradient: [ThemeColor], accent: ThemeColor? = nil, trend: ThemeColor,
+            achievement: ThemeColor? = nil
+        ) {
             self.gradient = gradient
             self.accent = accent
             self.trend = trend
+            self.achievement = achievement
         }
     }
 
@@ -242,6 +248,8 @@ public struct SlopTheme: Equatable, Sendable {
         public var accentText: ThemeColor
         /// The moving average line, at least 3:1 on `background`.
         public var trend: ThemeColor
+        /// An explicit earned-quota color; nil lets the view use the system foreground.
+        public var achievement: ThemeColor?
         /// Warnings: incomplete coverage, modified builds. Not themable.
         public var warning: ThemeColor
         /// The typical window background the contrast targets are measured against.
@@ -262,6 +270,7 @@ public struct SlopTheme: Equatable, Sendable {
             self.accent = accent
             accentText = accent.readable(on: background)
             trend = palette.trend.readable(on: background, ratio: 3)
+            achievement = palette.achievement
             let isDark = background.luminance < 0.2
             warning = ThemeColor(hex: isDark ? 0xD29922 : 0x8A5C00)
             self.background = background

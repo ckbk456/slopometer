@@ -48,6 +48,8 @@ public struct SyncReport: Equatable, Sendable {
     /// Each checked token's owner (`viewer.login`), by token ID. Missing when the check failed.
     public var tokenOwners: [String: String] = [:]
     public var calendarError: GitHubError?
+    /// True only after this run successfully replaced the contribution calendar.
+    public var calendarUpdated = false
     /// PR data was not refreshed: no token was usable, or the PR fetch failed.
     public var pullRequestError: GitHubError?
     /// At least one token was verified as belonging to the account.
@@ -58,6 +60,13 @@ public struct SyncReport: Equatable, Sendable {
     public var tokenErrors: [String: GitHubError] = [:]
     /// Nil when no PR fetch was attempted.
     public var pullRequestSyncMode: PullRequestSyncMode?
+
+    /// A failure of one source cannot confirm that source's goal from old cached data.
+    public func confirms(_ metric: Metric) -> Bool {
+        if metric == .contributions { return calendarUpdated && calendarError == nil }
+        return tokenVerified && pullRequestSyncMode != nil && pullRequestError == nil
+            && tokenErrors.isEmpty
+    }
 
     public var rateLimitReset: Date? {
         for error in [calendarError, pullRequestError] {
@@ -173,6 +182,7 @@ public actor SyncCoordinator {
                 try cache.replaceCalendar(counts, source: .profilePage, at: request.now)
             }
             cacheChanged = true
+            report.calendarUpdated = true
         } catch {
             report.calendarError = Self.githubError(error)
         }

@@ -83,3 +83,50 @@ struct QuotaMeter: View {
             LinearGradient(stops: stops, startPoint: .leading, endPoint: .trailing))
     }
 }
+
+/// A quiet, persistent celebration. No looping animation, so Reduce Motion is respected.
+struct QuotaAchievementBorder: View {
+    var cornerRadius: CGFloat = 12
+    @Environment(\.slopColors) private var colors
+    @Environment(\.widgetRenderingMode) private var renderingMode
+
+    var body: some View {
+        RoundedRectangle(cornerRadius: cornerRadius)
+            .strokeBorder(
+                colors.achievement(in: renderingMode),
+                lineWidth: 2
+            )
+            .allowsHitTesting(false)
+            .accessibilityHidden(true)
+    }
+}
+
+struct QuotaAchievementLabel: View {
+    let achievement: QuotaAchievement
+    @Environment(\.slopColors) private var colors
+    @Environment(\.widgetRenderingMode) private var renderingMode
+
+    var body: some View {
+        Label(achievement.label, systemImage: "checkmark.seal.fill")
+            .font(.caption.weight(.semibold))
+            .foregroundStyle(renderingMode == .fullColor ? colors.achievementText : .primary)
+            .help("Earned against that day's saved target. Later quota changes keep this win.")
+    }
+}
+
+/// Shared by calendar tiles and chart marks; the caller supplies its size.
+struct QuotaAchievementBadge: View {
+    @Environment(\.slopColors) private var colors
+    @Environment(\.widgetRenderingMode) private var renderingMode
+
+    var body: some View {
+        Image(systemName: "checkmark.circle.fill")
+            .resizable().scaledToFit()
+            .symbolRenderingMode(.palette)
+            .foregroundStyle(
+                colors.achievementInk(in: renderingMode), colors.achievement(in: renderingMode)
+            )
+            .accessibilityHidden(true)
+            .allowsHitTesting(false)
+    }
+}

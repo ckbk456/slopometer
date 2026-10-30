@@ -11,6 +11,7 @@ struct WidgetContent: View {
     /// The moment the widget shows, so the sync age can advance between snapshots.
     var now = Date()
     @Environment(\.slopColors) private var colors
+    @Environment(\.widgetRenderingMode) private var renderingMode
 
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
@@ -23,6 +24,15 @@ struct WidgetContent: View {
                     .lineLimit(2).minimumScaleFactor(0.8)
             }
         }
+        .overlay {
+            if let achievement = snapshot?.quota?.achievement,
+                let panel = snapshot?.widget(size), panel.headline == .quota,
+                size == .small || !panel.metric.requiresToken || snapshot?.tier == .token,
+                achievement.isToday(at: now)
+            {
+                QuotaAchievementBorder(cornerRadius: 14).padding(-8)
+            }
+        }
     }
 
     private var content: some View {
@@ -30,7 +40,9 @@ struct WidgetContent: View {
             if let snapshot, snapshot.tier != .notConfigured,
                 let panel = snapshot.widget(size)
             {
-                if panel.metric.requiresToken, snapshot.tier != .token {
+                if panel.metric.requiresToken, snapshot.tier != .token,
+                    !(size == .small && panel.headline == .quota && snapshot.quota != nil)
+                {
                     message(
                         "\(panel.metric.title) needs a GitHub token",
                         detail: "Add one in Settings, or show Contributions instead."
@@ -120,6 +132,10 @@ struct WidgetContent: View {
                 QuotaMeter(count: quota.count, target: quota.target, height: 6)
                 Text("\(quota.unit) today")
                     .font(.caption).foregroundStyle(.secondary).lineLimit(2)
+                if let achievement = quota.achievement, achievement.isToday(at: now) {
+                    QuotaAchievementLabel(achievement: achievement).lineLimit(1)
+                        .minimumScaleFactor(0.8)
+                }
             } else {
                 Text(panel.todayCount.map(String.init) ?? "–")
                     .font(countFont)
@@ -162,6 +178,14 @@ struct WidgetContent: View {
                 .foregroundStyle(.secondary)
         }
         .monospacedDigit()
+        .overlay(alignment: .topTrailing) {
+            if let achievement = quota.achievement, achievement.isToday(at: now), size == .medium {
+                Image(systemName: "checkmark.seal.fill")
+                    .font(.caption2).foregroundStyle(colors.achievement(in: renderingMode))
+                    .offset(x: 10, y: -5)
+                    .accessibilityLabel(achievement.label)
+            }
+        }
     }
 
     private var countFont: Font {
@@ -207,7 +231,7 @@ private struct WeekStrip: View {
         HStack(spacing: 5) {
             ForEach(points) { point in
                 VStack(spacing: 3) {
-                    DayTile(point: point, busiest: busiest)
+                    DayTile(point: point, busiest: busiest, unit: unit)
                         .frame(height: 30)
                     WeekdayLabel(date: point.day.start(in: .current), isToday: point.isIncomplete)
                 }
@@ -248,7 +272,7 @@ private struct CalendarGrid: View {
                 HStack(spacing: Self.gap) {
                     ForEach(0..<7, id: \.self) { column in
                         if let point = rows[row][column] {
-                            DayTile(point: point, busiest: busiest, textStyle: .title3)
+                            DayTile(point: point, busiest: busiest, unit: unit, textStyle: .title3)
                                 .accessibilityElement(children: .ignore)
                                 .accessibilityLabel(HeatmapLabel.describe(point, unit: unit))
                         } else {
@@ -299,6 +323,7 @@ private struct WeekdayLabel: View {
 struct DayTile: View {
     let point: DashboardSnapshot.Point
     let busiest: Int
+    let unit: String
     var textStyle: Font.TextStyle = .callout
     @Environment(\.slopColors) private var colors
     @Environment(\.widgetRenderingMode) private var renderingMode
@@ -333,10 +358,24 @@ struct DayTile: View {
                 shape.strokeBorder(SlopPalette.unknown, style: StrokeStyle(lineWidth: 1, dash: [2]))
                 Text("–").font(.system(textStyle)).foregroundStyle(.secondary)
             }
-            if point.isIncomplete {
+            if point.achievement != nil {
+                // Double outline stays visible against both bright and dark tile fills.
+                shape.strokeBorder(colors.achievement(in: renderingMode), lineWidth: 2)
+                shape.inset(by: 2).strokeBorder(
+                    Color(nsColor: .windowBackgroundColor), lineWidth: 1)
+            } else if point.isIncomplete {
                 shape.strokeBorder(Color.primary.opacity(0.6), lineWidth: 1)
             }
         }
+        .overlay(alignment: .topTrailing) {
+            if point.achievement != nil {
+                QuotaAchievementBadge()
+                    .frame(width: 10, height: 10)
+                    .offset(x: 2, y: -3)
+                    .accessibilityHidden(true)
+            }
+        }
+        .help(HeatmapLabel.describe(point, unit: unit))
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 }

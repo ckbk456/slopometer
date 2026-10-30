@@ -1,6 +1,6 @@
 import Foundation
 
-/// The single daily PR goal. Requires a token because it is built from PR records.
+/// One daily goal: provider calendar contributions, or token-backed PR records.
 public struct Goal: Codable, Equatable, Sendable {
     public var metric: Metric
     public var target: Int
@@ -26,7 +26,7 @@ public struct Goal: Codable, Equatable, Sendable {
         }
     }
 
-    public var isValid: Bool { metric.requiresToken && target > 0 }
+    public var isValid: Bool { target > 0 }
 
     /// Describes a repository filter; empty means every repository the token can read.
     public static func scopeLabel(for repositories: [String]) -> String {
@@ -64,20 +64,30 @@ public struct QuotaProgress: Equatable, Sendable {
         self.coverageComplete = coverageComplete
     }
 
+    /// A known provider-calendar total. Missing days must not be passed as zero.
+    public init(goal: Goal, contributionCount: Int, source: CalendarSource) {
+        metric = .contributions
+        target = goal.target
+        count = contributionCount
+        scopeLabel = "\(source.label), account-wide"
+        evidence = []
+        coverageComplete = true
+    }
+
     /// "Daily slop quota: 3 / 5 authored PRs merged"
     public var headline: String {
         "Daily slop quota: \(count) / \(target) \(metric.unit)"
     }
 }
 
-/// The notification for reaching the daily PR quota: at most one per goal and day.
+/// The notification for reaching the daily quota: at most one per goal and day.
 public struct QuotaCompletion: Equatable, Sendable {
     /// The goal (metric, target, repository filter) and the day in the goal timezone.
     public let key: String
     public let title: String
     public let body: String
 
-    /// Nil unless the last sync confirmed the PR data, the quota is reached with complete
+    /// Nil unless the last sync confirmed the goal metric's data, the quota is reached with complete
     /// coverage, and this goal was not already announced on `day`. Announced keys from
     /// earlier days are ignored, so they can be kept until the day changes.
     public static func due(
@@ -97,12 +107,44 @@ public struct QuotaCompletion: Equatable, Sendable {
     static func key(goal: Goal, repositories: [String], day: CalendarDay) -> String {
         [
             day.description, goal.metric.rawValue, String(goal.target),
-            repositories.sorted().joined(separator: ","),
+            goal.metric.requiresToken ? repositories.sorted().joined(separator: ",") : "",
         ].joined(separator: "|")
     }
 
     /// Whether an announced key belongs to `day`, so older ones can be dropped.
     public static func isFrom(_ day: CalendarDay, key: String) -> Bool {
         key.hasPrefix("\(day.description)|")
+    }
+}
+
+/// A win earned against the target saved for that day, independent of later edits.
+public struct QuotaAchievement: Codable, Equatable, Sendable {
+    public let day: CalendarDay
+    public let target: Int
+    public let count: Int
+    public let timeZoneID: String
+    /// Optional for snapshots written before achievements carried their metric.
+    public let metric: Metric?
+
+    public init(
+        day: CalendarDay, target: Int, count: Int, timeZoneID: String, metric: Metric? = nil
+    ) {
+        self.day = day
+        self.target = target
+        self.count = count
+        self.timeZoneID = timeZoneID
+        self.metric = metric
+    }
+
+    public var detail: String {
+        let datePolicy = metric == .contributions ? "GitHub calendar day" : timeZoneID
+        return "Quota reached · \(count) / \(target) \(metric?.unit ?? "PRs") · \(datePolicy)"
+    }
+
+    public var label: String { "Quota reached · \(count) / \(target)" }
+
+    public func isToday(at date: Date) -> Bool {
+        guard let zone = TimeZone(identifier: timeZoneID) else { return false }
+        return CalendarDay.containing(date, in: zone) == day
     }
 }

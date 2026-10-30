@@ -61,7 +61,7 @@ final class AppModel {
     private(set) var dataRemoved = false
 
     var openWindowAction: OpenWindowAction?
-    /// The opt-in notification for reaching the daily PR quota.
+    /// The opt-in notification for reaching the daily quota.
     let quotaNotifier = QuotaNotifier()
 
     private let cache: MeasurementCache?
@@ -205,12 +205,11 @@ final class AppModel {
             report.calendarError == nil && report.pullRequestError == nil
             ? 0 : consecutiveFailures + 1
         syncStage = nil
-        rebuild()
-        // Only a sync that verified a token and fetched PRs confirms today's count.
-        let confirmed = currentReport.map { $0.tokenVerified && $0.pullRequestError == nil }
+        rebuild(confirmed: true)
+        let confirmed = settings.goal.map { currentReport?.confirms($0.metric) == true } ?? false
         quotaNotifier.check(
             quota: snapshot.quota, goal: settings.goal, repositories: settings.repositories,
-            timeZone: settings.timeZone, confirmed: confirmed ?? false)
+            timeZone: settings.timeZone, confirmed: confirmed)
     }
 
     /// Shows each stage and publishes data the sync has already written, so the calendar
@@ -374,7 +373,7 @@ final class AppModel {
 
     // MARK: Internals
 
-    private func rebuild() {
+    private func rebuild(confirmed: Bool = false) {
         guard let cache else { return }
         var problems: [String] = []
         if let startupError { problems.append(startupError) }
@@ -395,6 +394,11 @@ final class AppModel {
         measured.login = accountLogin
         do {
             records = try cache.holds(measured.login) ? cache.pullRequests() : []
+            if let goal = measured.goal, !goal.metric.requiresToken || tokenUsable {
+                try cache.recordQuota(
+                    settings: measured,
+                    confirmed: confirmed && report?.confirms(goal.metric) == true)
+            }
             snapshot = try SnapshotBuilder.build(
                 settings: measured, cache: cache, tokenUsable: tokenUsable, problems: problems)
             menuBarMetric =

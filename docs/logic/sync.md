@@ -101,7 +101,7 @@ evidence and repository list read nothing from such a cache either.
 `SnapshotBuilder` turns settings plus cache into `DashboardSnapshot`: points for the
 selected range with unknown days as nil, a trailing average over completed days only
 (today is marked incomplete and has no average), today's count, the quota with its
-PR evidence, the last successful sync, and plain-language notices for missing token,
+PR evidence (empty for contribution goals), the last successful sync, and plain-language notices for missing token,
 stale data (older than 45 minutes), incomplete coverage, and sync errors.
 
 The app writes the snapshot as JSON to the App Group container
@@ -204,9 +204,13 @@ no advice.
 | Other presets' default trend; warning | #8A5C00, 5.33:1 | #D29922, 6.60:1 |
 
 `SlopThemeTests` checks the standard targets and, for every preset, accent text 4.5:1,
-trend 3:1, and warning 4.5:1 in both appearances. The menu bar panel draws the window
-background at 82 % opacity behind its content, so the wallpaper does not wash out the
-colors.
+trend 3:1, and warning 4.5:1 in both appearances. On macOS 26 and later the menu bar
+panel shows the system's Liquid Glass panel material with nothing laid over it, as Apple's
+menu bar extras do; its legibility over bright or busy wallpapers is a manual check. Earlier
+systems, and builds from SDKs before macOS 26, draw the window background at 82 % opacity
+behind the content, because the older vibrant material let the wallpaper wash out the colors.
+The app window's translucent background (below) means these contrast figures are measured
+against the standard backgrounds, not every wallpaper; that too is a manual check.
 
 The dashboard replaces the chart with a token explanation when a PR metric is
 selected without a usable token (missing, still being checked, rejected, or owned by another account)
@@ -307,6 +311,14 @@ Owners: `App/MainView.swift`, `App/SettingsView.swift`, `App/Glass.swift`.
   card stay borderless or bordered so glass is not stacked on glass. macOS 14 and 15, and
   builds made with an SDK before macOS 26 (CI uses Xcode 16.4), keep the earlier fills.
   Widgets are unchanged.
+- Translucent window (1.1.0 development): the whole window, title bar and toolbar
+  included, sits on AppKit's sidebar material blended with what is behind the window
+  (`NSVisualEffectView`, `.sidebar`, behind-window), so the desktop's colors show through
+  every tab as in a Finder or Tailscale sidebar. It is the window container background on
+  macOS 15 and later and a background extended into the title bar on macOS 14. Settings
+  and Widgets hide their forms' opaque scroll background so the material shows around the
+  grouped sections. Like a sidebar, the material turns flat while the window is inactive,
+  and the system makes it opaque with Reduce Transparency. The layout is unchanged.
 
 ## Known limits
 
@@ -317,3 +329,56 @@ Owners: `App/MainView.swift`, `App/SettingsView.swift`, `App/Glass.swift`.
 
 Deterministic evidence: `Tests/SlopometerCoreTests/GitHubClientTests.swift` and
 `SnapshotTests.swift`. Human/provider checklist: [measurements and sync](../../testing/MANUAL%20TO-DO/measurements-and-sync.md).
+
+
+### Achievement colors (1.1.0 development)
+
+Each theme palette also stores optional `achievement`. Missing/nil uses the system
+foreground (light in dark appearance, dark in light appearance), independent of
+activity colors and the accent. Settings › Appearance › Colors offers “Automatic
+achievement border”; turning it off enables the existing inline swatch picker.
+This field follows light/dark palette editing/sharing, saved themes, saved
+configurations, and the widget snapshot. Tinted widgets keep system monochrome.
+
+Tiles and charts use one badge view with contrasting checkmark ink. The custom
+color is used directly for borders and badge fills; completion text derives a
+readable version on the background. The sample preview includes earned days and
+a completed-quota label and border in both appearances.
+
+The new swatch uses the same local popover, hue/saturation/brightness/hex picker,
+`releaseWindowFocus()` safeguard, draft debounce, and commit-on-leave behavior as
+existing color controls. The target field's explicit-focus rules are unchanged.
+
+
+### Compact color controls and Activity achievements (same development build)
+
+Automatic accent color and Automatic achievement border each use one stable row:
+heading, switch, color swatch, and (?) help. The swatch remains mounted and dimmed/
+disabled in automatic mode, keeping both switch locations and the form height
+unchanged. Palette-sharing guidance, gradient editing instructions, mapping,
+meter, and average-line help are in their adjacent (?) popovers. Activity-scale
+labels and actual controls remain visible. The existing swatch and info popovers
+still release text focus before opening.
+
+Activity, menu tiles, and widgets only display their own metric's saved achievements.
+The former PR annotations on Contributions were a bug: they are removed. A contribution
+goal works in username-only mode using the successfully refreshed public calendar, or
+in token mode using the API calendar. Its quota card shows the source and account-wide
+total without PR evidence controls. Missing today means no quota count yet and a notice;
+known zero remains zero. A small widget with a quota headline can show a contribution
+goal even if its unused chart metric is a token-only PR metric.
+
+Settings now groups the enable switch, Counts (all three metrics), Daily target,
+Notify when reached, and PR repositories under Daily goal, with compact (?) guidance.
+PR metric choices, repository controls, and targets/notifications for an unavailable PR
+goal are disabled without a usable token. Counts remains usable so an enabled PR goal
+can be switched to Contributions. Enabling a parked PR goal without a token chooses
+Contributions; losing a token while a goal is enabled preserves that PR setting and
+shows a token-needed notice rather than silently changing its meaning.
+
+`SyncReport.calendarUpdated` is set only after the calendar cache replacement succeeds.
+`confirms(metric)` gates new achievements and notifications independently: failed PR
+fetches do not invalidate a refreshed contribution calendar, and failed calendars do
+not confirm contribution wins from stale data. Account checks still reject old reports.
+Tooltips/day details name the earned metric and original target; contribution tooltips
+say GitHub calendar day. The grid uses a border and corner badge with a wrapping legend.
