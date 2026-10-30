@@ -1,3 +1,4 @@
+import AppKit
 import SwiftUI
 
 // Liquid Glass for the app window on macOS 26 and later. CI builds with an SDK that
@@ -5,6 +6,7 @@ import SwiftUI
 // availability check, and earlier systems keep the previous appearance. Standard
 // controls (Form, segmented pickers, tabs) adopt the new design from the SDK by
 // themselves; these helpers cover the app's own cards, badges, and small buttons.
+// Behind all of it, the window shows the desktop through a translucent material.
 
 extension View {
     /// A content card: glass on macOS 26+, a quaternary fill before.
@@ -84,5 +86,35 @@ extension ToolbarItem {
         #else
             return self
         #endif
+    }
+}
+
+/// The window's background: AppKit's sidebar material blended with what is behind the
+/// window, so the desktop's colors show through every tab, as in a Finder or Tailscale
+/// sidebar. Like a sidebar it turns flat while the window is inactive, and the system
+/// makes it opaque with Reduce Transparency.
+private struct WindowMaterial: NSViewRepresentable {
+    func makeNSView(context: Context) -> NSVisualEffectView {
+        let view = NSVisualEffectView()
+        view.material = .sidebar
+        view.blendingMode = .behindWindow
+        view.state = .followsWindowActiveState
+        return view
+    }
+
+    func updateNSView(_ view: NSVisualEffectView, context: Context) {}
+}
+
+extension View {
+    /// Puts `WindowMaterial` behind the whole window, title bar and toolbar included. The
+    /// window container background exists from macOS 15; before, the content's background
+    /// extends into the title bar instead.
+    @ViewBuilder
+    func translucentWindowBackground() -> some View {
+        if #available(macOS 15, *) {
+            containerBackground(for: .window) { WindowMaterial() }
+        } else {
+            background { WindowMaterial().ignoresSafeArea() }
+        }
     }
 }

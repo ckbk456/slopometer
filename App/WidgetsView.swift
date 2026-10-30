@@ -25,6 +25,8 @@ struct WidgetsView: View {
                 summary: "Headline and a calendar grid, columns, or line.")
         }
         .formStyle(.grouped)
+        // The window's translucent material shows around the sections.
+        .scrollContentBackground(.hidden)
     }
 
     private func sizeSection(
@@ -40,7 +42,7 @@ struct WidgetsView: View {
             }
             if panel.wrappedValue.headline == .quota, model.snapshot.quota == nil {
                 Text(
-                    "No daily PR quota is on, so this shows today's count. Turn one on in Settings."
+                    "No daily goal count is available, so this shows today's count. Configure your goal in Settings."
                 )
                 .font(.caption).foregroundStyle(.secondary)
             }

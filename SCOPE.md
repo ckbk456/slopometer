@@ -15,15 +15,16 @@ connected GitHub dashboard, a working widget, or a signed release.
 
 - Background menu-bar app, desktop widget, and an app window for inspection and settings.
 - One GitHub account by username; account-level measurement by default.
-- Username-only tier: account contribution calendar from the public profile.
+- Username-only tier: account contribution calendar and contribution daily goals from the public profile.
 - Optional token tier (one or more tokens, for example one per organization):
   official contribution calendar, PRs opened, authored PRs merged, PR evidence,
   and optional repository filters. Classic tokens only by explicit opt-in. The app states which
   features need a token.
 - Grid, column, and line views; 30/90/180/365-day ranges; 7/30-day simple averages.
 - Palette presets, custom colors, density, and saved configurations.
-- One daily PR goal (token tier) with target, metric, scope, timezone, and
-  inspectable PR evidence.
+- One daily goal: account-wide contributions in either tier, or PRs opened/authored
+  PRs merged with a token, repository scope, timezone, and inspectable PR evidence.
+  Achievements stay specific to their metric and confirmed source.
 - Local cache, pagination, delayed-event reconciliation, rate-limit handling,
   offline/stale indicators, shared widget snapshot, and token storage in Keychain.
 - Remove All Data before uninstalling, with a prompt to revoke the deleted tokens on GitHub.

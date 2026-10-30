@@ -125,49 +125,64 @@ struct SettingsView: View {
                 sectionHeader(
                     "Tokens",
                     caption:
-                        "Read-only fine-grained tokens unlock PR stats, the daily quota, and repository filters."
+                        "Read-only fine-grained tokens unlock PR stats, PR goals, and repository filters."
                 )
             }
 
             Section {
-                LabeledContent("Repositories") {
+                Toggle("Enable daily goal", isOn: goalEnabled(bindable.settings))
+                let goal = model.settings.goal ?? model.parkedGoal
+                Picker("Counts", selection: goalBinding(bindable.settings, \.metric, goal)) {
+                    Text("Contributions").tag(Metric.contributions)
+                    Text("PRs opened").tag(Metric.prsOpened).disabled(!model.tokenUsable)
+                    Text("Authored PRs merged").tag(Metric.prsMerged).disabled(!model.tokenUsable)
+                }
+                .disabled(model.settings.goal == nil)
+                LabeledContent("Daily target") {
+                    HStack(spacing: 6) {
+                        TargetField(value: targetBinding(bindable.settings, goal))
+                            .frame(width: 56)
+                        Stepper(
+                            "Daily target", value: targetBinding(bindable.settings, goal),
+                            in: Goal.targetRange
+                        )
+                        .labelsHidden()
+                        Text(goal.metric.unit).foregroundStyle(.secondary)
+                    }
+                }
+                .disabled(
+                    model.settings.goal == nil || (goal.metric.requiresToken && !model.tokenUsable))
+                quotaNotification
+                    .disabled(
+                        model.settings.goal == nil
+                            || (goal.metric.requiresToken && !model.tokenUsable))
+                LabeledContent("PR repositories") {
                     RepositoryPicker(
                         selection: bindable.settings.repositories,
                         choices: RepositoryFilter.choices(
                             records: model.records, selected: model.settings.repositories))
                 }
-                Toggle("Daily PR quota", isOn: goalEnabled(bindable.settings))
-                Group {
-                    let goal = model.settings.goal ?? model.parkedGoal
-                    Picker("Counts", selection: goalBinding(bindable.settings, \.metric, goal)) {
-                        Text(Metric.prsMerged.unit).tag(Metric.prsMerged)
-                        Text(Metric.prsOpened.unit).tag(Metric.prsOpened)
-                    }
-                    LabeledContent("Daily target") {
-                        HStack(spacing: 6) {
-                            TargetField(value: targetBinding(bindable.settings, goal))
-                                .frame(width: 56)
-                            Stepper(
-                                "Daily target", value: targetBinding(bindable.settings, goal),
-                                in: Goal.targetRange
-                            )
-                            .labelsHidden()
-                            Text(goal.metric.unit).foregroundStyle(.secondary)
-                        }
-                    }
-                    quotaNotification
-                }
-                .disabled(model.settings.goal == nil)
+                .disabled(!model.tokenUsable)
             } header: {
-                VStack(alignment: .leading, spacing: 2) {
-                    Text("Pull requests")
-                    if !model.hasToken {
-                        Text("Needs a token above.")
-                            .font(.caption).fontWeight(.regular).foregroundStyle(.secondary)
+                HStack {
+                    Text("Daily goal")
+                    Spacer()
+                    InfoButton("About daily goals") {
+                        Text(
+                            "Choose one daily goal. Contributions work with just a public username and use GitHub's account-wide calendar total, including any private contribution counts the profile shares."
+                        )
+                        Text(
+                            "PR goals and repository filters need a usable token. The repository filter applies only to PR charts and PR goals; it never filters Contributions."
+                        )
+                        Text(
+                            "Achievements belong to the metric and target recorded for that day. A later target change keeps earned wins. New goals do not award untracked past days."
+                        )
+                        Text(
+                            "GitHub's public and API calendars can label activity on different days. Contribution achievements follow the calendar source that confirmed them, and reappear if you return to that source."
+                        )
                     }
                 }
             }
-            .disabled(!model.hasToken)
 
             Section("Timezone") {
                 LabeledContent("Timezone") {
@@ -250,6 +265,8 @@ struct SettingsView: View {
             }
         }
         .formStyle(.grouped)
+        // The window's translucent material shows around the sections.
+        .scrollContentBackground(.hidden)
     }
 
     private var removalWarning: String {
@@ -414,7 +431,11 @@ struct SettingsView: View {
             get: { settings.wrappedValue.goal != nil },
             set: { enabled in
                 if enabled {
-                    settings.wrappedValue.goal = model.parkedGoal
+                    var goal = model.parkedGoal
+                    if goal.metric.requiresToken && !model.tokenUsable {
+                        goal.metric = .contributions
+                    }
+                    settings.wrappedValue.goal = goal
                 } else {
                     if let goal = settings.wrappedValue.goal { model.parkedGoal = goal }
                     settings.wrappedValue.goal = nil

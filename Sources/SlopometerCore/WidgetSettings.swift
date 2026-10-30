@@ -12,7 +12,7 @@ public enum WidgetSize: String, Codable, CaseIterable, Identifiable, Sendable {
 
 /// What a widget leads with.
 public enum WidgetHeadline: String, Codable, CaseIterable, Identifiable, Sendable {
-    /// The daily PR quota when one is set, otherwise today's count.
+    /// The daily quota when one is set, otherwise today's count.
     case quota
     case today
 
@@ -20,7 +20,7 @@ public enum WidgetHeadline: String, Codable, CaseIterable, Identifiable, Sendabl
 
     public var title: String {
         switch self {
-        case .quota: "Daily PR quota"
+        case .quota: "Daily quota"
         case .today: "Today's count"
         }
     }

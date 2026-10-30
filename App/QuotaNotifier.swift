@@ -56,7 +56,7 @@ final class QuotaNotifier: NSObject {
         }
     }
 
-    /// Called after each sync. `confirmed` means the sync verified a token and fetched PRs.
+    /// Called after each sync. `confirmed` means this sync refreshed the goal metric successfully.
     func check(
         quota: DashboardSnapshot.Quota?, goal: Goal?, repositories: [String],
         timeZone: TimeZone, confirmed: Bool
@@ -93,7 +93,7 @@ extension QuotaNotifier: @preconcurrency UNUserNotificationCenterDelegate {
         completionHandler([.banner, .sound])
     }
 
-    /// Clicking the notification opens the app window, where the counted PRs are listed.
+    /// Clicking the notification opens the app window, where the daily goal is shown.
     func userNotificationCenter(
         _ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse,
         withCompletionHandler completionHandler: @escaping () -> Void

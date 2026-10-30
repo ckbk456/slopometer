@@ -136,8 +136,8 @@ struct QuotaTests {
         #expect(!progress.isReached)
     }
 
-    @Test func goalsMustBePositivePRTargets() {
-        #expect(!Goal(metric: .contributions, target: 3).isValid)
+    @Test func goalsAcceptAllMetricsWithPositiveTargets() {
+        #expect(Goal(metric: .contributions, target: 3).isValid)
         #expect(!Goal(metric: .prsMerged, target: 0).isValid)
         #expect(Goal(metric: .prsOpened, target: 1).isValid)
     }

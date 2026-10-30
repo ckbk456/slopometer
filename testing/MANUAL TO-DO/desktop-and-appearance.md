@@ -11,10 +11,11 @@
 - [ ] Without a token, PRs opened / Authored PRs merged show the token explanation; Add
       Token opens Settings scrolled to the token field. Rejected or mismatched tokens show
       their own wording.
-- [ ] Settings order: Username, Tokens (InsecuSlopometer™ last; see 0.9.0 below), Pull
-      requests, Timezone, About. Pull requests is
-      grayed out without a token; Counts and Daily target stay visible but grayed out while
-      the quota is off, and turning it back on restores their earlier values.
+- [ ] Settings order: Username, Tokens (InsecuSlopometer™ last; see 0.9.0 below), Daily
+      goal, Timezone, Appearance, General, and About. Contributions can be selected
+      without a token; PR choices and PR repositories are disabled. Counts and Daily
+      target stay visible but disabled while the goal is off. Re-enabling restores
+      the target and metric, except an unavailable parked PR goal uses Contributions.
 - [ ] Type a daily quota target (for example 100); values outside 1–999 snap into range.
 - [ ] (1.0.4; failed on 1.0.2) Type or paste letters into Daily target; they never appear,
       and pasting `4x2` leaves `42`. Clear the field and click elsewhere; the previous
@@ -28,7 +29,7 @@
 
 ## App window polish (0.7.0): pending
 
-- [ ] Focus the Username field, scroll Settings down, open Pull requests › Repositories
+- [ ] Focus the Username field, scroll Settings down, open Daily goal › PR repositories
       (with and without more than 8 repositories, so with and without the search field),
       then click elsewhere to close it. The form keeps its scroll position and the
       Username text is not selected. Repeat with each `?` popover.
@@ -128,7 +129,7 @@ checks below were not separately reported and remain pending.
       columns, segmented/toggle tint, the prominent Add Token button) reads as a darker green;
       dark appearance looks as before. Tile numbers are readable on every level.
 - [ ] Menu bar panel over a busy or bright wallpaper, light and dark: background is mostly
-      opaque, "Target reached", "Token", meter ticks, and 7-day tiles are readable; Increase
+      opaque (macOS 14–15 only after the translucent window change below), "Target reached", "Token", meter ticks, and 7-day tiles are readable; Increase
       Contrast and Reduce Transparency still look right.
 
 ## One registered build (0.11.1): pending
@@ -362,3 +363,72 @@ macOS 27.0.1). The fix slices the layout's subviews with explicit `Range<Int>` v
 - [ ] A Release export still has the bundle IDs, App Group, and URL scheme in
       [Updates](../../docs/logic/updates.md), and 1.0.6 installs update to it in place.
 
+
+
+## Daily achievements — development build
+
+- [ ] Check reached and unreached tiles, grid, columns, and line charts in light/dark
+  and custom themes. Counts stay legible beside the checkmarks; selection and today
+  remain distinguishable. Tooltips/VoiceOver give the original earned target.
+- [ ] Add the Slopometer Dev widget in all three sizes. Confirm the quota headline's
+  border and completion label/checkmark, plus historical marks. Check tinted and
+  unfocused desktop rendering, and that the border does not clip at the edges.
+- [ ] Cross the goal timezone's midnight with the app closed: yesterday's widget
+  snapshot must not keep today's outer celebration. Reduce Motion needs no animation.
+
+
+### Achievement color picker
+
+- [ ] Automatic achievement border is on for existing themes. It follows Light/Dark
+  without picking a color from the activity gradient or accent.
+- [ ] Turn it off and edit the Achievement swatch by hue, brightness/saturation,
+  and hex (Return to apply hex). The local popover stays beside its swatch.
+- [ ] Start with the daily target/username focused, scroll to the swatch, open and
+  dismiss it: no jump to those fields, text replacement, or stolen typing focus.
+- [ ] Drag a color and immediately leave Settings; the draft persists. Switch
+  Light/Dark editing, share/unshare palettes, save/update a named theme, and
+  relaunch: achievement colors are preserved along with the existing colors.
+- [ ] Reset to System; borders, badges, and completion labels return to neutral
+  foreground. Check menu, quota card, calendar/grid, columns/line, and all widget
+  sizes in full-color, tinted, and unfocused rendering. Numbers remain legible.
+
+
+### Compact Colors rows and Activity screen
+
+- [ ] Toggle Automatic accent color and Automatic achievement border repeatedly:
+  the switch, swatch, help button, and rows below stay in place. Automatic dims and
+  disables the swatch; manual enables the same picker without moving it.
+- [ ] Open each (?) help beside sharing, gradient actions, Mapping, Quota meter,
+  the two automatic colors, and Average line. All former descriptions remain
+  available; closing popovers does not steal text focus or scroll the form.
+- [ ] With Contributions selected, PR wins never appear. Enable a contribution goal,
+  Refresh, and confirm only its earned days have borders/checkmarks with contribution
+  units and original targets. Repeat Grid/Columns/Line and narrow/wide windows.
+- [ ] Contribution quota cards have no clickable PR count or evidence expander.
+  Switching to a PR goal restores the exact PR list. Verify source labels, menu progress,
+  and all widget sizes. A small quota widget works without a token regardless of its
+  unused chart metric setting.
+- [ ] In username-only mode, enable/disable a contribution goal, type/step its target,
+  and test opt-in notification. PR choices/repositories stay gray, but the metric
+  picker lets an existing unavailable PR goal switch to Contributions.
+- [ ] Changes to repository/timezone settings never filter or move contribution wins.
+  Switching between public/API calendars shows only the matching source's earned
+  history; switching back restores it. PR wins retain their repository/timezone scope.
+- [ ] Keep the app offline, change the goal, and verify no new achievement or notification
+  appears until the correct source syncs. A missing today is unavailable, never zero.
+
+## Translucent window — development build
+
+- [ ] The window's layout is unchanged (toolbar section switcher, Activity header), but
+      its background, title bar included, shows the desktop's colors through a sidebar-like
+      material in Activity, Widgets, and Settings. Move the window over different
+      wallpaper areas: the tint follows.
+- [ ] Settings and Widgets: the material shows around the grouped sections; rows, captions,
+      pickers, and the Appearance previews stay readable.
+- [ ] Activity over a bright, a busy, and a dark wallpaper, light and dark appearance: the
+      chart tiles, accent and achievement text, quota card, and notices stay readable.
+- [ ] Clicking another app turns the background flat like a Finder sidebar; it returns on
+      activation. Reduce Transparency makes it opaque; Increase Contrast stays legible.
+- [ ] Menu bar panel on macOS 26+: no gray backing, the system glass panel; over a bright
+      and a busy wallpaper the count, "Target reached", accent text, meter ticks, and 7-day
+      tiles stay readable. If not, the backing comes back.

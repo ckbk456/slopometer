@@ -66,6 +66,7 @@ private struct HeatmapGrid: View {
 
     let maxHeight: CGFloat?
     @Environment(\.slopColors) private var colors
+    @Environment(\.widgetRenderingMode) private var renderingMode
 
     var body: some View {
         let weeks = Self.weeks(points)
@@ -98,12 +99,38 @@ private struct HeatmapGrid: View {
 
     /// Explains the shades and outlines: the scale is relative to the busiest day shown.
     private func legend(busiest: Int) -> some View {
+        ViewThatFits(in: .horizontal) {
+            HStack(spacing: 14) {
+                activityLegend(busiest: busiest)
+                Spacer(minLength: 0)
+                statusLegend
+            }
+            VStack(alignment: .leading, spacing: 6) {
+                activityLegend(busiest: busiest)
+                statusLegend
+            }
+        }
+        .font(.caption)
+        .foregroundStyle(.secondary)
+        .accessibilityElement(children: .combine)
+    }
+
+    private func activityLegend(busiest: Int) -> some View {
         HStack(spacing: 14) {
             ShadeScale(includesEmpty: true)
-            if busiest > 0 {
-                Text("Busiest day: \(busiest) \(unit)")
+            if busiest > 0 { Text("Busiest day: \(busiest) \(unit)") }
+        }
+        .fixedSize(horizontal: true, vertical: false)
+    }
+
+    private var statusLegend: some View {
+        HStack(spacing: 14) {
+            if points.contains(where: { $0.achievement != nil }) {
+                HStack(spacing: 4) {
+                    QuotaAchievementBorder(cornerRadius: 2).frame(width: 10, height: 10)
+                    Text("Quota reached")
+                }
             }
-            Spacer(minLength: 0)
             HStack(spacing: 4) {
                 RoundedRectangle(cornerRadius: 2)
                     .strokeBorder(Color.primary.opacity(0.6), lineWidth: 1)
@@ -117,9 +144,7 @@ private struct HeatmapGrid: View {
                 Text("No data")
             }
         }
-        .font(.caption)
-        .foregroundStyle(.secondary)
-        .accessibilityElement(children: .combine)
+        .fixedSize(horizontal: true, vertical: false)
     }
 
     @ViewBuilder
@@ -136,11 +161,27 @@ private struct HeatmapGrid: View {
             }
         }
         .overlay {
-            // The selected day gets a heavier outline than today's, so the two never look alike.
+            if point.achievement != nil {
+                shape.strokeBorder(colors.achievement(in: renderingMode), lineWidth: 2)
+                shape.inset(by: 2).strokeBorder(Color(colors.appearance.background), lineWidth: 1)
+            }
             if selection?.wrappedValue == point.day {
-                shape.strokeBorder(Color.primary, lineWidth: 2)
-            } else if point.isIncomplete {
+                shape.inset(by: point.achievement == nil ? 0 : 3)
+                    .strokeBorder(Color.primary, lineWidth: 2)
+            } else if point.isIncomplete, point.achievement == nil {
                 shape.strokeBorder(Color.primary.opacity(0.6), lineWidth: 1)
+            }
+        }
+        .overlay {
+            if point.achievement != nil {
+                GeometryReader { geometry in
+                    let side = min(10, min(geometry.size.width, geometry.size.height) * 0.4)
+                    QuotaAchievementBadge()
+                        .frame(width: side, height: side)
+                        .position(x: geometry.size.width - side / 2, y: side / 2)
+                }
+                .accessibilityHidden(true)
+                .allowsHitTesting(false)
             }
         }
         .help(label)
@@ -317,7 +358,9 @@ enum HeatmapLabel {
     static func describe(_ point: DashboardSnapshot.Point, unit: String) -> String {
         let date = point.day.start(in: .current).formatted(date: .abbreviated, time: .omitted)
         let value = point.count.map { "\($0) \(unit)" } ?? "unknown"
-        return "\(date): \(value)\(point.isIncomplete ? " so far (today, incomplete)" : "")"
+        let achievement = point.achievement.map { "; \($0.detail) when confirmed" } ?? ""
+        return
+            "\(date): \(value)\(point.isIncomplete ? " so far (today, incomplete)" : "")\(achievement)"
     }
 
     /// The moving average on a day, for VoiceOver on line and column charts.
@@ -397,6 +440,9 @@ private struct TrendChart: View {
                     Text("Today, so far")
                 }
             }
+            if points.contains(where: { $0.achievement != nil }) {
+                Label("Quota reached", systemImage: "checkmark.circle.fill")
+            }
             Spacer(minLength: 0)
         }
         .font(.caption)
@@ -424,6 +470,15 @@ private struct TrendChart: View {
                             .interpolationMethod(.linear)
                             .accessibilityLabel(HeatmapLabel.describe(point, unit: unit))
                     }
+                }
+                if let count = point.count, point.achievement != nil {
+                    PointMark(x: .value("Day", date, unit: .day), y: .value(unit, count))
+                        .symbol {
+                            QuotaAchievementBadge()
+                                .frame(width: compact ? 8 : 12, height: compact ? 8 : 12)
+                                .accessibilityHidden(true)
+                        }
+                        .accessibilityLabel(HeatmapLabel.describe(point, unit: unit))
                 }
                 if showsAverage, let average = point.average {
                     LineMark(x: .value("Day", date, unit: .day), y: .value(unit, average))

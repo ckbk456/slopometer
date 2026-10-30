@@ -316,7 +316,10 @@ struct SyncCoordinatorTests {
             SyncRequest(login: "me", token: nil, timeZone: bangkok, now: now))
         var expected = SyncReport()
         expected.login = "me"
+        expected.calendarUpdated = true
         #expect(report == expected)
+        #expect(report.confirms(.contributions))
+        #expect(!report.confirms(.prsMerged))
         #expect(
             transport.requests.allSatisfy { $0.value(forHTTPHeaderField: "Authorization") == nil })
         #expect(try cache.calendar().count == 3)
@@ -398,6 +401,7 @@ struct SyncCoordinatorTests {
         let report = await SyncCoordinator(client: client(offline), cache: cache).sync(
             SyncRequest(login: "me", token: nil, timeZone: bangkok, now: now))
         #expect(report.calendarError == .offline)
+        #expect(!report.confirms(.contributions))
         #expect(try cache.calendar() == [day("2026-10-15"): 2])
         #expect(try cache.syncState().lastCalendarSync == date("2026-10-15T00:00:00Z"))
     }

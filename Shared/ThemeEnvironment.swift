@@ -1,5 +1,6 @@
 import SlopometerCore
 import SwiftUI
+import WidgetKit
 
 extension EnvironmentValues {
     /// The person's theme for both appearances. Set once per window, panel, and widget with
@@ -47,6 +48,25 @@ struct SlopColors {
     var mark: Color { Color(appearance.accent) }
     /// Text and icons in the accent color.
     var markText: Color { Color(appearance.accentText) }
+    /// Achievement decorations use the system foreground unless explicitly customized.
+    /// Tinted widgets always defer to the system's monochrome rendering.
+    func achievement(in mode: WidgetRenderingMode) -> Color {
+        guard mode == .fullColor, let color = appearance.achievement else { return .primary }
+        return Color(color)
+    }
+
+    /// The cut-out checkmark stays readable against the badge's chosen fill.
+    func achievementInk(in mode: WidgetRenderingMode) -> Color {
+        guard mode == .fullColor, let color = appearance.achievement else {
+            return Color(appearance.background)
+        }
+        return color.prefersLightText ? .white : .black
+    }
+
+    var achievementText: Color {
+        appearance.achievement.map { Color($0.readable(on: appearance.background)) } ?? .primary
+    }
+
     /// The moving average line.
     var average: Color { Color(appearance.trend) }
     /// Incomplete coverage and other warnings.

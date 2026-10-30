@@ -67,3 +67,14 @@ Credentials never belong in this database.
 Deterministic evidence: `Tests/SlopometerCoreTests/MeasurementCacheTests.swift`
 covers repeat writes, isolation, unknown versus zero, rejected writes, and reopen
 persistence. Human/provider checklist: [measurements and sync](../../testing/MANUAL%20TO-DO/measurements-and-sync.md).
+
+## Quota history
+
+The additive `createQuotaHistory` migration creates `quota_days` keyed by scope and
+calendar day, storing the day's target and optional confirmed achievement count.
+For PRs the scope includes account, metric, normalized repository filter, and timezone,
+retaining the existing keys. Contributions use account, metric, `provider-calendar`,
+and calendar source (`profilePage` or `graphQL`); they ignore repository and timezone
+settings. This separates sources with different date labels without a destructive
+migration. All scopes exclude the target. Sync record replacement leaves achievements intact.
+Account reset and Remove All Data clear them. No credentials enter this table.

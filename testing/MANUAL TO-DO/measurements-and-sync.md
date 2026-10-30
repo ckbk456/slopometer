@@ -1,6 +1,6 @@
 # Measurements and sync
 
-Provider integration and PR quotas are not yet implemented. All gates are pending.
+Provider integration and daily goals are implemented. Human/provider gates below remain pending.
 
 - [ ] Compare account contribution dates/counts with GitHub's provider calendar.
 - [ ] Inspect the exact PR list behind opened and authored-merged counts.
@@ -65,3 +65,31 @@ Provider integration and PR quotas are not yet implemented. All gates are pendin
 
 Deterministic numeric/cache tests are separate from this provider checklist.
 Record actual account/permission coverage without exposing credential values.
+
+
+## Daily achievements — development build
+
+- [ ] Set a reachable PR quota and Refresh with working tokens. Confirm the earned
+  target label, menu/card border, and today's checkmarked tile. Counts stay uncapped.
+- [ ] Raise the target above today's count. The live progress changes while the
+  original achievement remains; quit/reopen and confirm it survives.
+- [ ] On the next day, change the target and confirm yesterday keeps its original
+  win. A delayed sync uses yesterday's saved target when that day was observed.
+- [ ] Offline, failed tokens, incomplete results, or settings edits alone award no
+  new win. Days before tracking or never observed with a quota are unmarked.
+- [ ] Switch PR metric, account, repository filter, or timezone: another scope's
+  wins must not appear. Return to the same scope to see its retained history.
+- [ ] Remove All Data clears achievements along with the cache.
+
+## Contribution goals (1.1.0 development): pending
+
+- [ ] With only a public username, set Contributions as the daily goal. Refresh and
+  compare the exact count to the public calendar. The quota names the unofficial source.
+- [ ] Confirm Contributions never gets a border from an earned PR goal, and PR charts
+  never get a contribution border. Check menu tiles and all widget sizes too.
+- [ ] Check known zero, absent today (including timezones ahead of provider labels),
+  offline cache, delayed prior-day data, and target changes after earning a win.
+- [ ] Confirm a successful calendar sync can notify without any token; failed calendar
+  fetches cannot notify or earn new contribution wins even if PR fetches succeeded.
+- [ ] Add/remove a token and verify public/API calendar history remains separate and
+  previous source wins return when switching back. No raw counts or dates are rewritten.

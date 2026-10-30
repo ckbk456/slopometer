@@ -75,27 +75,34 @@ struct InlineColorPicker: View {
 struct ColorSwatchButton: View {
     let title: String
     @Binding var color: ThemeColor
+    var showsTitle = true
     @State private var isPresented = false
 
     var body: some View {
-        LabeledContent(title) {
-            Button {
-                releaseWindowFocus()
-                isPresented.toggle()
-            } label: {
-                RoundedRectangle(cornerRadius: 5)
-                    .fill(Color(color))
-                    .overlay {
-                        RoundedRectangle(cornerRadius: 5).strokeBorder(.primary.opacity(0.25))
-                    }
-                    .frame(width: 44, height: 20)
-            }
-            .buttonStyle(.plain)
-            .help("Change \(title.lowercased()), \(color.hexString)")
-            .accessibilityLabel("\(title), \(color.hexString)")
-            .popover(isPresented: $isPresented, arrowEdge: .bottom) {
-                InlineColorPicker(color: $color).padding(14)
-            }
+        if showsTitle {
+            LabeledContent(title) { swatch }
+        } else {
+            swatch
+        }
+    }
+
+    private var swatch: some View {
+        Button {
+            releaseWindowFocus()
+            isPresented.toggle()
+        } label: {
+            RoundedRectangle(cornerRadius: 5)
+                .fill(Color(color))
+                .overlay {
+                    RoundedRectangle(cornerRadius: 5).strokeBorder(.primary.opacity(0.25))
+                }
+                .frame(width: 44, height: 20)
+        }
+        .buttonStyle(.plain)
+        .help("Change \(title.lowercased()), \(color.hexString)")
+        .accessibilityLabel("\(title), \(color.hexString)")
+        .popover(isPresented: $isPresented, arrowEdge: .bottom) {
+            InlineColorPicker(color: $color).padding(14)
         }
     }
 }

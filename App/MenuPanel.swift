@@ -43,10 +43,11 @@ struct MenuPanel: View {
                 .padding(.bottom, 6)
         }
         .frame(width: density.pick(300, 280))
-        // The window's own material lets the wallpaper through; a mostly opaque window
-        // background behind the content keeps green text and tiles legible on any desktop.
-        .background {
-            Color(nsColor: .windowBackgroundColor).opacity(0.82).ignoresSafeArea()
+        .background { PanelBacking() }
+        .overlay {
+            if snapshot.quota?.achievement != nil {
+                QuotaAchievementBorder(cornerRadius: 12)
+            }
         }
     }
 
@@ -89,7 +90,7 @@ struct MenuPanel: View {
                         .foregroundStyle(.secondary)
                 }
                 .monospacedDigit()
-                Text("\(quota.unit.capitalizedFirst) today in \(quota.scopeLabel)")
+                Text("\(quota.unit.capitalizedFirst) today · \(quota.scopeLabel)")
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
                 quotaStatus(quota)
@@ -98,6 +99,9 @@ struct MenuPanel: View {
             .accessibilityElement(children: .ignore)
             .accessibilityLabel(quota.headline)
             .accessibilityValue(statusText(quota))
+            if let achievement = quota.achievement {
+                QuotaAchievementLabel(achievement: achievement)
+            }
             QuotaMeter(count: quota.count, target: quota.target)
                 .accessibilityLabel("Quota progress")
                 .accessibilityValue("\(quota.count) of \(quota.target) \(quota.unit)")
@@ -136,7 +140,7 @@ struct MenuPanel: View {
                 .foregroundStyle(colors.warning)
         } else if quota.isReached {
             Label(statusText(quota), systemImage: "checkmark.seal.fill")
-                .foregroundStyle(colors.markText)
+                .foregroundStyle(colors.achievementText)
         } else {
             Label {
                 Text(statusText(quota))
@@ -339,6 +343,29 @@ struct MenuPanel: View {
     }
 }
 
+/// macOS 26 and later draw the panel in the system's Liquid Glass, as Apple's own menu bar
+/// extras are, so nothing is laid over it; the system adapts it for Reduce Transparency.
+/// Earlier systems, and builds from SDKs before macOS 26, get the older vibrant material,
+/// which lets a busy wallpaper wash out theme colors, so a mostly opaque window background
+/// sits behind the content there.
+private struct PanelBacking: View {
+    var body: some View {
+        #if compiler(>=6.2)
+            if #available(macOS 26, *) {
+                Color.clear
+            } else {
+                fallback
+            }
+        #else
+            fallback
+        #endif
+    }
+
+    private var fallback: some View {
+        Color(nsColor: .windowBackgroundColor).opacity(0.82).ignoresSafeArea()
+    }
+}
+
 /// One icon-led status line. The title stays in the primary color so it reads on the
 /// translucent panel; an optional trailing value is secondary unless styled.
 private struct PanelRow<Value: View>: View {
@@ -402,7 +429,7 @@ private struct WeekRow: View {
             HStack(spacing: 5) {
                 ForEach(points) { point in
                     VStack(spacing: 3) {
-                        DayTile(point: point, busiest: busiest)
+                        DayTile(point: point, busiest: busiest, unit: unit)
                             .frame(height: 28)
                         Text(
                             point.day.start(in: .current),
